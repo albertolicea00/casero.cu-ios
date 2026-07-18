@@ -6,6 +6,7 @@
 [![UI: SwiftUI](https://img.shields.io/badge/UI-SwiftUI-007AFF?logo=swift)](https://developer.apple.com/xcode/swiftui/)
 [![PRs: Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
 
+[Mira la versión en español](README.es.md)
 
 Native iOS client for Cuban lodging hosts to submit guest reports to the official portal. 🇨🇺
 
