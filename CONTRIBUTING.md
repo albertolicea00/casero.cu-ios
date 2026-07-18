@@ -15,11 +15,13 @@ changes to the iOS client.
 
 ## Getting set up
 
-```bash
-git clone <this-repo-url>
-cd casero-cu-ios
-open CaseroCU.xcodeproj
-```
+1. Fork the repo on GitHub
+2. Clone your fork:
+   ```bash
+   git clone https://github.com/<your-username>/casero.cu-ios.git
+   cd casero.cu-ios
+   open CaseroCU.xcodeproj
+   ```
 
 You need a recent Xcode and macOS.
 
@@ -67,7 +69,7 @@ add tool or AI attribution trailers.
 
 ## Reporting bugs and requesting features
 
-Use the issue templates under
-[.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE). For anything touching the
-portal API, describe the request/response without including real credentials or
-guest data.
+- **iOS-specific bugs** → [open an issue](https://github.com/albertolicea00/casero.cu-ios/issues/new)
+- **Core / cross-platform issues** (API changes, auth flow, etc.) → file in either repo
+- Use the issue templates under [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE)
+- For anything touching the portal API, describe the request/response without including real credentials or guest data

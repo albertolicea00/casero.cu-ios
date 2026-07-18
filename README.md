@@ -1,72 +1,71 @@
-# CASERO — iOS
+# 🏠 CASERO.cu — iOS
 
-Native iOS client for Cuban private lodging hosts (*arrendadores*) to report
-their guests to the immigration authority.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Platform: iOS](https://img.shields.io/badge/Platform-iOS-000000?logo=apple)](https://developer.apple.com/ios/)
+[![Language: Swift](https://img.shields.io/badge/Language-Swift-F05138?logo=swift)](https://swift.org)
+[![UI: SwiftUI](https://img.shields.io/badge/UI-SwiftUI-007AFF?logo=swift)](https://developer.apple.com/xcode/swiftui/)
+[![PRs: Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
 
-Hosts are legally required to register every guest with immigration. Today that
-means either dialing phone (USSD) codes and confirming by SMS, or using the
-official web portal at `https://casero.rem.cu/` — a site that is only reachable
-from inside Cuba and serves an untrusted TLS certificate. This app wraps both
-channels behind a native, offline-friendly interface.
 
-> **Unofficial project.** This is an independent client. It is not affiliated
-> with, endorsed by, or maintained by CIDP-MININT or any government entity. It
-> talks to the official portal using the host's own credentials, the same way a
-> browser does.
+Native iOS client for Cuban **casa particular** hosts to report their guests to the authorities. 🇨🇺
 
-## Features
+> ⚠️ **Unofficial project.** Not affiliated with CIDP-MININT or any government entity. Talks to the official portal using the host's own credentials, the same way a browser does.
 
-- **Guest registration** through the two supported channels:
-  - **USSD / SMS codes** — works without a data connection.
-  - **Web portal API** — the app authenticates against `casero.rem.cu` and
-    performs the same requests the browser makes.
-- List active and registered guests, with companions.
-- Manage communication channels (phones and emails) used by the portal.
+---
 
-## Tech stack
+## ✨ Features
 
-- **Language:** Swift
-- **UI:** SwiftUI (to be confirmed as the project is scaffolded)
-- **Dependencies:** Swift Package Manager
-- **Networking:** the portal is ASP.NET MVC; the client must carry the
-  anti-forgery token and session cookies (see [CLAUDE.md](CLAUDE.md)).
+- 📋 **Guest registration** via two channels:
+  - 📞 **USSD / SMS codes** — works offline, no data connection needed
+  - 🌐 **Web portal API** — authenticates against `casero.rem.cu` and mirrors browser requests
+- 👥 List active & registered guests with companions
+- 📱 Manage communication channels (phones & emails)
 
-## Getting started
+## 🛠 Tech Stack
+
+| Layer | Choice |
+|-------|--------|
+| Language | Swift |
+| UI | SwiftUI |
+| Dependencies | Swift Package Manager |
+| Networking | ASP.NET MVC portal (anti-forgery token + session cookies) |
+
+## 🚀 Getting Started
 
 ```bash
-git clone <this-repo-url>
-cd casero-cu-ios
-open CaseroCU.xcodeproj   # or CaseroCU.xcworkspace once dependencies are added
+git clone https://github.com/albertolicea00/casero.cu-ios.git
+cd casero.cu-ios
+open CaseroCU.xcodeproj
 ```
 
-Build and run from Xcode, or from the command line:
+Build from CLI:
 
 ```bash
 xcodebuild -scheme CaseroCU -destination 'platform=iOS Simulator,name=iPhone 15' build
 ```
 
-Signing material (`*.p12`, `*.mobileprovision`, `*.p8`) is never committed —
-see [.gitignore](.gitignore).
+> 🔐 Signing material (`*.p12`, `*.mobileprovision`, `*.p8`) is never committed.
 
-## The `casero.rem.cu` certificate
+## 🔒 TLS Note
 
-The portal serves a certificate that fails standard validation. The recommended
-approach is **certificate pinning to the known server certificate** via a
-`URLSessionDelegate` authentication challenge, not disabling App Transport
-Security globally. See [CLAUDE.md](CLAUDE.md) for the reverse-engineered request
-flow and the handling notes.
+The portal serves a certificate that fails standard validation. The app uses **certificate pinning** via `URLSessionDelegate` — not global ATS disable. See [CLAUDE.md](CLAUDE.md) for the reverse-engineered request flow.
 
-## Contributing
+## 🤝 Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) and the
-[Code of Conduct](CODE_OF_CONDUCT.md). This repository uses
-[Conventional Commits](https://www.conventionalcommits.org/).
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md). Uses [Conventional Commits](https://www.conventionalcommits.org/).
 
-## Related repositories
+### 🐛 Reporting Bugs
 
-- `casero-cu-ios` — iOS client (this repository)
-- `casero-cu-apk` — Android client
+Found a bug? Open an issue in the repo where you found it:
+- **iOS-specific bugs** → [file here](https://github.com/albertolicea00/casero.cu-ios/issues)
+- **Android-specific bugs** → [file here](https://github.com/albertolicea00/casero.cu-apk/issues)
+- **Core / cross-platform issues** (API changes, auth flow, etc.) → file in either repo, we'll track it across both
 
-## License
+## 📦 Related
+
+- [casero.cu-ios](https://github.com/albertolicea00/casero.cu-ios) — iOS client (this repo)
+- [casero.cu-apk](https://github.com/albertolicea00/casero.cu-apk) — Android client
+
+## 📄 License
 
 [MIT](LICENSE) © 2026 Alberto Licea
