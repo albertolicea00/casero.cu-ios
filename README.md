@@ -7,7 +7,7 @@
 [![PRs: Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
 
 
-Native iOS client for Cuban **casa particular** hosts to report their guests to the authorities. 🇨🇺
+Native iOS client for Cuban lodging hosts to submit guest reports to the official portal. 🇨🇺
 
 > ⚠️ **Unofficial project.** Not affiliated with CIDP-MININT or any government entity. Talks to the official portal using the host's own credentials, the same way a browser does.
 >
