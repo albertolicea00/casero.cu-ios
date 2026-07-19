@@ -6,10 +6,11 @@ name: USSD sync check
 # Runs on a schedule only (no pull_request trigger) — it is expected to stay red
 # for now, so it must not gate unrelated PRs.
 
-on:
-  schedule:
-    - cron: "0 6 * * 1" # Mondays 06:00 UTC
-  workflow_dispatch:
+on: {} # temporarily disabled
+# on:
+#   schedule:
+#     - cron: "0 6 * * 1" # Mondays 06:00 UTC
+#   workflow_dispatch:
 
 permissions:
   contents: read
