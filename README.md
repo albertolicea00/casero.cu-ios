@@ -5,6 +5,7 @@
 [![Language: Swift](https://img.shields.io/badge/Language-Swift-F05138?logo=swift)](https://swift.org)
 [![UI: SwiftUI](https://img.shields.io/badge/UI-SwiftUI-007AFF?logo=swift)](https://developer.apple.com/xcode/swiftui/)
 [![PRs: Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
+[![USSD sync](https://github.com/albertolicea00/casero.cu-ios/actions/workflows/ussd-sync-check.yml/badge.svg)](https://github.com/albertolicea00/casero.cu-ios/actions/workflows/ussd-sync-check.yml)
 
 [Mira la versión en español](README.es.md)
 
