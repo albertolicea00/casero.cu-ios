@@ -1,0 +1,29 @@
+name: CaseroCU
+options:
+  bundleIdPrefix: com.caserocu
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: "" # set your Apple Developer team id locally; never commit it
+
+targets:
+  CaseroCU:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+    resources:
+      - Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.caserocu.ios
+        INFOPLIST_FILE: Resources/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_USER_SCRIPT_SANDBOXING: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
