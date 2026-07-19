@@ -1,0 +1,64 @@
+name: USSD sync check
+
+# Weekly reminder that the casero.rem.cu guest-report code is still unspecified.
+# MyUSSDCodes-collection is the source of truth; until its `casero-report`
+# collection stops being a placeholder, this run fails and opens/updates an issue.
+# Runs on a schedule only (no pull_request trigger) — it is expected to stay red
+# for now, so it must not gate unrelated PRs.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ussd-sync-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      REPORT_FILE: ${{ runner.temp }}/ussd-sync-report.md
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check casero-report status in MyUSSDCodes-collection
+        id: check
+        continue-on-error: true
+        run: node .github/scripts/check-ussd-sync.mjs
+
+      - name: Open or update tracking issue
+        if: steps.check.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync(process.env.REPORT_FILE, 'utf8');
+            const title = 'USSD/SMS reporting code not finalized (MyUSSDCodes-collection)';
+            const marker = '<!-- ussd-sync-check -->';
+            const { owner, repo } = context.repo;
+            const open = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: 'open', labels: 'ussd-sync', per_page: 100,
+            });
+            const found = open.find((i) => i.title === title);
+            const fullBody = `${marker}\n\n${body}`;
+            if (found) {
+              await github.rest.issues.update({ owner, repo, issue_number: found.number, body: fullBody });
+            } else {
+              await github.rest.issues.create({ owner, repo, title, body: fullBody, labels: ['ussd-sync'] });
+            }
+
+      - name: Fail while the reporting code is a placeholder
+        if: steps.check.outcome == 'failure'
+        run: |
+          echo "casero-report is still a placeholder in MyUSSDCodes-collection."
+          exit 1
