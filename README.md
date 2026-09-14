@@ -5,7 +5,6 @@
 [![Language: Swift](https://img.shields.io/badge/Language-Swift-F05138?logo=swift)](https://swift.org)
 [![UI: SwiftUI](https://img.shields.io/badge/UI-SwiftUI-007AFF?logo=swift)](https://developer.apple.com/xcode/swiftui/)
 [![PRs: Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
-[![USSD sync](https://github.com/albertolicea00/casero.cu-ios/actions/workflows/ussd-sync-check.yml/badge.svg)](https://github.com/albertolicea00/casero.cu-ios/actions/workflows/ussd-sync-check.yml)
 
 [Mira la versión en español](README.es.md)
 
@@ -53,12 +52,6 @@ xcodebuild -scheme CaseroCU -destination 'platform=iOS Simulator,name=iPhone 15'
 ## 🔒 TLS Note
 
 The portal serves a certificate that fails standard validation. The app uses **certificate pinning** via `URLSessionDelegate` — not global ATS disable. See [CLAUDE.md](CLAUDE.md) for the reverse-engineered request flow.
-
-## 🔄 Reporting code source of truth
-
-USSD/SMS codes across my apps are centralized in **[MyUSSDCodes-collection](https://github.com/albertolicea00/MyUSSDCodes-collection)** (the single source of truth). CASERO's guest-report code is **not finalized yet** — `USSDSMSReporter` still ships `smsDestination` / `reportBody` placeholders.
-
-A weekly GitHub Action ([`ussd-sync-check`](.github/workflows/ussd-sync-check.yml)) watches the canonical [`casero-report`](https://github.com/albertolicea00/MyUSSDCodes-collection/blob/main/codes/casero-report.json) collection. It is **expected to stay red** until the real reporting code is published there (its `placeholder` tag removed) — that red is the reminder. Once it lands, wire the real dial string into `USSDSMSReporter` and close the tracking issue.
 
 ## 🤝 Contributing
 
