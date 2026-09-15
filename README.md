@@ -76,6 +76,7 @@ Found a bug? Open an issue in the repo where you found it:
 
 - [casero.cu-ios](https://github.com/albertolicea00/casero.cu-ios) — iOS client (this repo)
 - [casero.cu-apk](https://github.com/albertolicea00/casero.cu-apk) — Android client
+- [casero.cu-web](https://github.com/albertolicea00/casero.cu-web) — Web client
 
 ## 📄 License
 
