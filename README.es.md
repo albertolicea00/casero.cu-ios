@@ -33,6 +33,14 @@ Cliente nativo iOS para que los arrendadores de casas particulares en Cuba repor
 | Dependencias | Swift Package Manager |
 | Red | Portal ASP.NET MVC (token antifalsificación + cookies de sesión) |
 
+## 🏗 ¿Por qué aplicaciones nativas independientes? (iOS vs Android)
+
+En lugar de utilizar una tecnología híbrida o multiplataforma (como Flutter o React Native), CASERO.cu mantiene bases de código nativas e independientes:
+
+- **Permisos y libertad en Android:** Android permite un nivel más profundo de integración con el sistema operativo (automatización de llamadas/USSD, tareas en segundo plano e integración con el hardware), lo que permite extender el funcionamiento de la app según las necesidades.
+- **Restricciones del Sandbox de iOS:** iOS aplica un sandbox más estricto y con menores libertades de API, por lo que la app en iOS se mantiene acotada a lo que la plataforma permite de forma oficial.
+- **Experiencia optimizada:** El desarrollo nativo en Swift/SwiftUI para iOS y Kotlin/Jetpack Compose para Android garantiza el máximo rendimiento, una interfaz acorde a cada sistema y el cumplimiento de requerimientos de seguridad nativos (como certificate pinning y background workers).
+
 ## 🚀 Primeros Pasos
 
 ```bash
