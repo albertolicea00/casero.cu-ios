@@ -92,3 +92,4 @@ ehthumbs.db
 Thumbs.db
 *.swp
 *~
+.ignore/*
