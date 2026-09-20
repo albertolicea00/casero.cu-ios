@@ -4,8 +4,8 @@ struct GuestsView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var viewModel: GuestsViewModel
 
-    init(client: CaseroClient) {
-        _viewModel = StateObject(wrappedValue: GuestsViewModel(client: client))
+    init(client: CaseroClient, settings: AppSettings) {
+        _viewModel = StateObject(wrappedValue: GuestsViewModel(client: client, settings: settings))
     }
 
     private static let displayDate: DateFormatter = {
@@ -18,54 +18,90 @@ struct GuestsView: View {
 
     var body: some View {
         NavigationStack {
-            content
-                .navigationTitle("Registered guests")
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Sign out") {
-                            Task {
-                                await viewModel.signOut()
-                                appState.isSignedIn = false
-                            }
-                        }
+            VStack(spacing: 0) {
+                if viewModel.isOffline {
+                    Label(offlineCaption, systemImage: "icloud.slash")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                        .padding(.top, 4)
+                }
+
+                Picker("Segment", selection: $viewModel.segment) {
+                    ForEach(GuestsViewModel.Segment.allCases) { segment in
+                        Text(segment.rawValue).tag(segment)
                     }
                 }
+                .pickerStyle(.segmented)
+                .padding([.horizontal, .top])
+
+                content
+            }
+            .searchable(text: $viewModel.searchText, prompt: "Name or passport")
+            .navigationTitle("Guests")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        Task { await viewModel.reload() }
+                    } label: {
+                        if viewModel.isLoading {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                    }
+                    .disabled(viewModel.isLoading)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Sign out") {
+                        Task { await appState.signOutCompletely() }
+                    }
+                }
+            }
         }
-        .task { await reload() }
+        .task {
+            await viewModel.loadFromCache()
+            await viewModel.reload()
+        }
+        .onChange(of: viewModel.isSessionExpired) { expired in
+            guard expired else { return }
+            Task {
+                await appState.reportSessionExpired()
+                viewModel.acknowledgeSessionExpired()
+            }
+        }
+    }
+
+    private var offlineCaption: String {
+        if let lastFetched = viewModel.lastFetched {
+            return "Showing cached data from \(Self.displayDate.string(from: lastFetched))."
+        }
+        return "Showing cached data."
     }
 
     @ViewBuilder
     private var content: some View {
-        switch viewModel.state {
-        case .loading:
-            ProgressView()
-
-        case .content(let guests):
-            if guests.isEmpty {
-                Text("No guests in this range.").foregroundStyle(.secondary)
-            } else {
-                List(guests) { guest in
-                    GuestRow(guest: guest, dateFormatter: Self.displayDate)
+        let guests = viewModel.filteredGuests
+        if guests.isEmpty {
+            if viewModel.isLoading {
+                ProgressView().frame(maxHeight: .infinity)
+            } else if let message = viewModel.errorMessage {
+                VStack(spacing: 12) {
+                    Text(message).foregroundStyle(.red).multilineTextAlignment(.center)
+                    Button("Retry") { Task { await viewModel.reload() } }
+                        .buttonStyle(.bordered)
                 }
+                .padding()
+                .frame(maxHeight: .infinity)
+            } else {
+                Text("No guests in this range.").foregroundStyle(.secondary).frame(maxHeight: .infinity)
             }
-
-        case .error(let message):
-            VStack(spacing: 12) {
-                Text(message).foregroundStyle(.red).multilineTextAlignment(.center)
-                Button("Retry") { Task { await reload() } }
-                    .buttonStyle(.bordered)
+        } else {
+            List(guests) { guest in
+                GuestRow(guest: guest, dateFormatter: Self.displayDate)
             }
-            .padding()
-
-        case .sessionExpired:
-            ProgressView()
-        }
-    }
-
-    private func reload() async {
-        await viewModel.load()
-        if viewModel.isSessionExpired {
-            appState.isSignedIn = false
+            .refreshable { await viewModel.reload() }
         }
     }
 }
