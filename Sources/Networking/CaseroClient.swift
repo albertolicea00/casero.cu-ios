@@ -1,5 +1,13 @@
 import Foundation
 
+/// Discriminates the two `ValidarPersonaDiie` lookup modes seen in captured
+/// traffic: `tipo=0` with a passport number, `tipo=2` with an underscore-joined
+/// full name.
+enum PersonaLookup: Int {
+    case byPassport = 0
+    case byName = 2
+}
+
 /// Thin client over the CASERO web portal. It behaves like a browser: cookies
 /// (via `HTTPCookieStorage`) and the anti-forgery token are carried on every
 /// request, and the portal's login redirect / `REDIRECT` sentinel are mapped to
@@ -71,6 +79,105 @@ final class CaseroClient: NSObject, @unchecked Sendable {
         }
     }
 
+    // MARK: - Companions
+
+    /// Companions of a guest (Cuban nationals, identified by carné). Same paging
+    /// contract as `ListarHuespedes` per CLAUDE.md, keyed by the guest's stay id.
+    ///
+    /// ASSUMPTION (unverified against live traffic): the request carries
+    /// `estanciaId` alongside the paging fields, and the response envelope is
+    /// shaped like `GuestListResponse` under a `ListaAcompannantes` key. Confirm
+    /// against a real capture before relying on this in production.
+    func listCompanions(estanciaId: String, pageSize: Int = 20, page: Int = 1) async throws -> [Guest] {
+        let token = try AntiForgery.extract(from: try await getHTML("Huespedes/HuespedesRegistrados"))
+        let body = formEncoded([
+            ("estanciaId", estanciaId),
+            ("cantMaxRegistros", String(pageSize)),
+            ("pagina", String(page)),
+            ("__RequestVerificationToken", token),
+        ])
+        let text = try await postForJSON(
+            "Huespedes/ListarAcompannantes",
+            body: body,
+            referer: "Huespedes/HuespedesRegistrados",
+        )
+        return try JSONDecoder().decode(CompanionListResponse.self, from: Data(text.utf8)).companions
+    }
+
+    // MARK: - Registration
+
+    /// Looks up a foreign guest in the DIIE registry.
+    /// - Parameters:
+    ///   - identificador: passport number (`tipo == .byPassport`) or an
+    ///     underscore-joined full name (`tipo == .byName`), per captured traffic.
+    func validatePersonaDiie(identificador: String, tipo: PersonaLookup) async throws -> PersonaValidation {
+        try await validatePersona(
+            path: "Huespedes/ValidarPersonaDiie",
+            body: formEncodedWithToken([("identificador", identificador), ("tipo", String(tipo.rawValue))]),
+        )
+    }
+
+    /// Looks up a Cuban companion by carné de identidad in the SUIN registry.
+    func validatePersonaSuin(identificador: String) async throws -> PersonaValidation {
+        try await validatePersona(
+            path: "Huespedes/ValidarPersonaSuin",
+            body: formEncodedWithToken([("identificador", identificador)]),
+        )
+    }
+
+    private func validatePersona(path: String, body: (String) -> Data) async throws -> PersonaValidation {
+        let token = try AntiForgery.extract(from: try await getHTML("Huespedes"))
+        let text = try await postForJSON(path, body: body(token), referer: "Huespedes")
+        return try JSONDecoder().decode(PersonaValidation.self, from: Data(text.utf8))
+    }
+
+    /// Registers one or more guests/companions in a single call (`|`-joined `personas`).
+    func registerGuests(_ people: [GuestRegistration]) async throws -> [Guest] {
+        guard !people.isEmpty else { return [] }
+        let token = try AntiForgery.extract(from: try await getHTML("Huespedes"))
+        let personas = people.map(\.wireFormat).joined(separator: "|")
+        let body = formEncoded([
+            ("personas", personas),
+            ("__RequestVerificationToken", token),
+        ])
+        let text = try await postForJSON("Huespedes/RegistrarHuesped", body: body, referer: "Huespedes")
+        return try Self.decodeGuestOrArray(Data(text.utf8))
+    }
+
+    // MARK: - Photos
+
+    /// Foreign guest photo. Query parameters mirror the captured request exactly.
+    func fetchForeignGuestPhoto(passport: String, name: String, nationalityCode: String, sex: String) async throws -> Data {
+        var components = URLComponents(url: Self.baseURL.appending(path: "Huespedes/ObtenerFotoDiie"), resolvingAgainstBaseURL: false)!
+        components.queryItems = [
+            URLQueryItem(name: "pasap", value: passport),
+            URLQueryItem(name: "nomb", value: name),
+            URLQueryItem(name: "apel1", value: ""),
+            URLQueryItem(name: "apel2", value: ""),
+            URLQueryItem(name: "ciud", value: nationalityCode),
+            URLQueryItem(name: "sexo", value: sex),
+        ]
+        return try await fetchPhoto(at: components.url!)
+    }
+
+    /// Companion (Cuban national) photo, looked up by carné de identidad.
+    func fetchCompanionPhoto(carne: String) async throws -> Data {
+        var components = URLComponents(url: Self.baseURL.appending(path: "Huespedes/ObtenerFotoSUINPorCi"), resolvingAgainstBaseURL: false)!
+        components.queryItems = [URLQueryItem(name: "ci", value: carne)]
+        return try await fetchPhoto(at: components.url!)
+    }
+
+    private func fetchPhoto(at url: URL) async throws -> Data {
+        var req = URLRequest(url: url)
+        req.httpMethod = "GET"
+        let (data, response) = try await perform(req)
+        guard (200..<300).contains(response.statusCode) else {
+            if (300..<400).contains(response.statusCode) { throw PortalError.sessionExpired }
+            throw PortalError.http(response.statusCode)
+        }
+        return data
+    }
+
     // MARK: - Requests
 
     private func getHTML(_ path: String) async throws -> String {
@@ -109,6 +216,7 @@ final class CaseroClient: NSObject, @unchecked Sendable {
     }
 
     private func perform(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
+        guard CertificatePinner.isBundled else { throw PortalError.certificateNotBundled }
         do {
             let (data, response) = try await session.data(for: request)
             guard let http = response as? HTTPURLResponse else { throw PortalError.unreachable }
@@ -139,6 +247,44 @@ final class CaseroClient: NSObject, @unchecked Sendable {
             return "\(encodedKey)=\(encodedValue)"
         }
         return Data(pairs.joined(separator: "&").utf8)
+    }
+
+    /// Builds a form body closure that appends the anti-forgery token once it's known.
+    private func formEncodedWithToken(_ params: [(String, String)]) -> (String) -> Data {
+        { token in self.formEncoded(params + [("__RequestVerificationToken", token)]) }
+    }
+
+    /// `RegistrarHuesped` returns a bare object for a single person and an array
+    /// for multiple; normalize both to `[Guest]`.
+    private static func decodeGuestOrArray(_ data: Data) throws -> [Guest] {
+        if let array = try? JSONDecoder().decode([Guest].self, from: data) {
+            return array
+        }
+        return [try JSONDecoder().decode(Guest.self, from: data)]
+    }
+}
+
+/// Envelope for `Huespedes/ListarAcompannantes`. Field names for the request are
+/// documented at the call site in `CaseroClient.listCompanions` as unverified.
+private struct CompanionListResponse: Decodable {
+    let error: String
+    let page: Int
+    let total: Int
+    let companions: [Guest]
+
+    private enum CodingKeys: String, CodingKey {
+        case error = "Error"
+        case page = "Pagina"
+        case total = "Total"
+        case companions = "ListaAcompannantes"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        error = (try? container.decode(String.self, forKey: .error)) ?? ""
+        page = (try? container.decode(Int.self, forKey: .page)) ?? 1
+        total = (try? container.decode(Int.self, forKey: .total)) ?? 0
+        companions = (try? container.decode([Guest].self, forKey: .companions)) ?? []
     }
 }
 

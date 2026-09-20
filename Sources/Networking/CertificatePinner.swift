@@ -11,6 +11,11 @@ enum CertificatePinner {
 
     private static let bundledName = "casero_rem_cu"
 
+    /// Whether the pinned certificate ships in the app bundle. `CaseroClient`
+    /// checks this before issuing any request so a missing certificate surfaces
+    /// as `PortalError.certificateNotBundled` instead of a silent connection failure.
+    static var isBundled: Bool { pinnedData != nil }
+
     private static let pinnedData: Data? = {
         guard let url = Bundle.main.url(forResource: bundledName, withExtension: "cer") else {
             return nil

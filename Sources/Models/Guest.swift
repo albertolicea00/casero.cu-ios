@@ -5,7 +5,7 @@ import Foundation
 /// Portal JSON keys are PascalCase and dates arrive as `/Date(ms)/` strings, so
 /// this decodes manually. Foreign guests are identified by passport
 /// (`identificador`); nationality arrives as a numeric code plus a display name.
-struct Guest: Decodable, Identifiable {
+struct Guest: Codable, Identifiable {
     let fullName: String
     let identificador: String
     let checkIn: Date?
@@ -15,6 +15,8 @@ struct Guest: Decodable, Identifiable {
     let nationality: String?
     let sex: String?
     let stayId: String
+    /// Present on `RegistrarHuesped` responses: "OK" or an error message per person.
+    let response: String?
 
     var id: String { stayId }
 
@@ -28,6 +30,7 @@ struct Guest: Decodable, Identifiable {
         case nationality = "DescNacionalidad"
         case sex = "Sexo"
         case stayId = "EstanciaId"
+        case response = "Respuesta"
     }
 
     init(from decoder: Decoder) throws {
@@ -41,6 +44,7 @@ struct Guest: Decodable, Identifiable {
         nationality = try? container.decode(String.self, forKey: .nationality)
         sex = try? container.decode(String.self, forKey: .sex)
         stayId = (try? container.decode(String.self, forKey: .stayId)) ?? ""
+        response = try? container.decode(String.self, forKey: .response)
     }
 }
 
