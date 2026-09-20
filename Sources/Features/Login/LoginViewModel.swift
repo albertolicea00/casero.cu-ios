@@ -9,9 +9,14 @@ final class LoginViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let client: CaseroClient
+    private let settings: AppSettings
 
-    init(client: CaseroClient) {
+    init(client: CaseroClient, settings: AppSettings) {
         self.client = client
+        self.settings = settings
+        if settings.rememberCredentials, let savedUser = KeychainStore.get(.username) {
+            user = savedUser
+        }
     }
 
     var canSubmit: Bool {
@@ -24,8 +29,13 @@ final class LoginViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
+        let trimmedUser = user.trimmingCharacters(in: .whitespaces)
         do {
-            try await client.login(user: user.trimmingCharacters(in: .whitespaces), password: password)
+            try await client.login(user: trimmedUser, password: password)
+            if settings.rememberCredentials {
+                KeychainStore.set(trimmedUser, for: .username)
+                KeychainStore.set(password, for: .password)
+            }
             return true
         } catch {
             errorMessage = (error as? PortalError)?.errorDescription ?? error.localizedDescription

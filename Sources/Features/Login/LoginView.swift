@@ -4,8 +4,8 @@ struct LoginView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var viewModel: LoginViewModel
 
-    init(client: CaseroClient) {
-        _viewModel = StateObject(wrappedValue: LoginViewModel(client: client))
+    init(client: CaseroClient, settings: AppSettings) {
+        _viewModel = StateObject(wrappedValue: LoginViewModel(client: client, settings: settings))
     }
 
     var body: some View {
