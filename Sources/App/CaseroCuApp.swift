@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct CaseroCUApp: App {
+struct CaseroCuApp: App {
     @StateObject private var appState = AppState()
 
     var body: some Scene {

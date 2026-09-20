@@ -46,13 +46,13 @@ Rather than using a single cross-platform framework (e.g., Flutter or React Nati
 ```bash
 git clone https://github.com/albertolicea00/casero.cu-ios.git
 cd casero.cu-ios
-open CaseroCU.xcodeproj
+open CaseroCu.xcodeproj
 ```
 
 Build from CLI:
 
 ```bash
-xcodebuild -scheme CaseroCU -destination 'platform=iOS Simulator,name=iPhone 15' build
+xcodebuild -scheme CaseroCu -destination 'platform=iOS Simulator,name=iPhone 15' build
 ```
 
 > 🔐 Signing material (`*.p12`, `*.mobileprovision`, `*.p8`) is never committed.

@@ -45,13 +45,13 @@ En lugar de utilizar una tecnología híbrida o multiplataforma (como Flutter o 
 ```bash
 git clone https://github.com/albertolicea00/casero.cu-ios.git
 cd casero.cu-ios
-open CaseroCU.xcodeproj
+open CaseroCu.xcodeproj
 ```
 
 Compilar desde CLI:
 
 ```bash
-xcodebuild -scheme CaseroCU -destination 'platform=iOS Simulator,name=iPhone 15' build
+xcodebuild -scheme CaseroCu -destination 'platform=iOS Simulator,name=iPhone 15' build
 ```
 
 > 🔐 El material de firma (`*.p12`, `*.mobileprovision`, `*.p8`) nunca se sube al repositorio.

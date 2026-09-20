@@ -1,4 +1,4 @@
-name: CaseroCU
+name: CaseroCu
 options:
   bundleIdPrefix: com.caserocu
   deploymentTarget:
@@ -13,7 +13,7 @@ settings:
     DEVELOPMENT_TEAM: "" # set your Apple Developer team id locally; never commit it
 
 targets:
-  CaseroCU:
+  CaseroCu:
     type: application
     platform: iOS
     sources:

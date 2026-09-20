@@ -20,7 +20,7 @@ changes to the iOS client.
    ```bash
    git clone https://github.com/<your-username>/casero.cu-ios.git
    cd casero.cu-ios
-   open CaseroCU.xcodeproj
+   open CaseroCu.xcodeproj
    ```
 
 You need a recent Xcode and macOS.

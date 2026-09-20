@@ -25,10 +25,10 @@ platforms live in separate repositories).
 
 ```bash
 # Build for the simulator
-xcodebuild -scheme CaseroCU -destination 'platform=iOS Simulator,name=iPhone 15' build
+xcodebuild -scheme CaseroCu -destination 'platform=iOS Simulator,name=iPhone 15' build
 
 # Run unit tests
-xcodebuild -scheme CaseroCU -destination 'platform=iOS Simulator,name=iPhone 15' test
+xcodebuild -scheme CaseroCu -destination 'platform=iOS Simulator,name=iPhone 15' test
 
 # Lint / format (if wired in)
 swiftlint
