@@ -49,15 +49,14 @@ final class AppState: ObservableObject {
     }
 }
 
+/// SMS/USSD reporting needs no portal account, so it's always reachable. The
+/// other tabs talk to the portal and gate themselves behind login instead of
+/// blocking the whole app before the tab bar even exists.
 struct RootView: View {
     @EnvironmentObject private var appState: AppState
 
     var body: some View {
-        if appState.isSignedIn {
-            MainTabView(client: appState.client)
-        } else {
-            LoginView(client: appState.client, settings: appState.settings)
-        }
+        MainTabView(client: appState.client)
     }
 }
 
@@ -76,15 +75,38 @@ struct MainTabView: View {
                 SMSHelpView()
                     .tabItem { Label("SMS", systemImage: "message.fill") }
 
-                RegisterGuestView(client: client)
-                    .tabItem { Label("Register", systemImage: "person.badge.plus") }
+                AuthGate(client: client) {
+                    RegisterGuestView(client: client)
+                }
+                .tabItem { Label("Register", systemImage: "person.badge.plus") }
 
-                GuestsView(client: client, settings: appState.settings)
-                    .tabItem { Label("Guests", systemImage: "person.2.fill") }
+                AuthGate(client: client) {
+                    GuestsView(client: client, settings: appState.settings)
+                }
+                .tabItem { Label("Guests", systemImage: "person.2.fill") }
 
-                SettingsView(client: client, settings: appState.settings)
-                    .tabItem { Label("Settings", systemImage: "gearshape.fill") }
+                AuthGate(client: client) {
+                    SettingsView(client: client, settings: appState.settings)
+                }
+                .tabItem { Label("Settings", systemImage: "gearshape.fill") }
             }
+        }
+    }
+}
+
+/// Shows `LoginView` in place of any portal-backed tab's content until the
+/// user signs in, instead of blocking the whole app (SMS reporting needs no
+/// account).
+private struct AuthGate<Content: View>: View {
+    @EnvironmentObject private var appState: AppState
+    let client: CaseroClient
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        if appState.isSignedIn {
+            content()
+        } else {
+            LoginView(client: client, settings: appState.settings)
         }
     }
 }
