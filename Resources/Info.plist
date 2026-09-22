@@ -38,7 +38,7 @@
             <key>casero.rem.cu</key>
             <dict>
                 <key>NSExceptionMinimumTLSVersion</key>
-                <string>TLSv1.0</string>
+                <string>TLSv1.2</string>
                 <key>NSExceptionRequiresForwardSecrecy</key>
                 <false/>
                 <key>NSIncludesSubdomains</key>
