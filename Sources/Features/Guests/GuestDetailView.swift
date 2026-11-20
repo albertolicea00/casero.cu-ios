@@ -88,11 +88,12 @@ struct GuestDetailView: View {
                         .font(.body)
                         .accessibilityLabel("Nationality: \(nationality)")
                 }
-                if let birthDate = guest.birthDate {
-                    Label(PortalDates.display(birthDate), systemImage: "birthday.cake")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                Label(
+                    guest.birthDate.map(PortalDates.display) ?? String(localized: "Birth date unavailable"),
+                    systemImage: "birthday.cake"
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
         }
         .padding(.horizontal, 4)

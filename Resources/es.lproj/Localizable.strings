@@ -39,6 +39,7 @@
 "Use the phone number associated with your host account. Request phone association and wait for confirmation before reporting." = "Usa el número asociado a tu registro como arrendador. Solicita la asociación del teléfono y espera la confirmación antes de reportar.";
 "Each guest and companion needs a separate report. Check the reply's name and nationality, then send the confirmation code when prompted." = "Cada huésped y acompañante requiere un reporte separado. Comprueba el nombre y la nacionalidad de la respuesta y luego envía el código de confirmación cuando se te solicite.";
 "Birth date" = "Fecha de nacimiento";
+"Birth date unavailable" = "Fecha de nacimiento no disponible";
 "Built from the guests already cached on this device — reload the Guests tab first to include recent data." = "Se exportan los huéspedes guardados en este dispositivo. Actualiza la pestaña Huéspedes para incluir los datos recientes.";
 "CASERO web portal" = "Portal web de CASERO";
 "CSV / Excel" = "CSV / Excel";

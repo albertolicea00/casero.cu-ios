@@ -39,6 +39,7 @@
 "Use the phone number associated with your host account. Request phone association and wait for confirmation before reporting." = "Use the phone number associated with your host account. Request phone association and wait for confirmation before reporting.";
 "Each guest and companion needs a separate report. Check the reply's name and nationality, then send the confirmation code when prompted." = "Each guest and companion needs a separate report. Check the reply's name and nationality, then send the confirmation code when prompted.";
 "Birth date" = "Birth date";
+"Birth date unavailable" = "Birth date unavailable";
 "Built from the guests already cached on this device — reload the Guests tab first to include recent data." = "Built from the guests already cached on this device — reload the Guests tab first to include recent data.";
 "CASERO web portal" = "CASERO web portal";
 "CSV / Excel" = "CSV / Excel";
