@@ -58,22 +58,26 @@ struct GuestDetailView: View {
         HStack(alignment: .top, spacing: 14) {
             GuestAvatar(guest: guest, photo: photo, size: 58)
             VStack(alignment: .leading, spacing: 7) {
-                Text(guest.fullName)
-                    .font(.title3.weight(.semibold))
-                    .textSelection(.enabled)
+                HStack(alignment: .top, spacing: 6) {
+                    Text(guest.fullName)
+                        .font(.title3.weight(.semibold))
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    if let nationality = guest.nationality,
+                        let flag = NationalityFlag.emoji(for: nationality)
+                    {
+                        Text(flag)
+                            .accessibilityLabel("Nationality: \(nationality)")
+                    }
+                }
                 Text("Passport/ID: \(guest.identificador)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
                 if let nationality = guest.nationality {
-                    HStack(spacing: 6) {
-                        if let flag = NationalityFlag.emoji(for: nationality) {
-                            Text(flag).accessibilityHidden(true)
-                        }
-                        Text(nationality)
-                    }
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    Text(nationality)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
                 if let date = guest.birthDate {
                     Text("Birth date: \(PortalDates.display(date))")
