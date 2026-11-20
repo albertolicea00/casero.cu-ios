@@ -21,6 +21,9 @@ struct GuestDetailView: View {
                 sectionHeading("Personal data")
                 personalCard
                 photoAction
+                if !isCompanion {
+                    companionsAction
+                }
 
                 sectionHeading("Stay timeline")
                 stayCard
@@ -91,7 +94,7 @@ struct GuestDetailView: View {
     }
 
     private var photoAction: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .trailing, spacing: 4) {
             Button {
                 Task { await loadPhoto() }
             } label: {
@@ -108,8 +111,37 @@ struct GuestDetailView: View {
             .foregroundStyle(.secondary)
             .disabled(isLoadingPhoto)
             if let photoError {
-                Text(photoError).font(.caption2).foregroundStyle(.red)
+                Text(photoError)
+                    .font(.caption2)
+                    .foregroundStyle(.red)
+                    .multilineTextAlignment(.trailing)
             }
+        }
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .padding(.horizontal, 5)
+    }
+
+    private var companionsAction: some View {
+        HStack {
+            Spacer()
+            Button {
+                Task { await loadCompanions() }
+            } label: {
+                Group {
+                    if isLoadingCompanions {
+                        ProgressView()
+                    } else {
+                        Label(
+                            didLoadCompanions ? "Reload companions" : "Load companions",
+                            systemImage: "arrow.clockwise"
+                        )
+                    }
+                }
+                .font(.caption)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
+            .disabled(isLoadingCompanions || guest.stayId.isEmpty)
         }
         .padding(.horizontal, 5)
     }
@@ -152,25 +184,6 @@ struct GuestDetailView: View {
             if let companionsError {
                 Text(companionsError).font(.caption).foregroundStyle(.red)
             }
-            Button {
-                Task { await loadCompanions() }
-            } label: {
-                Group {
-                    if isLoadingCompanions {
-                        ProgressView()
-                    } else {
-                        Label(
-                            didLoadCompanions ? "Reload companions" : "Load companions",
-                            systemImage: "arrow.clockwise"
-                        )
-                    }
-                }
-                .font(.caption)
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(.secondary)
-            .disabled(isLoadingCompanions || guest.stayId.isEmpty)
-            .padding(.horizontal, 5)
         }
     }
 
