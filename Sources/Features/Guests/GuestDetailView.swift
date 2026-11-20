@@ -20,10 +20,8 @@ struct GuestDetailView: View {
             VStack(alignment: .leading, spacing: 10) {
                 sectionHeading("Personal data")
                 personalCard
+                personalMetadata
                 photoAction
-                if !isCompanion {
-                    companionsAction
-                }
 
                 sectionHeading("Stay timeline")
                 stayCard
@@ -59,12 +57,6 @@ struct GuestDetailView: View {
                         .font(.title3.weight(.semibold))
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    if let nationality = guest.nationality,
-                        let flag = NationalityFlag.emoji(for: nationality)
-                    {
-                        Text(flag)
-                            .accessibilityLabel("Nationality: \(nationality)")
-                    }
                 }
                 Text("Passport/ID: \(guest.identificador)")
                     .font(.subheadline)
@@ -75,15 +67,32 @@ struct GuestDetailView: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
-                if let date = guest.birthDate {
-                    Text("Birth date: \(PortalDates.display(date))")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .guestCard()
+    }
+
+    private var personalMetadata: some View {
+        VStack(spacing: 8) {
+            Divider()
+            HStack(spacing: 12) {
+                Spacer(minLength: 0)
+                if let nationality = guest.nationality,
+                    let flag = NationalityFlag.emoji(for: nationality)
+                {
+                    Text(flag)
+                        .font(.body)
+                        .accessibilityLabel("Nationality: \(nationality)")
+                }
+                if let birthDate = guest.birthDate {
+                    Label(PortalDates.display(birthDate), systemImage: "birthday.cake")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(.horizontal, 4)
     }
 
     private var photoAction: some View {
@@ -111,31 +120,6 @@ struct GuestDetailView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
-        .padding(.horizontal, 5)
-    }
-
-    private var companionsAction: some View {
-        HStack {
-            Spacer()
-            Button {
-                Task { await loadCompanions() }
-            } label: {
-                Group {
-                    if isLoadingCompanions {
-                        ProgressView()
-                    } else {
-                        Label(
-                            didLoadCompanions ? "Reload companions" : "Load companions",
-                            systemImage: "arrow.clockwise"
-                        )
-                    }
-                }
-                .font(.caption)
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .disabled(isLoadingCompanions || guest.stayId.isEmpty)
-        }
         .padding(.horizontal, 5)
     }
 
@@ -176,6 +160,23 @@ struct GuestDetailView: View {
             }
             if let companionsError {
                 Text(companionsError).font(.caption).foregroundStyle(.red)
+            }
+            HStack {
+                Spacer()
+                Button {
+                    Task { await loadCompanions() }
+                } label: {
+                    if isLoadingCompanions {
+                        ProgressView()
+                            .frame(minWidth: 128, minHeight: 36)
+                    } else {
+                        Text(didLoadCompanions ? "Reload companions" : "Load companions")
+                            .frame(minWidth: 128, minHeight: 36)
+                    }
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.regular)
+                .disabled(isLoadingCompanions || guest.stayId.isEmpty)
             }
         }
     }
