@@ -2,9 +2,13 @@ import SwiftUI
 
 struct GuestsView: View {
     @EnvironmentObject private var appState: AppState
+    private let client: CaseroClient
+    @ObservedObject private var settings: AppSettings
     @StateObject private var viewModel: GuestsViewModel
 
     init(client: CaseroClient, settings: AppSettings) {
+        self.client = client
+        self.settings = settings
         _viewModel = StateObject(wrappedValue: GuestsViewModel(client: client, settings: settings))
     }
 
@@ -12,13 +16,17 @@ struct GuestsView: View {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "dd/MM/yy"
-        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.timeZone = PortalDates.timeZone
         return formatter
     }()
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                if !appState.isSignedIn {
+                    Text("Sign in on Register to refresh portal data.").font(.caption).foregroundStyle(.secondary)
+                        .padding(.horizontal)
+                }
                 if viewModel.isOffline {
                     Label(offlineCaption, systemImage: "icloud.slash")
                         .font(.caption)
@@ -28,9 +36,20 @@ struct GuestsView: View {
                         .padding(.top, 4)
                 }
 
+                DisclosureGroup("Date range") {
+                    DatePicker("From", selection: $viewModel.from, displayedComponents: .date)
+                    DatePicker("To", selection: $viewModel.to, displayedComponents: .date)
+                    Button("Apply dates") { Task { await viewModel.reload() } }
+                        .accessibilityLabel("Reload guests")
+                        .disabled(viewModel.isLoading || !appState.isSignedIn)
+                }
+                .padding(.horizontal)
+                if let message = viewModel.errorMessage, !viewModel.guests.isEmpty {
+                    Text(message).font(.caption).foregroundStyle(.red).padding(.horizontal)
+                }
                 Picker("Segment", selection: $viewModel.segment) {
                     ForEach(GuestsViewModel.Segment.allCases) { segment in
-                        Text(segment.rawValue).tag(segment)
+                        Text(LocalizedStringKey(segment.rawValue)).tag(segment)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -48,10 +67,11 @@ struct GuestsView: View {
                         if viewModel.isLoading {
                             ProgressView()
                         } else {
-                            Image(systemName: "arrow.clockwise")
+                            Image(systemName: "arrow.clockwise").frame(minWidth: 44, minHeight: 44)
                         }
                     }
-                    .disabled(viewModel.isLoading)
+                    .accessibilityLabel("Reload guests")
+                    .disabled(viewModel.isLoading || !appState.isSignedIn)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Sign out") {
@@ -62,8 +82,10 @@ struct GuestsView: View {
         }
         .task {
             await viewModel.loadFromCache()
-            await viewModel.reload()
+            if appState.isSignedIn { await viewModel.reload() }
         }
+        .onChange(of: viewModel.guests.count) { count in appState.hasCachedGuests = count > 0 }
+        .onChange(of: settings.cacheTTL) { _ in Task { await viewModel.loadFromCache() } }
         .onChange(of: viewModel.isSessionExpired) { expired in
             guard expired else { return }
             Task {
@@ -75,9 +97,9 @@ struct GuestsView: View {
 
     private var offlineCaption: String {
         if let lastFetched = viewModel.lastFetched {
-            return "Showing cached data from \(Self.displayDate.string(from: lastFetched))."
+            return String(localized: "Showing cached data from \(Self.displayDate.string(from: lastFetched)).")
         }
-        return "Showing cached data."
+        return String(localized: "Showing cached data.")
     }
 
     @ViewBuilder
@@ -99,9 +121,13 @@ struct GuestsView: View {
             }
         } else {
             List(guests) { guest in
-                GuestRow(guest: guest, dateFormatter: Self.displayDate)
+                NavigationLink {
+                    GuestDetailView(guest: guest, client: client, settings: settings)
+                } label: {
+                    GuestRow(guest: guest, dateFormatter: Self.displayDate)
+                }
             }
-            .refreshable { await viewModel.reload() }
+            .refreshable { if appState.isSignedIn { await viewModel.reload() } }
         }
     }
 }

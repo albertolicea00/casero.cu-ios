@@ -18,7 +18,7 @@ struct Guest: Codable, Identifiable {
     /// Present on `RegistrarHuesped` responses: "OK" or an error message per person.
     let response: String?
 
-    var id: String { stayId }
+    var id: String { "\(stayId)|\(identificador)|\(checkIn?.timeIntervalSince1970 ?? 0)" }
 
     private enum CodingKeys: String, CodingKey {
         case fullName = "Biografico"
@@ -33,18 +33,39 @@ struct Guest: Codable, Identifiable {
         case response = "Respuesta"
     }
 
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(fullName, forKey: .fullName)
+        try container.encode(identificador, forKey: .identificador)
+        try container.encodeIfPresent(checkIn.map(DotNetDate.string), forKey: .checkIn)
+        try container.encodeIfPresent(checkOut.map(DotNetDate.string), forKey: .checkOut)
+        try container.encodeIfPresent(birthDate.map(DotNetDate.string), forKey: .birthDate)
+        try container.encodeIfPresent(nationalityCode, forKey: .nationalityCode)
+        try container.encodeIfPresent(nationality, forKey: .nationality)
+        try container.encodeIfPresent(sex, forKey: .sex)
+        try container.encode(stayId, forKey: .stayId)
+        try container.encodeIfPresent(response, forKey: .response)
+    }
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         fullName = (try? container.decode(String.self, forKey: .fullName)) ?? ""
         identificador = (try? container.decode(String.self, forKey: .identificador)) ?? ""
-        checkIn = DotNetDate.parse(try? container.decode(String.self, forKey: .checkIn))
-        checkOut = DotNetDate.parse(try? container.decode(String.self, forKey: .checkOut))
-        birthDate = DotNetDate.parse(try? container.decode(String.self, forKey: .birthDate))
+        checkIn =
+            DotNetDate.parse(try? container.decode(String.self, forKey: .checkIn))
+            ?? (try? container.decode(Date.self, forKey: .checkIn))
+        checkOut =
+            DotNetDate.parse(try? container.decode(String.self, forKey: .checkOut))
+            ?? (try? container.decode(Date.self, forKey: .checkOut))
+        birthDate =
+            DotNetDate.parse(try? container.decode(String.self, forKey: .birthDate))
+            ?? (try? container.decode(Date.self, forKey: .birthDate))
         nationalityCode = try? container.decode(String.self, forKey: .nationalityCode)
         nationality = try? container.decode(String.self, forKey: .nationality)
         sex = try? container.decode(String.self, forKey: .sex)
         stayId = (try? container.decode(String.self, forKey: .stayId)) ?? ""
         response = try? container.decode(String.self, forKey: .response)
+        guard !identificador.isEmpty, !fullName.isEmpty else { throw PortalError.invalidResponse }
     }
 }
 
@@ -67,6 +88,7 @@ struct GuestListResponse: Decodable {
         error = (try? container.decode(String.self, forKey: .error)) ?? ""
         page = (try? container.decode(Int.self, forKey: .page)) ?? 1
         total = (try? container.decode(Int.self, forKey: .total)) ?? 0
-        guests = (try? container.decode([Guest].self, forKey: .guests)) ?? []
+        guard error.isEmpty else { throw PortalError.rejected(error) }
+        guests = try container.decode([Guest].self, forKey: .guests)
     }
 }

@@ -76,6 +76,7 @@ struct GuestRegistration {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "dd/MM/yy"
+        formatter.timeZone = PortalDates.timeZone
         return formatter
     }()
 

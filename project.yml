@@ -4,6 +4,8 @@ options:
   deploymentTarget:
     iOS: "16.0"
   createIntermediateGroups: true
+  developmentLanguage: en
+  knownRegions: [en, es]
 
 settings:
   base:
@@ -17,9 +19,12 @@ targets:
     type: application
     platform: iOS
     sources:
-      - Sources
-    resources:
-      - Resources
+      - path: Sources
+      - path: Resources
+        excludes:
+          - Info.plist
+          - README.md
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.caserocu.ios
@@ -27,3 +32,25 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_USER_SCRIPT_SANDBOXING: YES
         TARGETED_DEVICE_FAMILY: "1,2"
+
+  CaseroCuTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - Tests
+    dependencies:
+      - target: CaseroCu
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.caserocu.ios.tests
+
+schemes:
+  CaseroCu:
+    build:
+      targets:
+        CaseroCu: all
+    test:
+      targets:
+        - CaseroCuTests
+      gatherCoverageData: true

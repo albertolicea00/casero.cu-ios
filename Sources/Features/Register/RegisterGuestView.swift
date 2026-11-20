@@ -14,11 +14,12 @@ struct RegisterGuestView: View {
                 Section("Look up") {
                     Picker("Type", selection: $viewModel.lookupKind) {
                         ForEach(RegisterGuestViewModel.LookupKind.allCases) { kind in
-                            Text(kind.rawValue).tag(kind)
+                            Text(LocalizedStringKey(kind.rawValue)).tag(kind)
                         }
                     }
                     TextField(
-                        viewModel.lookupKind == .foreignGuest ? "Passport number" : "Carné de identidad",
+                        LocalizedStringKey(
+                            viewModel.lookupKind == .foreignGuest ? "Passport number" : "Carné de identidad"),
                         text: $viewModel.identificador,
                     )
                     .textInputAutocapitalization(.characters)
@@ -44,14 +45,20 @@ struct RegisterGuestView: View {
                         }
                         DatePicker("Check-in", selection: $viewModel.checkIn, displayedComponents: .date)
                         DatePicker("Check-out", selection: $viewModel.checkOut, displayedComponents: .date)
+                        if let message = viewModel.validationMessage {
+                            Text(message).foregroundStyle(.red)
+                        }
                         Button("Add to registration") { viewModel.addToQueue() }
+                            .disabled(!viewModel.canAdd)
                     }
                 }
 
                 if !viewModel.queue.isEmpty {
                     Section("Ready to register (\(viewModel.queue.count))") {
                         ForEach(Array(viewModel.queue.enumerated()), id: \.offset) { _, entry in
-                            Text("\(entry.firstName) \(entry.lastName1) \(entry.lastName2)".trimmingCharacters(in: .whitespaces))
+                            Text(
+                                "\(entry.firstName) \(entry.lastName1) \(entry.lastName2)".trimmingCharacters(
+                                    in: .whitespaces))
                         }
                         .onDelete { viewModel.removeFromQueue($0) }
 
@@ -61,7 +68,7 @@ struct RegisterGuestView: View {
                             if viewModel.isSubmitting {
                                 ProgressView()
                             } else {
-                                Text("Register \(viewModel.queue.count) \(viewModel.queue.count == 1 ? "person" : "people")")
+                                Text("Register people")
                             }
                         }
                         .disabled(!viewModel.canSubmit)
@@ -71,12 +78,23 @@ struct RegisterGuestView: View {
                 if let results = viewModel.lastSubmission {
                     Section("Last result") {
                         ForEach(results) { guest in
-                            Label(guest.fullName, systemImage: guest.response == "OK" ? "checkmark.circle.fill" : "xmark.circle.fill")
+                            VStack(alignment: .leading) {
+                                Label(
+                                    guest.fullName,
+                                    systemImage: guest.response == "OK" ? "checkmark.circle.fill" : "xmark.circle.fill"
+                                )
                                 .foregroundStyle(guest.response == "OK" ? .green : .red)
+                                Text(guest.response ?? String(localized: "Unconfirmed")).font(.caption)
+                            }
                         }
                     }
                 }
 
+                Section {
+                    NavigationLink("Complete in official portal") {
+                        PortalPageView(path: "Huespedes", title: "Register guest")
+                    }
+                }
                 if let message = viewModel.errorMessage {
                     Section {
                         Text(message).foregroundStyle(.red)
@@ -85,6 +103,8 @@ struct RegisterGuestView: View {
             }
             .navigationTitle("Register guest")
         }
+        .onChange(of: viewModel.lookupKind) { _ in viewModel.clearLookup() }
+        .onChange(of: viewModel.identificador) { _ in viewModel.clearLookup() }
         .onChange(of: viewModel.isSessionExpired) { expired in
             guard expired else { return }
             Task {

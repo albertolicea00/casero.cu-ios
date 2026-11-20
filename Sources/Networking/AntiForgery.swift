@@ -1,21 +1,32 @@
 import Foundation
 
-/// Extracts the ASP.NET anti-forgery form token embedded in every portal page.
+/// Reads the token independently of attribute order and HTML quote style.
 enum AntiForgery {
-
-    private static let pattern = #"name="__RequestVerificationToken"[^>]*value="([^"]+)""#
-
     static func extract(from html: String) throws -> String {
-        guard let regex = try? NSRegularExpression(pattern: pattern) else {
-            throw PortalError.antiForgeryMissing
-        }
+        let inputs = try NSRegularExpression(pattern: #"<input\b[^>]*>"#, options: .caseInsensitive)
+        let attributes = try NSRegularExpression(pattern: #"([\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))"#)
         let range = NSRange(html.startIndex..<html.endIndex, in: html)
-        guard let match = regex.firstMatch(in: html, range: range),
-              let valueRange = Range(match.range(at: 1), in: html) else {
-            throw PortalError.antiForgeryMissing
+        for input in inputs.matches(in: html, range: range) {
+            guard let inputRange = Range(input.range, in: html) else { continue }
+            let tag = String(html[inputRange])
+            var values: [String: String] = [:]
+            for attribute in attributes.matches(in: tag, range: NSRange(tag.startIndex..<tag.endIndex, in: tag)) {
+                guard let name = Range(attribute.range(at: 1), in: tag) else { continue }
+                for index in 2...4 {
+                    if let value = Range(attribute.range(at: index), in: tag) {
+                        values[String(tag[name]).lowercased()] = String(tag[value])
+                        break
+                    }
+                }
+            }
+            if values["name"] == "__RequestVerificationToken", let token = values["value"], !token.isEmpty {
+                return token.replacingOccurrences(of: "&quot;", with: "\"")
+                    .replacingOccurrences(of: "&#39;", with: "'")
+                    .replacingOccurrences(of: "&lt;", with: "<")
+                    .replacingOccurrences(of: "&gt;", with: ">")
+                    .replacingOccurrences(of: "&amp;", with: "&")
+            }
         }
-        let token = String(html[valueRange])
-        if token.isEmpty { throw PortalError.antiForgeryMissing }
-        return token
+        throw PortalError.antiForgeryMissing
     }
 }

@@ -12,29 +12,45 @@ enum PersonaLookup: Int {
 /// (via `HTTPCookieStorage`) and the anti-forgery token are carried on every
 /// request, and the portal's login redirect / `REDIRECT` sentinel are mapped to
 /// `PortalError.sessionExpired`.
-final class CaseroClient: NSObject, @unchecked Sendable {
+final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
 
     static let baseURL = URL(string: "https://casero.rem.cu/Plataforma/")!
 
     private static let userAgent =
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 " +
-        "(KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 "
+        + "(KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
 
     private static let portalDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "dd/MM/yy"
+        formatter.timeZone = PortalDates.timeZone
         return formatter
     }()
 
-    private lazy var session: URLSession = {
-        let config = URLSessionConfiguration.default
-        config.httpCookieStorage = HTTPCookieStorage.shared
-        config.httpCookieAcceptPolicy = .always
-        config.timeoutIntervalForRequest = 20
-        config.httpAdditionalHeaders = ["User-Agent": Self.userAgent]
-        return URLSession(configuration: config, delegate: self, delegateQueue: nil)
-    }()
+    private var session: URLSession!
+
+    init(configuration: URLSessionConfiguration = .default) {
+        super.init()
+        configuration.httpCookieStorage = HTTPCookieStorage.shared
+        configuration.httpCookieAcceptPolicy = .always
+        configuration.timeoutIntervalForRequest = 20
+        configuration.urlCache = nil
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        configuration.httpAdditionalHeaders = ["User-Agent": Self.userAgent]
+        session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+    }
+
+    /// Called only after an explicit session-expired response, never after a
+    /// timeout or an uncertain registration result.
+    var recoverSession: (@Sendable () async -> Bool)?
+
+    private func authenticated<T>(_ operation: () async throws -> T) async throws -> T {
+        do { return try await operation() } catch PortalError.sessionExpired {
+            guard await recoverSession?() == true else { throw PortalError.sessionExpired }
+            return try await operation()
+        }
+    }
 
     // MARK: - Public API
 
@@ -48,14 +64,52 @@ final class CaseroClient: NSObject, @unchecked Sendable {
         ])
         let (_, response) = try await post("Cuenta/IniciarSesion", body: body)
         switch response.statusCode {
-        case 300..<400: return // success: portal redirects to /Plataforma/
+        case 300..<400:
+            guard let location = response.value(forHTTPHeaderField: "Location"),
+                let destination = URL(string: location, relativeTo: Self.baseURL)?.absoluteURL,
+                destination.scheme == "https",
+                destination.host == Self.baseURL.host,
+                destination.path.hasPrefix("/Plataforma"),
+                !destination.path.lowercased().contains("iniciarsesion")
+            else {
+                throw PortalError.invalidCredentials
+            }
+            return
         case 200: throw PortalError.invalidCredentials
         default: throw PortalError.http(response.statusCode)
         }
     }
 
-    /// Registered guests for a date range.
-    func listGuests(from: Date, to: Date, pageSize: Int = 20, page: Int = 1) async throws -> [Guest] {
+    /// Fetches every page so filtering and exports cannot silently lose stays.
+    func listGuests(from: Date, to: Date, pageSize: Int = 100, page: Int = 1) async throws -> [Guest] {
+        guard from <= to, (1...200).contains(pageSize), page >= 1 else { throw PortalError.invalidResponse }
+        return try await authenticated {
+            var guests: [Guest] = []
+            var seen = Set<String>()
+            var currentPage = page
+            while currentPage < page + 1000 {
+                try Task.checkCancellation()
+                let result = try await self.listGuestPage(from: from, to: to, pageSize: pageSize, page: currentPage)
+                if result.guests.isEmpty {
+                    if result.total > guests.count { throw PortalError.invalidResponse }
+                    return guests
+                }
+                for guest in result.guests {
+                    guard seen.insert(guest.id).inserted else { throw PortalError.invalidResponse }
+                    guests.append(guest)
+                }
+                if result.total > 0 {
+                    if guests.count >= result.total { return guests }
+                } else if result.guests.count < pageSize {
+                    return guests
+                }
+                currentPage += 1
+            }
+            throw PortalError.invalidResponse
+        }
+    }
+
+    private func listGuestPage(from: Date, to: Date, pageSize: Int, page: Int) async throws -> GuestListResponse {
         let token = try AntiForgery.extract(from: try await getHTML("Huespedes/HuespedesRegistrados"))
         let body = formEncoded([
             ("fechaInicio", Self.portalDateFormatter.string(from: from)),
@@ -65,17 +119,18 @@ final class CaseroClient: NSObject, @unchecked Sendable {
             ("__RequestVerificationToken", token),
         ])
         let text = try await postForJSON(
-            "Huespedes/ListarHuespedes",
-            body: body,
-            referer: "Huespedes/HuespedesRegistrados",
-        )
-        return try JSONDecoder().decode(GuestListResponse.self, from: Data(text.utf8)).guests
+            "Huespedes/ListarHuespedes", body: body, referer: "Huespedes/HuespedesRegistrados")
+        return try JSONDecoder().decode(GuestListResponse.self, from: Data(text.utf8))
     }
 
     func signOut() async {
-        _ = try? await perform(request(for: "Cuenta/CerrarSesion", method: "GET"))
-        HTTPCookieStorage.shared.cookies(for: Self.baseURL)?.forEach {
-            HTTPCookieStorage.shared.deleteCookie($0)
+        let tasks = await session.allTasks
+        for task in tasks { task.cancel() }
+        var logout = request(for: "Cuenta/CerrarSesion", method: "GET")
+        logout.timeoutInterval = 5
+        _ = try? await perform(logout)
+        for cookie in HTTPCookieStorage.shared.cookies(for: Self.baseURL) ?? [] {
+            HTTPCookieStorage.shared.deleteCookie(cookie)
         }
     }
 
@@ -88,20 +143,38 @@ final class CaseroClient: NSObject, @unchecked Sendable {
     /// `estanciaId` alongside the paging fields, and the response envelope is
     /// shaped like `GuestListResponse` under a `ListaAcompannantes` key. Confirm
     /// against a real capture before relying on this in production.
-    func listCompanions(estanciaId: String, pageSize: Int = 20, page: Int = 1) async throws -> [Guest] {
-        let token = try AntiForgery.extract(from: try await getHTML("Huespedes/HuespedesRegistrados"))
-        let body = formEncoded([
-            ("estanciaId", estanciaId),
-            ("cantMaxRegistros", String(pageSize)),
-            ("pagina", String(page)),
-            ("__RequestVerificationToken", token),
-        ])
-        let text = try await postForJSON(
-            "Huespedes/ListarAcompannantes",
-            body: body,
-            referer: "Huespedes/HuespedesRegistrados",
-        )
-        return try JSONDecoder().decode(CompanionListResponse.self, from: Data(text.utf8)).companions
+    func listCompanions(estanciaId: String, pageSize: Int = 100, page: Int = 1) async throws -> [Guest] {
+        guard !estanciaId.isEmpty, (1...200).contains(pageSize), page >= 1 else { throw PortalError.invalidResponse }
+        return try await authenticated {
+            var companions: [Guest] = []
+            var seen = Set<String>()
+            for currentPage in page..<(page + 1000) {
+                try Task.checkCancellation()
+                let token = try AntiForgery.extract(from: try await getHTML("Huespedes/HuespedesRegistrados"))
+                let body = formEncoded([
+                    ("estanciaId", estanciaId), ("cantMaxRegistros", String(pageSize)),
+                    ("pagina", String(currentPage)), ("__RequestVerificationToken", token),
+                ])
+                let text = try await postForJSON(
+                    "Huespedes/ListarAcompannantes", body: body,
+                    referer: "Huespedes/HuespedesRegistrados")
+                let result = try JSONDecoder().decode(CompanionListResponse.self, from: Data(text.utf8))
+                if result.companions.isEmpty {
+                    guard result.total <= companions.count else { throw PortalError.invalidResponse }
+                    return companions
+                }
+                for person in result.companions {
+                    guard seen.insert(person.id).inserted else { throw PortalError.invalidResponse }
+                    companions.append(person)
+                }
+                if result.total > 0 {
+                    if companions.count >= result.total { return companions }
+                } else if result.companions.count < pageSize {
+                    return companions
+                }
+            }
+            throw PortalError.invalidResponse
+        }
     }
 
     // MARK: - Registration
@@ -111,18 +184,22 @@ final class CaseroClient: NSObject, @unchecked Sendable {
     ///   - identificador: passport number (`tipo == .byPassport`) or an
     ///     underscore-joined full name (`tipo == .byName`), per captured traffic.
     func validatePersonaDiie(identificador: String, tipo: PersonaLookup) async throws -> PersonaValidation {
-        try await validatePersona(
-            path: "Huespedes/ValidarPersonaDiie",
-            body: formEncodedWithToken([("identificador", identificador), ("tipo", String(tipo.rawValue))]),
-        )
+        return try await authenticated {
+            return try await validatePersona(
+                path: "Huespedes/ValidarPersonaDiie",
+                body: formEncodedWithToken([("identificador", identificador), ("tipo", String(tipo.rawValue))]),
+            )
+        }
     }
 
     /// Looks up a Cuban companion by carné de identidad in the SUIN registry.
     func validatePersonaSuin(identificador: String) async throws -> PersonaValidation {
-        try await validatePersona(
-            path: "Huespedes/ValidarPersonaSuin",
-            body: formEncodedWithToken([("identificador", identificador)]),
-        )
+        return try await authenticated {
+            return try await validatePersona(
+                path: "Huespedes/ValidarPersonaSuin",
+                body: formEncodedWithToken([("identificador", identificador)]),
+            )
+        }
     }
 
     private func validatePersona(path: String, body: (String) -> Data) async throws -> PersonaValidation {
@@ -133,38 +210,48 @@ final class CaseroClient: NSObject, @unchecked Sendable {
 
     /// Registers one or more guests/companions in a single call (`|`-joined `personas`).
     func registerGuests(_ people: [GuestRegistration]) async throws -> [Guest] {
-        guard !people.isEmpty else { return [] }
-        let token = try AntiForgery.extract(from: try await getHTML("Huespedes"))
-        let personas = people.map(\.wireFormat).joined(separator: "|")
-        let body = formEncoded([
-            ("personas", personas),
-            ("__RequestVerificationToken", token),
-        ])
-        let text = try await postForJSON("Huespedes/RegistrarHuesped", body: body, referer: "Huespedes")
-        return try Self.decodeGuestOrArray(Data(text.utf8))
+        return try await authenticated {
+            guard !people.isEmpty else { return [] }
+            let token = try AntiForgery.extract(from: try await getHTML("Huespedes"))
+            let personas = people.map(\.wireFormat).joined(separator: "|")
+            let body = formEncoded([
+                ("personas", personas),
+                ("__RequestVerificationToken", token),
+            ])
+            let text = try await postForJSON("Huespedes/RegistrarHuesped", body: body, referer: "Huespedes")
+            return try Self.decodeGuestOrArray(Data(text.utf8))
+        }
     }
 
     // MARK: - Photos
 
     /// Foreign guest photo. Query parameters mirror the captured request exactly.
-    func fetchForeignGuestPhoto(passport: String, name: String, nationalityCode: String, sex: String) async throws -> Data {
-        var components = URLComponents(url: Self.baseURL.appending(path: "Huespedes/ObtenerFotoDiie"), resolvingAgainstBaseURL: false)!
-        components.queryItems = [
-            URLQueryItem(name: "pasap", value: passport),
-            URLQueryItem(name: "nomb", value: name),
-            URLQueryItem(name: "apel1", value: ""),
-            URLQueryItem(name: "apel2", value: ""),
-            URLQueryItem(name: "ciud", value: nationalityCode),
-            URLQueryItem(name: "sexo", value: sex),
-        ]
-        return try await fetchPhoto(at: components.url!)
+    func fetchForeignGuestPhoto(passport: String, name: String, nationalityCode: String, sex: String) async throws
+        -> Data
+    {
+        return try await authenticated {
+            var components = URLComponents(
+                url: Self.baseURL.appending(path: "Huespedes/ObtenerFotoDiie"), resolvingAgainstBaseURL: false)!
+            components.queryItems = [
+                URLQueryItem(name: "pasap", value: passport),
+                URLQueryItem(name: "nomb", value: name),
+                URLQueryItem(name: "apel1", value: ""),
+                URLQueryItem(name: "apel2", value: ""),
+                URLQueryItem(name: "ciud", value: nationalityCode),
+                URLQueryItem(name: "sexo", value: sex),
+            ]
+            return try await fetchPhoto(at: components.url!)
+        }
     }
 
     /// Companion (Cuban national) photo, looked up by carné de identidad.
     func fetchCompanionPhoto(carne: String) async throws -> Data {
-        var components = URLComponents(url: Self.baseURL.appending(path: "Huespedes/ObtenerFotoSUINPorCi"), resolvingAgainstBaseURL: false)!
-        components.queryItems = [URLQueryItem(name: "ci", value: carne)]
-        return try await fetchPhoto(at: components.url!)
+        return try await authenticated {
+            var components = URLComponents(
+                url: Self.baseURL.appending(path: "Huespedes/ObtenerFotoSUINPorCi"), resolvingAgainstBaseURL: false)!
+            components.queryItems = [URLQueryItem(name: "ci", value: carne)]
+            return try await fetchPhoto(at: components.url!)
+        }
     }
 
     private func fetchPhoto(at url: URL) async throws -> Data {
@@ -175,6 +262,8 @@ final class CaseroClient: NSObject, @unchecked Sendable {
             if (300..<400).contains(response.statusCode) { throw PortalError.sessionExpired }
             throw PortalError.http(response.statusCode)
         }
+        if isRedirectSentinel(String(decoding: data, as: UTF8.self)) { throw PortalError.sessionExpired }
+        guard response.mimeType?.hasPrefix("image/") == true else { throw PortalError.invalidResponse }
         return data
     }
 
@@ -221,6 +310,10 @@ final class CaseroClient: NSObject, @unchecked Sendable {
             let (data, response) = try await session.data(for: request)
             guard let http = response as? HTTPURLResponse else { throw PortalError.unreachable }
             return (data, http)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch let error as URLError where error.code == .cancelled {
+            throw CancellationError()
         } catch let error as PortalError {
             throw error
         } catch {
@@ -284,7 +377,8 @@ private struct CompanionListResponse: Decodable {
         error = (try? container.decode(String.self, forKey: .error)) ?? ""
         page = (try? container.decode(Int.self, forKey: .page)) ?? 1
         total = (try? container.decode(Int.self, forKey: .total)) ?? 0
-        companions = (try? container.decode([Guest].self, forKey: .companions)) ?? []
+        guard error.isEmpty else { throw PortalError.rejected(error) }
+        companions = try container.decode([Guest].self, forKey: .companions)
     }
 }
 

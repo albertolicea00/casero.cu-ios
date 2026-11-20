@@ -24,9 +24,16 @@ enum CertificatePinner {
     }()
 
     /// Evaluates a server-trust challenge against the pinned certificate.
-    static func evaluate(_ challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+    static func evaluate(_ challenge: URLAuthenticationChallenge) -> (
+        URLSession.AuthChallengeDisposition, URLCredential?
+    ) {
         guard challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
-              let serverTrust = challenge.protectionSpace.serverTrust else {
+            let serverTrust = challenge.protectionSpace.serverTrust
+        else {
+            return (.performDefaultHandling, nil)
+        }
+
+        guard challenge.protectionSpace.host.lowercased() == "casero.rem.cu" else {
             return (.performDefaultHandling, nil)
         }
 
@@ -36,7 +43,8 @@ enum CertificatePinner {
         }
 
         guard let chain = SecTrustCopyCertificateChain(serverTrust) as? [SecCertificate],
-              let leaf = chain.first else {
+            let leaf = chain.first
+        else {
             return (.cancelAuthenticationChallenge, nil)
         }
 

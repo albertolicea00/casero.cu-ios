@@ -19,8 +19,18 @@ final class LoginViewModel: ObservableObject {
         }
     }
 
+    var validationMessage: String? {
+        guard !password.isEmpty else { return nil }
+        let pattern = #"^(?=.*[A-Z])(?=.*\W)(?=.*[0-9])(?=.*[a-z]).*$"#
+        guard (8...100).contains(password.count), password.range(of: pattern, options: .regularExpression) != nil else {
+            return String(localized: "Use 8–100 characters with uppercase, lowercase, a number, and a symbol.")
+        }
+        return nil
+    }
+
     var canSubmit: Bool {
-        !user.isEmpty && password.count >= 8 && !isLoading
+        !user.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && (8...100).contains(password.count)
+            && validationMessage == nil && !isLoading
     }
 
     /// Returns `true` on a successful sign-in.
@@ -32,6 +42,8 @@ final class LoginViewModel: ObservableObject {
         let trimmedUser = user.trimmingCharacters(in: .whitespaces)
         do {
             try await client.login(user: trimmedUser, password: password)
+            await GuestCache.shared.clear()
+            await PhotoCache.shared.clear()
             if settings.rememberCredentials {
                 KeychainStore.set(trimmedUser, for: .username)
                 KeychainStore.set(password, for: .password)

@@ -7,13 +7,20 @@ struct SettingsView: View {
 
     init(client: CaseroClient, settings: AppSettings) {
         self.settings = settings
-        _viewModel = StateObject(wrappedValue: SettingsViewModel(client: client))
+        _viewModel = StateObject(wrappedValue: SettingsViewModel(client: client, settings: settings))
     }
 
     var body: some View {
         NavigationStack {
             Form {
                 accountSection
+                Section("Communication channels") {
+                    NavigationLink("Manage phones and emails") {
+                        PortalPageView(path: "ViasComunicacion", title: "Communication channels")
+                    }
+                    Text("Changes are saved directly through the official portal form.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
                 sessionSection
                 cacheSection
                 exportSection
@@ -21,7 +28,10 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .task { await viewModel.refreshCacheSummary() }
-            .sheet(item: $viewModel.exportedFile) { file in
+            .onChange(of: settings.saveImages) { enabled in
+                if !enabled { Task { await PhotoCache.shared.clear() } }
+            }
+            .sheet(item: $viewModel.exportedFile, onDismiss: viewModel.removeExport) { file in
                 ShareSheet(items: [file.url])
             }
         }
@@ -41,11 +51,17 @@ struct SettingsView: View {
 
     private var sessionSection: some View {
         Section("Session") {
+            if !settings.rememberCredentials {
+                Text("Enable Remember credentials at sign-in to recover expired sessions automatically.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             Toggle("Auto re-authenticate on expiry", isOn: $settings.autoReauth)
                 .disabled(!settings.rememberCredentials)
-            Text("Detected lazily: only when a real request comes back as expired, never by polling in the background. If off (or no credentials saved), a banner asks you to sign in again.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            Text(
+                "Detected lazily: only when a real request comes back as expired, never by polling in the background. If off (or no credentials saved), a banner asks you to sign in again."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
     }
 
@@ -61,7 +77,10 @@ struct SettingsView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Button("Clear cache", role: .destructive) {
-                Task { await viewModel.clearCache() }
+                Task {
+                    await viewModel.clearCache()
+                    appState.hasCachedGuests = false
+                }
             }
         }
     }
@@ -78,9 +97,11 @@ struct SettingsView: View {
             if viewModel.exportFormat == .pdf {
                 Toggle("Include photos", isOn: $viewModel.includePhotosInPDF)
             }
-            Text("Built from the guests already cached on this device — reload the Guests tab first to include recent data.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            Text(
+                "Built from the guests already cached on this device — reload the Guests tab first to include recent data."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
             Button {
                 Task { await viewModel.export() }
             } label: {
@@ -91,6 +112,7 @@ struct SettingsView: View {
                 }
             }
             .disabled(viewModel.isExporting)
+            if let message = viewModel.noticeMessage { Text(message).foregroundStyle(.secondary).font(.caption) }
             if let message = viewModel.errorMessage {
                 Text(message).foregroundStyle(.red).font(.caption)
             }
@@ -101,6 +123,7 @@ struct SettingsView: View {
         Section("About") {
             NavigationLink("Manual") { ManualView() }
             NavigationLink("Disclaimer") { DisclaimerView() }
+            NavigationLink("Privacy") { PrivacyView() }
             NavigationLink("Developer & official links") { DeveloperInfoView() }
         }
     }
@@ -109,22 +132,8 @@ struct SettingsView: View {
 private struct ManualView: View {
     var body: some View {
         ScrollView {
-            Text(
-                """
-                SMS: report a guest over your carrier network when the portal is unreachable. \
-                iOS requires you to confirm sending the message yourself.
-
-                Register: look up a guest by passport (foreign) or carné (Cuban companion), \
-                add them with check-in/check-out dates, then submit — you can batch several \
-                people into one submission.
-
-                Guests: shows active and past stays. Pull to refresh or tap the reload icon; \
-                data is cached on-device so you can still browse it offline.
-
-                Settings: manage your session, cache, exports, and this manual.
-                """
-            )
-            .padding()
+            Text("Manual instructions")
+                .padding()
         }
         .navigationTitle("Manual")
     }
@@ -133,17 +142,8 @@ private struct ManualView: View {
 private struct DisclaimerView: View {
     var body: some View {
         ScrollView {
-            Text(
-                """
-                CASERO for iOS is an unofficial, independent client for the CASERO web portal \
-                (casero.rem.cu) and the official USSD/SMS reporting codes. It is not affiliated \
-                with, endorsed by, or produced by CIDP-MININT or any Cuban government agency.
-
-                Use at your own risk. The developer is not responsible for reporting delays, \
-                data loss, or portal outages beyond this app's control.
-                """
-            )
-            .padding()
+            Text("App disclaimer")
+                .padding()
         }
         .navigationTitle("Disclaimer")
     }
@@ -162,5 +162,12 @@ private struct DeveloperInfoView: View {
             }
         }
         .navigationTitle("Developer info")
+    }
+}
+
+private struct PrivacyView: View {
+    var body: some View {
+        ScrollView { Text("Privacy details").padding() }
+            .navigationTitle("Privacy")
     }
 }

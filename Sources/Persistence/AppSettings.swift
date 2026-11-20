@@ -17,12 +17,12 @@ final class AppSettings: ObservableObject {
 
         var label: String {
             switch self {
-            case .oneHour: return "1 hour"
-            case .sixHours: return "6 hours"
-            case .oneDay: return "1 day"
-            case .threeDays: return "3 days"
-            case .oneWeek: return "1 week"
-            case .forever: return "Never expire"
+            case .oneHour: return String(localized: "1 hour")
+            case .sixHours: return String(localized: "6 hours")
+            case .oneDay: return String(localized: "1 day")
+            case .threeDays: return String(localized: "3 days")
+            case .oneWeek: return String(localized: "1 week")
+            case .forever: return String(localized: "Never expire")
             }
         }
 

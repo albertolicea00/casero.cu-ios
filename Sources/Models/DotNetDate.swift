@@ -1,24 +1,19 @@
 import Foundation
 
-/// Parses ASP.NET JSON dates of the form `/Date(1772600400000)/` into `Date`.
-///
-/// The value is epoch milliseconds (may be negative). The portal uses
-/// `-62135578800000` (.NET `DateTime.MinValue`) to mean "no date"; callers should
-/// treat pre-epoch results as absent.
+/// ASP.NET dates use UTC milliseconds; only DateTime.MinValue is absent.
 enum DotNetDate {
-
-    private static let pattern = try? NSRegularExpression(pattern: #"/Date\((-?\d+)\)/"#)
+    private static let pattern = try! NSRegularExpression(pattern: #"^/Date\((-?\d+)(?:[+-]\d{4})?\)/$"#)
 
     static func parse(_ raw: String?) -> Date? {
-        guard let raw, let regex = pattern else { return nil }
-        let range = NSRange(raw.startIndex..<raw.endIndex, in: raw)
-        guard let match = regex.firstMatch(in: raw, range: range),
-              let millisRange = Range(match.range(at: 1), in: raw),
-              let millis = Double(raw[millisRange]) else {
-            return nil
-        }
-        let date = Date(timeIntervalSince1970: millis / 1000)
-        // Drop .NET DateTime.MinValue and other pre-epoch sentinels.
-        return date.timeIntervalSince1970 <= 0 ? nil : date
+        guard let raw,
+            let match = pattern.firstMatch(in: raw, range: NSRange(raw.startIndex..., in: raw)),
+            let range = Range(match.range(at: 1), in: raw),
+            let millis = Double(raw[range]), millis > -62_135_578_800_000
+        else { return nil }
+        return Date(timeIntervalSince1970: millis / 1000)
+    }
+
+    static func string(_ date: Date) -> String {
+        "/Date(\(Int64((date.timeIntervalSince1970 * 1000).rounded())))/"
     }
 }

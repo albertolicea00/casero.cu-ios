@@ -96,3 +96,5 @@ Thumbs.db
 *.swp
 *~
 .ignore/*
+# Public portal TLS certificate; this is not signing material.
+!Resources/casero_rem_cu.cer

@@ -1,5 +1,5 @@
-import Network
 import Foundation
+import Network
 
 /// Tracks whether the device currently has internet connectivity, for the
 /// connectivity banner. SMS/USSD reporting doesn't need this — it only needs

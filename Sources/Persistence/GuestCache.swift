@@ -8,21 +8,27 @@ actor GuestCache {
     struct Snapshot: Codable {
         let fetchedAt: Date
         let guests: [Guest]
+        var rangeStart: Date? = nil
+        var rangeEnd: Date? = nil
     }
+
+    private(set) var generation = UUID()
 
     static let shared = GuestCache()
 
     private let fileURL: URL
 
-    init(fileManager: FileManager = .default) {
-        let base = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+    init(directory: URL? = nil, fileManager: FileManager = .default) {
+        let base = directory ?? fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        try? fileManager.createDirectory(at: base, withIntermediateDirectories: true)
         fileURL = base.appendingPathComponent("guests-cache.json")
     }
 
-    func save(_ guests: [Guest]) {
-        let snapshot = Snapshot(fetchedAt: Date(), guests: guests)
+    func save(_ guests: [Guest], from: Date? = nil, to: Date? = nil, generation expected: UUID? = nil) {
+        guard expected == nil || expected == generation else { return }
+        let snapshot = Snapshot(fetchedAt: Date(), guests: guests, rangeStart: from, rangeEnd: to)
         guard let data = try? JSONEncoder().encode(snapshot) else { return }
-        try? data.write(to: fileURL, options: .atomic)
+        try? data.write(to: fileURL, options: [.atomic, .completeFileProtection])
     }
 
     func load() -> Snapshot? {
@@ -31,6 +37,7 @@ actor GuestCache {
     }
 
     func clear() {
+        generation = UUID()
         try? FileManager.default.removeItem(at: fileURL)
     }
 

@@ -14,21 +14,28 @@ enum PortalError: LocalizedError {
     case http(Int)
     /// Transport failure — most often the portal being unreachable from outside Cuba.
     case unreachable
+    case rejected(String)
+    case invalidResponse
 
     var errorDescription: String? {
         switch self {
+        case .rejected(let message):
+            return message
+        case .invalidResponse:
+            return String(
+                localized: "The portal returned an unexpected response. Please try again or use the official portal.")
         case .sessionExpired:
-            return "Session expired. Please sign in again."
+            return String(localized: "Session expired. Please sign in again.")
         case .invalidCredentials:
-            return "Invalid username or password."
+            return String(localized: "Invalid username or password.")
         case .antiForgeryMissing:
-            return "Anti-forgery token not found in page HTML."
+            return String(localized: "Could not validate the portal form. Please try again.")
         case .certificateNotBundled:
-            return "Pinned certificate not bundled. Add casero_rem_cu.cer to the app resources — see CLAUDE.md."
+            return String(localized: "The portal security certificate is missing from this installation.")
         case .http(let code):
-            return "Portal returned HTTP \(code)."
+            return String(localized: "Portal returned HTTP \(code).")
         case .unreachable:
-            return "Could not reach the portal (only reachable from inside Cuba)."
+            return String(localized: "Could not reach the portal (only reachable from inside Cuba).")
         }
     }
 }

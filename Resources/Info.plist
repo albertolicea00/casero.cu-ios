@@ -25,6 +25,14 @@
         <string>UIInterfaceOrientationPortrait</string>
     </array>
 
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+
     <!--
       App Transport Security.
       We do NOT allow arbitrary loads. The portal's certificate is pinned in code
