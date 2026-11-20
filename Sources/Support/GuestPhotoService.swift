@@ -14,16 +14,7 @@ final class GuestPhotoService {
     }
 
     func image(for guest: Guest, isCompanion: Bool = false) async throws -> UIImage {
-        // This cache key is never requested over the network.
-        var key = URLComponents()
-        key.scheme = "casero-photo"
-        key.host = "guest"
-        key.queryItems = [
-            URLQueryItem(name: "id", value: guest.identificador),
-            URLQueryItem(name: "nationality", value: guest.nationalityCode),
-            URLQueryItem(name: "kind", value: isCompanion ? "companion" : "guest"),
-        ]
-        guard let url = key.url else { throw PortalError.invalidResponse }
+        guard let url = cacheURL(for: guest, isCompanion: isCompanion) else { throw PortalError.invalidResponse }
         if settings.saveImages,
             let data = await cache.data(for: url, ttl: settings.cacheTTL.interval),
             let image = UIImage(data: data)
@@ -43,5 +34,25 @@ final class GuestPhotoService {
         guard let image = UIImage(data: data) else { throw PortalError.invalidResponse }
         if settings.saveImages { await cache.store(data, for: url, generation: generation) }
         return image
+    }
+
+    func cachedImage(for guest: Guest, isCompanion: Bool = false) async -> UIImage? {
+        guard settings.saveImages,
+            let url = cacheURL(for: guest, isCompanion: isCompanion),
+            let data = await cache.data(for: url, ttl: settings.cacheTTL.interval)
+        else { return nil }
+        return UIImage(data: data)
+    }
+
+    private func cacheURL(for guest: Guest, isCompanion: Bool) -> URL? {
+        var key = URLComponents()
+        key.scheme = "casero-photo"
+        key.host = "guest"
+        key.queryItems = [
+            URLQueryItem(name: "id", value: guest.identificador),
+            URLQueryItem(name: "nationality", value: guest.nationalityCode),
+            URLQueryItem(name: "kind", value: isCompanion ? "companion" : "guest"),
+        ]
+        return key.url
     }
 }

@@ -6,14 +6,20 @@ final class GuestsViewModel: ObservableObject {
     enum Segment: String, CaseIterable, Identifiable {
         case active = "Active"
         case history = "History"
-        case all = "All"
+        var id: String { rawValue }
+    }
+
+    enum SortOrder: String, CaseIterable, Identifiable {
+        case newestFirst = "Newest first"
+        case oldestFirst = "Oldest first"
         var id: String { rawValue }
     }
 
     @Published var from = PortalDates.calendar.date(byAdding: .month, value: -3, to: Date()) ?? Date()
     @Published var to = Date()
     @Published var guests: [Guest] = []
-    @Published var segment: Segment = .all
+    @Published var segment: Segment = .active
+    @Published var sortOrder: SortOrder = .newestFirst
     @Published var searchText = ""
     @Published private(set) var isLoading = false
     @Published private(set) var isOffline = false
@@ -35,17 +41,25 @@ final class GuestsViewModel: ObservableObject {
         let now = Date()
         let bySegment = guests.filter { guest in
             switch segment {
-            case .all: return true
             case .active:
                 return (guest.checkIn ?? .distantPast) <= now
                     && (guest.checkOut ?? .distantFuture) >= PortalDates.calendar.startOfDay(for: now)
             case .history: return (guest.checkOut ?? .distantFuture) < PortalDates.calendar.startOfDay(for: now)
             }
         }
-        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else { return bySegment }
-        let needle = searchText.lowercased()
-        return bySegment.filter {
-            $0.fullName.lowercased().contains(needle) || $0.identificador.lowercased().contains(needle)
+        let bySearch: [Guest]
+        if searchText.trimmingCharacters(in: .whitespaces).isEmpty {
+            bySearch = bySegment
+        } else {
+            let needle = searchText.lowercased()
+            bySearch = bySegment.filter {
+                $0.fullName.lowercased().contains(needle) || $0.identificador.lowercased().contains(needle)
+            }
+        }
+        return bySearch.sorted {
+            let left = $0.checkIn ?? .distantPast
+            let right = $1.checkIn ?? .distantPast
+            return sortOrder == .newestFirst ? left > right : left < right
         }
     }
 

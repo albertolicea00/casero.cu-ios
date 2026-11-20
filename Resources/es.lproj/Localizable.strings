@@ -80,6 +80,14 @@
 "Last result" = "Último resultado";
 "Load companions" = "Cargar acompañantes";
 "Load photo" = "Cargar foto";
+"Reload companions" = "Actualizar acompañantes";
+"Reload photo" = "Actualizar foto";
+"Newest first" = "Más recientes primero";
+"Oldest first" = "Más antiguos primero";
+"Sort order" = "Orden";
+"Sort guests" = "Ordenar huéspedes";
+"Stay timeline" = "Estancia";
+"Companion details" = "Detalles del acompañante";
 "Loading" = "Cargando";
 "Look up" = "Buscar";
 "Manage phones and emails" = "Gestionar teléfonos y correos";
