@@ -45,7 +45,7 @@
 "Could not build export: %@" = "Could not build export: %@";
 "Could not reach the portal (only reachable from inside Cuba)." = "Could not reach the portal (only reachable from inside Cuba).";
 "Could not connect to the portal. Check your internet connection and try again. Portal access may be limited to networks in Cuba." = "Could not connect to the portal. Check your internet connection and try again. Portal access may be limited to networks in Cuba.";
-"A secure connection to the portal could not be established. Check your network and device date and time. Portal access may be limited to networks in Cuba." = "A secure connection to the portal could not be established. Check your network and device date and time. Portal access may be limited to networks in Cuba.";
+"The HTTPS connection to the portal ended before it could be established. Check whether this network can reach casero.rem.cu, then try again." = "The HTTPS connection to the portal ended before it could be established. Check whether this network can reach casero.rem.cu, then try again.";
 "Could not validate the portal form. Please try again." = "Could not validate the portal form. Please try again.";
 "Cuban companion" = "Cuban companion";
 "Cuban companion (carné)" = "Cuban companion (carné)";

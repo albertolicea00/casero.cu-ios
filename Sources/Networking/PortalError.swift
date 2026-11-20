@@ -44,7 +44,7 @@ enum PortalError: LocalizedError {
         case .secureConnection:
             return String(
                 localized:
-                    "A secure connection to the portal could not be established. Check your network and device date and time. Portal access may be limited to networks in Cuba."
+                    "The HTTPS connection to the portal ended before it could be established. Check whether this network can reach casero.rem.cu, then try again."
             )
         }
     }
