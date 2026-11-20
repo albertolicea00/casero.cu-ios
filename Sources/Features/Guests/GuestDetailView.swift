@@ -38,6 +38,9 @@ struct GuestDetailView: View {
         .task(id: guest.id + (isCompanion ? "-companion" : "-guest")) {
             photo = await GuestPhotoService(client: client, settings: settings).cachedImage(
                 for: guest, isCompanion: isCompanion)
+            if !isCompanion {
+                await restoreCachedCompanions()
+            }
         }
     }
 
@@ -204,12 +207,26 @@ struct GuestDetailView: View {
         do {
             companions = try await client.listCompanions(estanciaId: guest.stayId, pageSize: 100)
             didLoadCompanions = true
+            await GuestCache.shared.saveCompanions(companions, for: guest.stayId)
             onCompanionsLoaded?(companions.count)
         } catch PortalError.sessionExpired {
             await appState.reportSessionExpired()
         } catch {
             companionsError = error.localizedDescription
         }
+    }
+
+    private func restoreCachedCompanions() async {
+        guard !guest.stayId.isEmpty,
+            let snapshot = await GuestCache.shared.loadCompanions(for: guest.stayId)
+        else { return }
+        if await GuestCache.shared.isStale(snapshot, ttl: settings.cacheTTL.interval) {
+            await GuestCache.shared.removeCompanions(for: guest.stayId)
+            return
+        }
+        companions = snapshot.companions
+        didLoadCompanions = true
+        onCompanionsLoaded?(companions.count)
     }
 }
 
