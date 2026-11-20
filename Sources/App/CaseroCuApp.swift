@@ -115,6 +115,9 @@ struct MainTabView: View {
             ConnectivityBanner(connectivity: appState.connectivity)
 
             TabView {
+                SMSHelpView()
+                    .tabItem { Label("SMS", systemImage: "message.fill") }
+
                 AuthGate(client: client) {
                     RegisterGuestView(client: client)
                 }
@@ -128,9 +131,6 @@ struct MainTabView: View {
                     }
                 }
                 .tabItem { Label("Guests", systemImage: "person.2.fill") }
-
-                SMSHelpView()
-                    .tabItem { Label("SMS", systemImage: "message.fill") }
 
                 SettingsView(client: client, settings: appState.settings)
                     .tabItem { Label("Settings", systemImage: "gearshape.fill") }
