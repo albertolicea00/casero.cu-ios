@@ -147,23 +147,16 @@ struct SMSHelpView: View {
 
     private var confirmationSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "checkmark.message.fill")
-                    .font(.title3)
-                    .foregroundStyle(.tint)
-                    .frame(width: 36, height: 36)
-                    .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Confirm received code")
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-                    Text(
-                        "Check the name and nationality in the service reply before confirming. Requests expire after six hours; start a new report if that time has passed."
-                    )
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                }
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Confirm received code")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                Text(
+                    "Check the name and nationality in the service reply before confirming. Requests expire after six hours; start a new report if that time has passed."
+                )
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             }
 
             confirmationInputCard
