@@ -5,6 +5,8 @@ import SwiftUI
 struct SMSHelpView: View {
     @StateObject private var model = SMSReportViewModel()
     @State private var isInfoPresented = false
+    @State private var selectedReportKind = SMSReportViewModel.Kind.guest
+    @State private var isConfirmationMode = false
     let onOpenSettings: () -> Void
 
     init(onOpenSettings: @escaping () -> Void = {}) {
@@ -16,10 +18,13 @@ struct SMSHelpView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Picker("Operation", selection: $model.kind) {
+                        Picker("Operation", selection: $selectedReportKind) {
                             Text("Guest").tag(SMSReportViewModel.Kind.guest)
                             Text("Companion").tag(SMSReportViewModel.Kind.companion)
-                            Text("Confirm").tag(SMSReportViewModel.Kind.confirmation)
+                        }
+                        .onChange(of: selectedReportKind) { kind in
+                            isConfirmationMode = false
+                            model.kind = kind
                         }
                         .pickerStyle(.segmented)
                         .labelsHidden()
@@ -59,6 +64,23 @@ struct SMSHelpView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, 4)
+                    }
+
+                    if isConfirmationMode {
+                        Button("Back to guest or companion") {
+                            isConfirmationMode = false
+                            model.kind = selectedReportKind
+                            model.confirmationCode = ""
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
+                    } else {
+                        Button("Confirm received code") {
+                            selectedReportKind = model.kind
+                            isConfirmationMode = true
+                            model.kind = .confirmation
+                        }
+                        .buttonStyle(.bordered)
                     }
 
                     if let result = model.resultMessage {
@@ -103,7 +125,7 @@ struct SMSHelpView: View {
 
     private var inputCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if model.kind == .confirmation {
+            if isConfirmationMode {
                 TextField("Confirmation code without HC", text: $model.confirmationCode)
                     .textContentType(.oneTimeCode)
                     .textInputAutocapitalization(.characters)
@@ -232,25 +254,26 @@ private struct SMSReportInfoSheet: View {
                             "If you already have an account, associate or update your phone from Settings > Communication channels, or use the official portal."
                         )
                         .font(.subheadline)
+                        Divider()
+                        Button {
+                            dismiss()
+                            onOpenSettings()
+                        } label: {
+                            HStack {
+                                Label("Manage phone in Settings", systemImage: "gearshape")
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .padding(.vertical, 4)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.tint)
                     }
                     .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
-
-                    Button {
-                        dismiss()
-                        onOpenSettings()
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Label("Manage phone in Settings", systemImage: "gearshape")
-                            Image(systemName: "arrow.up.right")
-                                .font(.caption.weight(.semibold))
-                            Spacer()
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.tint)
 
                     NavigationLink {
                         PortalPageView(path: "", title: "Official portal")

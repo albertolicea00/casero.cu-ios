@@ -2,11 +2,14 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
+    private let client: CaseroClient
     @ObservedObject private var settings: AppSettings
     @StateObject private var viewModel: SettingsViewModel
     @State private var isExportFormPresented = false
+    @State private var isLoginPresented = false
 
     init(client: CaseroClient, settings: AppSettings) {
+        self.client = client
         self.settings = settings
         _viewModel = StateObject(wrappedValue: SettingsViewModel(client: client, settings: settings))
     }
@@ -26,6 +29,9 @@ struct SettingsView: View {
             .task { await viewModel.refreshCacheSummary() }
             .onChange(of: settings.saveImages) { enabled in
                 if !enabled { Task { await PhotoCache.shared.clear() } }
+            }
+            .onChange(of: appState.isSignedIn) { signedIn in
+                if signedIn { isLoginPresented = false }
             }
             .sheet(isPresented: $isExportFormPresented) {
                 ExportFormSheet(viewModel: viewModel)
@@ -52,9 +58,22 @@ struct SettingsView: View {
             Text("Stored in the iOS Keychain, used only for silent session recovery.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Button("Sign out", role: .destructive) {
-                Task { await appState.signOutCompletely() }
+            if appState.isSignedIn {
+                Button("Sign out of the app", role: .destructive) {
+                    Task { await appState.signOutCompletely() }
+                }
+            } else {
+                Button {
+                    isLoginPresented = true
+                } label: {
+                    Label("Sign in to the app", systemImage: "person.crop.circle.badge.plus")
+                }
             }
+        }
+        .sheet(isPresented: $isLoginPresented) {
+            LoginView(client: client, settings: settings)
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         }
     }
 
@@ -82,11 +101,13 @@ struct SettingsView: View {
                 }
             }
             Toggle("Save guest photos", isOn: $settings.saveImages)
-            Button("Clear cache", role: .destructive) {
+            Button(role: .destructive) {
                 Task {
                     await viewModel.clearCache()
                     appState.hasCachedGuests = false
                 }
+            } label: {
+                Label("Clear cache", systemImage: "trash")
             }
             Text(viewModel.cacheSummary)
                 .font(.caption)

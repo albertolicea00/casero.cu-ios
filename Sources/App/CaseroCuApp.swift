@@ -179,28 +179,21 @@ private struct AuthGate<Content: View>: View {
                     Image(systemName: "person.badge.key")
                         .font(.system(size: 38))
                         .foregroundStyle(.tertiary)
-                    Text("Sign in required to register guests")
+                    Text("Sign in to the guest portal")
                         .font(.headline)
                         .multilineTextAlignment(.center)
-                    Text("Sign in to the guest portal")
+                    Text("Sign in to look up and report guests.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                    Button(action: onSignIn) {
+                        Label("Sign in", systemImage: "person.crop.circle.badge.plus")
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
                 .padding()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .navigationTitle("Register")
-                .safeAreaInset(edge: .bottom, alignment: .trailing, spacing: 0) {
-                    HStack {
-                        Spacer()
-                        Button(action: onSignIn) {
-                            Label("Sign in", systemImage: "person.crop.circle.badge.plus")
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .clipShape(Capsule())
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                }
             }
             .onAppear {
                 if isActive { onSignIn() }

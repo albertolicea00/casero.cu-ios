@@ -110,7 +110,15 @@ struct GuestsView: View {
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    if !appState.isSignedIn {
+                        Button {
+                            isLoginPresented = true
+                        } label: {
+                            Label("Sign in", systemImage: "person.crop.circle.badge.plus")
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
                     Button {
                         Task { await viewModel.reload() }
                     } label: {
@@ -143,22 +151,6 @@ struct GuestsView: View {
                 LoginView(client: client, settings: settings)
                     .presentationDetents([.large])
                     .presentationDragIndicator(.visible)
-            }
-            .safeAreaInset(edge: .bottom, alignment: .trailing, spacing: 0) {
-                if !appState.isSignedIn {
-                    HStack {
-                        Spacer()
-                        Button {
-                            isLoginPresented = true
-                        } label: {
-                            Label("Sign in", systemImage: "person.crop.circle.badge.plus")
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .clipShape(Capsule())
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                }
             }
         }
         .task {

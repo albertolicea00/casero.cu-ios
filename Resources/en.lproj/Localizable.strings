@@ -206,6 +206,10 @@
 "Showing cached data from %@." = "Showing cached data from %@.";
 "Showing cached data." = "Showing cached data.";
 "Sign in" = "Sign in";
+"Sign in to the app" = "Sign in to the app";
+"Sign out of the app" = "Sign out of the app";
+"Sign in to look up and report guests." = "Sign in to look up and report guests.";
+"Back to guest or companion" = "Back to guest or companion";
 "Sign in in app" = "Sign in in app";
 "Use your account to register guests and manage your data." = "Use your account to register guests and manage your data.";
 "Sign in required to register guests" = "Sign in required to register guests";

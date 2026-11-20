@@ -206,6 +206,10 @@
 "Showing cached data from %@." = "Mostrando datos guardados el %@.";
 "Showing cached data." = "Mostrando datos guardados.";
 "Sign in" = "Iniciar sesión";
+"Sign in to the app" = "Iniciar sesión en la app";
+"Sign out of the app" = "Cerrar sesión de la app";
+"Sign in to look up and report guests." = "Inicia sesión para consultar y reportar huéspedes.";
+"Back to guest or companion" = "Volver al huésped o acompañante";
 "Sign in in app" = "Iniciar sesión en la app";
 "Use your account to register guests and manage your data." = "Usa tu cuenta para registrar huéspedes y gestionar tus datos.";
 "Sign in required to register guests" = "Inicia sesión para registrar huéspedes";
