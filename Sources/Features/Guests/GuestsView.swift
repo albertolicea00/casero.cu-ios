@@ -75,9 +75,10 @@ struct GuestsView: View {
                         isDateFilterPresented = true
                     } label: {
                         Image(systemName: "calendar")
+                            .foregroundStyle(.secondary)
                             .frame(width: 44, height: 44)
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.plain)
                     .accessibilityLabel("Date range")
                 }
                 .padding(.horizontal)
