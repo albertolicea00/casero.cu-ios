@@ -2,8 +2,9 @@ import Foundation
 import Security
 
 /// Pins the `casero.rem.cu` certificate. The portal serves a certificate that
-/// fails standard chain validation; rather than trusting any CA we compare the
-/// presented leaf certificate byte-for-byte against a bundled copy.
+/// fails validation against the device's public CA store. Trust is limited to
+/// the bundled leaf certificate, then evaluated against the portal hostname
+/// and normal certificate validity rules.
 ///
 /// Bundle the DER certificate as `casero_rem_cu.cer` in the app resources. If it
 /// is absent the pinner rejects every connection (fail closed).
@@ -48,10 +49,21 @@ enum CertificatePinner {
             return (.cancelAuthenticationChallenge, nil)
         }
 
-        let presented = SecCertificateCopyData(leaf) as Data
-        if presented == pinned {
-            return (.useCredential, URLCredential(trust: serverTrust))
+        guard SecCertificateCopyData(leaf) as Data == pinned else {
+            return (.cancelAuthenticationChallenge, nil)
         }
-        return (.cancelAuthenticationChallenge, nil)
+
+        // The portal's issuing CA is private and is not installed on user
+        // devices. Trust this exact pinned leaf as the sole anchor, while still
+        // checking its dates, server-auth usage, and hostname for this request.
+        let policy = SecPolicyCreateSSL(true, challenge.protectionSpace.host as CFString)
+        guard SecTrustSetPolicies(serverTrust, policy) == errSecSuccess,
+            SecTrustSetAnchorCertificates(serverTrust, [leaf] as CFArray) == errSecSuccess,
+            SecTrustSetAnchorCertificatesOnly(serverTrust, true) == errSecSuccess,
+            SecTrustEvaluateWithError(serverTrust, nil)
+        else {
+            return (.cancelAuthenticationChallenge, nil)
+        }
+        return (.useCredential, URLCredential(trust: serverTrust))
     }
 }
