@@ -159,14 +159,43 @@ private struct SMSReportInfoSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Before the first report").font(.headline)
+                    infoHeading("Before the first report")
+                    VStack(alignment: .leading, spacing: 12) {
                         Text(
-                            "Use the phone number associated with your host account. Call 18808 to request association and wait for confirmation before reporting."
+                            "Use the phone number associated with your host account. Request phone association and wait for confirmation before reporting."
                         )
+                        if let url = USSDSMSReporter.dialURL(for: USSDSMSReporter.associationPhone) {
+                            Divider()
+                            Link(destination: url) {
+                                HStack {
+                                    Label("Call 18808", systemImage: "phone.fill")
+                                    Spacer()
+                                    Image(systemName: "arrow.up.right")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.tertiary)
+                                }
+                            }
+                            Divider()
+                        }
                         Text("SMS does not require internet, but needs cellular service. Carrier charges may apply.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
+
+                    infoHeading("After sending")
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(
+                            "Each guest and companion needs a separate report. Check the reply's name and nationality, then send the confirmation code when prompted."
+                        )
+                        Divider()
+                        Text(
+                            "The report is complete only after the service returns a final registration code. Confirmation requests expire after six hours; start a new report if one expires."
+                        )
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     }
                     .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -209,17 +238,6 @@ private struct SMSReportInfoSheet: View {
                     .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
-
-                    if let url = USSDSMSReporter.dialURL(for: USSDSMSReporter.associationPhone) {
-                        HStack {
-                            Spacer()
-                            Link(destination: url) {
-                                Label("Call 18808", systemImage: "phone.fill")
-                            }
-                            .buttonStyle(.borderedProminent)
-                            Spacer()
-                        }
-                    }
 
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Instructions and portal").font(.headline)
@@ -295,5 +313,12 @@ private struct SMSReportInfoSheet: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+
+    private func infoHeading(_ title: LocalizedStringKey) -> some View {
+        Text(title)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 4)
     }
 }
