@@ -174,6 +174,8 @@
 "Sign in on the Register tab to look up and report guests. An internet connection to the portal is required." = "Inicia sesión en la pestaña Registrar para buscar y reportar huéspedes. Necesitas conexión a internet y acceso al portal.";
 "Sign in to the guest portal" = "Inicia sesión en el portal de huéspedes";
 "Sign out" = "Cerrar sesión";
+"Sign out?" = "¿Cerrar sesión?";
+"Sign out of the portal account?" = "¿Quieres cerrar la sesión del portal?";
 "Signing out…" = "Cerrando sesión…";
 "Some photos could not be loaded. The export includes the remaining data." = "No se pudieron cargar algunas fotos. La exportación incluye los demás datos.";
 "Some registrations were not confirmed. They remain in the queue. Verify the portal before retrying to avoid duplicate reports." = "Algunos registros no fueron confirmados y siguen en la lista. Revisa el portal antes de reintentar para evitar reportes duplicados.";

@@ -6,6 +6,7 @@ struct GuestsView: View {
     @ObservedObject private var settings: AppSettings
     @StateObject private var viewModel: GuestsViewModel
     @State private var isDateFilterPresented = false
+    @State private var isShowingSignOutConfirmation = false
     @State private var pendingFrom = Date()
     @State private var pendingTo = Date()
 
@@ -106,32 +107,49 @@ struct GuestsView: View {
                 content
             }
             .background(Color(uiColor: .systemBackground).ignoresSafeArea())
-            .navigationTitle("Guests")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
             .toolbar {
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    Button {
-                        Task { await viewModel.reload() }
-                    } label: {
-                        if viewModel.isLoading {
-                            ProgressView()
-                        } else {
-                            Image(systemName: "arrow.clockwise")
+                ToolbarItem(placement: .navigationBarLeading) {
+                    HStack(spacing: 4) {
+                        Text("Guests").font(.headline)
+                        Button {
+                            Task { await viewModel.reload() }
+                        } label: {
+                            if viewModel.isLoading {
+                                ProgressView()
+                            } else {
+                                Image(systemName: "arrow.clockwise")
+                            }
                         }
-                    }
-                    .accessibilityLabel("Reload guests")
-                    .disabled(viewModel.isLoading || !appState.isSignedIn)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .accessibilityLabel("Reload guests")
+                        .disabled(viewModel.isLoading || !appState.isSignedIn)
 
-                    Button {
-                        Task { await appState.signOutCompletely() }
-                    } label: {
-                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                        Button {
+                            isShowingSignOutConfirmation = true
+                        } label: {
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                        }
+                        .frame(minWidth: 44, minHeight: 44)
+                        .accessibilityLabel("Sign out")
+                        .disabled(appState.isSigningOut)
                     }
-                    .accessibilityLabel("Sign out")
-                    .disabled(appState.isSigningOut)
                 }
+            }
+            .confirmationDialog(
+                "Sign out?",
+                isPresented: $isShowingSignOutConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Sign out", role: .destructive) {
+                    Task { await appState.signOutCompletely() }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Sign out of the portal account?")
             }
             .sheet(isPresented: $isDateFilterPresented) {
                 GuestDateRangeSheet(
