@@ -39,26 +39,35 @@ struct GuestsView: View {
 
                 HStack(spacing: 10) {
                     HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
+
                         TextField("Name or passport", text: $viewModel.searchText)
-                            .textInputAutocapitalization(.never)
+                            .textInputAutocapitalization(.words)
                             .autocorrectionDisabled()
-                            .padding(.leading, 24)
-                            .textFieldStyle(.roundedBorder)
-                            .overlay(alignment: .leading) {
-                                Image(systemName: "magnifyingglass")
-                                    .foregroundStyle(.secondary)
-                                    .padding(.leading, 8)
-                                    .accessibilityHidden(true)
-                            }
+                            .textFieldStyle(.plain)
+                            .submitLabel(.search)
+                            .frame(maxWidth: .infinity, minHeight: 44)
+
                         if !viewModel.searchText.isEmpty {
                             Button {
                                 viewModel.searchText = ""
                             } label: {
-                                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.tertiary)
                             }
+                            .buttonStyle(.plain)
                             .accessibilityLabel("Clear search")
                         }
                     }
+                    .padding(.horizontal, 12)
+                    .frame(height: 44)
+                    .background(
+                        Color(uiColor: .secondarySystemBackground),
+                        in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    )
 
                     Button {
                         pendingFrom = viewModel.from
