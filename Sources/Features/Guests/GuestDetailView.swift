@@ -6,6 +6,7 @@ struct GuestDetailView: View {
     let client: CaseroClient
     let settings: AppSettings
     var isCompanion = false
+    var onCompanionsLoaded: ((Int) -> Void)? = nil
     @State private var photo: UIImage?
     @State private var photoError: String?
     @State private var companions: [Guest] = []
@@ -111,14 +112,17 @@ struct GuestDetailView: View {
 
     private var stayCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            StayDateLine(title: "Check-in", date: guest.checkIn, color: .accentColor)
-            StayDateLine(title: "Check-out", date: guest.checkOut, color: .orange)
-            if let summary = GuestStayText.summary(for: guest) {
+            StayDateLine(
+                title: "Check-in", date: guest.checkIn, color: .accentColor, systemImage: "arrow.right.to.line")
+            StayDateLine(
+                title: "Check-out", date: guest.checkOut, color: .orange, systemImage: "arrow.left.to.line")
+            if let duration = GuestStayText.duration(for: guest) {
                 Divider()
-                Label(summary, systemImage: "moon.stars")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                Label(
+                    String.localizedStringWithFormat(String(localized: "Stay: %@"), duration), systemImage: "moon.stars"
+                )
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.secondary)
             }
         }
         .guestCard()
@@ -192,6 +196,7 @@ struct GuestDetailView: View {
         do {
             companions = try await client.listCompanions(estanciaId: guest.stayId, pageSize: 100)
             didLoadCompanions = true
+            onCompanionsLoaded?(companions.count)
         } catch PortalError.sessionExpired {
             await appState.reportSessionExpired()
         } catch {
@@ -204,10 +209,14 @@ private struct StayDateLine: View {
     let title: LocalizedStringKey
     let date: Date?
     let color: Color
+    let systemImage: String
 
     var body: some View {
         HStack(spacing: 10) {
-            Circle().fill(color).frame(width: 8, height: 8)
+            Image(systemName: systemImage)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(color)
+                .frame(width: 18)
             Text(title).font(.subheadline.weight(.semibold))
             Spacer(minLength: 8)
             if let date {
@@ -268,13 +277,17 @@ private struct CompanionSummary: View {
             }
             if guest.checkIn != nil || guest.checkOut != nil {
                 Divider().padding(.vertical, 3)
-                StayDateLine(title: "Check-in", date: guest.checkIn, color: .accentColor)
-                StayDateLine(title: "Check-out", date: guest.checkOut, color: .orange)
-                if let summary = GuestStayText.summary(for: guest) {
-                    Label(summary, systemImage: "moon.stars")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                StayDateLine(
+                    title: "Check-in", date: guest.checkIn, color: .accentColor, systemImage: "arrow.right.to.line")
+                StayDateLine(
+                    title: "Check-out", date: guest.checkOut, color: .orange, systemImage: "arrow.left.to.line")
+                if let duration = GuestStayText.duration(for: guest) {
+                    Label(
+                        String.localizedStringWithFormat(String(localized: "Stay: %@"), duration),
+                        systemImage: "moon.stars"
+                    )
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
                 }
             }
         }
@@ -340,7 +353,7 @@ private struct GuestAvatar: View {
             }
         }
         .frame(width: size, height: size)
-        .clipShape(Circle())
+        .clipShape(RoundedRectangle(cornerRadius: 12))
         .accessibilityLabel(guest.fullName)
     }
 
@@ -402,9 +415,4 @@ enum GuestStayText {
         return String.localizedStringWithFormat(format, duration)
     }
 
-    static func summary(for guest: Guest, relativeTo now: Date = .now) -> String? {
-        guard let duration = duration(for: guest), let checkIn = guest.checkIn else { return nil }
-        let age = age(of: checkIn, relativeTo: now)
-        return String.localizedStringWithFormat(String(localized: "Stay: %@ (%@)"), duration, age)
-    }
 }

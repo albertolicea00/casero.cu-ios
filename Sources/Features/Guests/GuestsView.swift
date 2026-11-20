@@ -9,6 +9,7 @@ struct GuestsView: View {
     @State private var isLoginPresented = false
     @State private var pendingFrom = Date()
     @State private var pendingTo = Date()
+    @State private var companionCounts: [String: Int] = [:]
 
     init(client: CaseroClient, settings: AppSettings) {
         self.client = client
@@ -221,9 +222,18 @@ struct GuestsView: View {
                 LazyVStack(spacing: 10) {
                     ForEach(guests) { guest in
                         NavigationLink {
-                            GuestDetailView(guest: guest, client: client, settings: settings)
+                            GuestDetailView(
+                                guest: guest,
+                                client: client,
+                                settings: settings,
+                                onCompanionsLoaded: { count in companionCounts[guest.id] = count }
+                            )
                         } label: {
-                            GuestRow(guest: guest, dateFormatter: Self.displayDate)
+                            GuestRow(
+                                guest: guest,
+                                dateFormatter: Self.displayDate,
+                                companionCount: companionCounts[guest.id]
+                            )
                         }
                         .buttonStyle(.plain)
                     }
@@ -303,6 +313,7 @@ private struct GuestDateRangeSheet: View {
 private struct GuestRow: View {
     let guest: Guest
     let dateFormatter: DateFormatter
+    let companionCount: Int?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -312,19 +323,11 @@ private struct GuestRow: View {
                         .lineLimit(1)
                         .truncationMode(.tail)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    if let nationality = guest.nationality,
-                        let flag = NationalityFlag.emoji(for: nationality)
-                    {
-                        Text(flag).accessibilityLabel("Nationality: \(nationality)")
-                    }
                 }
                 .font(.headline)
                 .foregroundStyle(.primary)
-                Text("Passport/ID: \(guest.identificador)")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                if let nationality = guest.nationality {
-                    Text("Nationality: \(nationality)")
+                if let companionLine {
+                    Text(companionLine)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -340,14 +343,18 @@ private struct GuestRow: View {
                     stayDate(title: "Check-out", date: guest.checkOut)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                if let summary = GuestStayText.summary(for: guest) {
+                if let duration = GuestStayText.duration(for: guest) {
                     HStack(spacing: 6) {
                         Image(systemName: "moon.stars")
-                        Text(summary)
+                        Text(String.localizedStringWithFormat(String(localized: "Stay: %@"), duration))
                     }
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                }
+                if let checkIn = guest.checkIn {
+                    Text(GuestStayText.age(of: checkIn))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
@@ -355,6 +362,13 @@ private struct GuestRow: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
         .contentShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    private var companionLine: String? {
+        guard let companionCount, companionCount > 0 else { return nil }
+        return companionCount == 1
+            ? String(localized: "+ 1 companion")
+            : String(localized: "+ \(companionCount) companions")
     }
 
     @ViewBuilder

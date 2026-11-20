@@ -12,27 +12,51 @@ struct LoginView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    Text("Sign in to the guest portal")
-                        .foregroundStyle(.secondary)
-                    TextField("Username", text: $viewModel.user)
-                        .textContentType(.username)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                    SecureField("Password", text: $viewModel.password)
-                        .textContentType(.password)
-                    Toggle("Remember credentials", isOn: $settings.rememberCredentials)
-                }
+            ScrollView {
+                VStack(spacing: 18) {
+                    VStack(spacing: 6) {
+                        Text("Sign in to the guest portal")
+                            .font(.title2.weight(.semibold))
+                            .multilineTextAlignment(.center)
+                        Text("Use your account to register guests and manage your data.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 12)
 
-                if let message = viewModel.validationMessage {
-                    Section { Text(message).font(.caption).foregroundStyle(.secondary) }
-                }
-                if let message = viewModel.errorMessage {
-                    Section { Text(message).foregroundStyle(.red).font(.footnote) }
-                }
+                    VStack(spacing: 0) {
+                        TextField("Username", text: $viewModel.user)
+                            .textContentType(.username)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .padding(.vertical, 12)
+                        Divider()
+                        SecureField("Password", text: $viewModel.password)
+                            .textContentType(.password)
+                            .padding(.vertical, 12)
+                        Divider()
+                        Toggle("Remember credentials", isOn: $settings.rememberCredentials)
+                            .padding(.vertical, 8)
+                    }
+                    .padding(.horizontal, 16)
+                    .background(
+                        Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
 
-                Section {
+                    if let message = viewModel.validationMessage {
+                        Text(message)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    if let message = viewModel.errorMessage {
+                        Text(message)
+                            .foregroundStyle(.red)
+                            .font(.footnote)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+
                     Button {
                         Task {
                             if await viewModel.submit() {
@@ -53,6 +77,7 @@ struct LoginView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(!viewModel.canSubmit)
+                    .padding(.top, 4)
 
                     NavigationLink {
                         PortalPageView(path: "", title: "Official portal")
@@ -61,8 +86,11 @@ struct LoginView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
+                    .padding(.top, -8)
                 }
+                .padding(20)
             }
+            .background(Color(uiColor: .systemBackground).ignoresSafeArea())
             .navigationTitle("Sign in in app")
             .navigationBarTitleDisplayMode(.inline)
         }

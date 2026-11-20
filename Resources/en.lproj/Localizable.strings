@@ -12,10 +12,11 @@
 "%lld days" = "%lld days";
 "1 year" = "1 year";
 "%lld years" = "%lld years";
+"+ 1 companion" = "+ 1 companion";
+"+ %lld companions" = "+ %lld companions";
 "%@ ago" = "%@ ago";
 "In %@" = "In %@";
 "Today" = "Today";
-"Stay: %@ (%@)" = "Stay: %@ (%@)";
 "Stay: %@" = "Stay: %@";
 "Nationality unknown" = "Nationality unknown";
 "1 hour" = "1 hour";
@@ -40,6 +41,15 @@
 "Cache" = "Cache";
 "Cached data has expired. Reload Guests before exporting." = "Cached data has expired. Reload Guests before exporting.";
 "Call 18808" = "Call 18808";
+"How to report by SMS" = "How to report by SMS";
+"Associate your host phone" = "Associate your host phone";
+"Call 18808 from the phone associated with your host account and wait for confirmation. If you already have an account, manage the phone in Settings or on the official portal." = "Call 18808 from the phone associated with your host account and wait for confirmation. If you already have an account, manage the phone in Settings or on the official portal.";
+"Prepare the first message" = "Prepare the first message";
+"For a guest, enter the passport and stay days. For a companion, enter the main guest's passport and the companion's identity number; the main guest must already be registered. The app prepares the HC message for 7344. Review it in Messages and send it." = "For a guest, enter the passport and stay days. For a companion, enter the main guest's passport and the companion's identity number; the main guest must already be registered. The app prepares the HC message for 7344. Review it in Messages and send it.";
+"Check the reply and confirm" = "Check the reply and confirm";
+"Wait for the service reply. Verify the guest's name and nationality, then select Confirm, enter the received confirmation code without HC, and send the prepared confirmation message to 7344." = "Wait for the service reply. Verify the guest's name and nationality, then select Confirm, enter the received confirmation code without HC, and send the prepared confirmation message to 7344.";
+"Wait for the registration code" = "Wait for the registration code";
+"The report is complete only after the service returns a final registration code. Each person needs a separate exchange. Confirmation requests expire after six hours; start a new report if one expires." = "The report is complete only after the service returns a final registration code. Each person needs a separate exchange. Confirmation requests expire after six hours; start a new report if one expires.";
 "Carné de identidad" = "Carné de identidad";
 "Casero" = "Casero";
 "Changes are saved directly through the official portal form." = "Changes are saved directly through the official portal form.";
@@ -193,6 +203,7 @@
 "Showing cached data." = "Showing cached data.";
 "Sign in" = "Sign in";
 "Sign in in app" = "Sign in in app";
+"Use your account to register guests and manage your data." = "Use your account to register guests and manage your data.";
 "Sign in required to register guests" = "Sign in required to register guests";
 "Sign in on the Register tab to look up and report guests. An internet connection to the portal is required." = "Sign in on the Register tab to look up and report guests. An internet connection to the portal is required.";
 "Sign in to the guest portal" = "Sign in to the guest portal";

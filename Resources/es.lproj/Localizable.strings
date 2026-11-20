@@ -12,10 +12,11 @@
 "%lld days" = "%lld días";
 "1 year" = "1 año";
 "%lld years" = "%lld años";
+"+ 1 companion" = "+ 1 acompañante";
+"+ %lld companions" = "+ %lld acompañantes";
 "%@ ago" = "hace %@";
 "In %@" = "en %@";
 "Today" = "hoy";
-"Stay: %@ (%@)" = "Estancia: %@ (%@)";
 "Stay: %@" = "Estancia: %@";
 "Nationality unknown" = "Nacionalidad desconocida";
 "1 hour" = "1 hora";
@@ -40,6 +41,15 @@
 "Cache" = "Datos guardados";
 "Cached data has expired. Reload Guests before exporting." = "Los datos guardados vencieron. Actualiza Huéspedes antes de exportar.";
 "Call 18808" = "Llamar al 18808";
+"How to report by SMS" = "Cómo reportar por SMS";
+"Associate your host phone" = "Asocia el teléfono de tu registro";
+"Call 18808 from the phone associated with your host account and wait for confirmation. If you already have an account, manage the phone in Settings or on the official portal." = "Llama al 18808 desde el teléfono asociado a tu registro como arrendador y espera la confirmación. Si ya tienes una cuenta, gestiona el teléfono en Ajustes o en el portal oficial.";
+"Prepare the first message" = "Prepara el primer mensaje";
+"For a guest, enter the passport and stay days. For a companion, enter the main guest's passport and the companion's identity number; the main guest must already be registered. The app prepares the HC message for 7344. Review it in Messages and send it." = "Para un huésped, introduce el pasaporte y los días de estancia. Para un acompañante, introduce el pasaporte del huésped principal y el carné del acompañante; el huésped principal debe estar registrado. La app prepara el mensaje HC para el 7344. Revísalo en Mensajes y envíalo.";
+"Check the reply and confirm" = "Revisa la respuesta y confirma";
+"Wait for the service reply. Verify the guest's name and nationality, then select Confirm, enter the received confirmation code without HC, and send the prepared confirmation message to 7344." = "Espera la respuesta del servicio. Comprueba el nombre y la nacionalidad del huésped; selecciona Confirmar, introduce el código de confirmación recibido sin HC y envía el mensaje preparado al 7344.";
+"Wait for the registration code" = "Espera el código de registro";
+"The report is complete only after the service returns a final registration code. Each person needs a separate exchange. Confirmation requests expire after six hours; start a new report if one expires." = "El reporte solo queda completo cuando el servicio devuelve el código final de registro. Cada persona requiere un intercambio separado. Las solicitudes de confirmación vencen a las seis horas; inicia un reporte nuevo si vence.";
 "Carné de identidad" = "Carné de identidad";
 "Casero" = "Casero";
 "Changes are saved directly through the official portal form." = "Los cambios se guardan directamente mediante el formulario del portal oficial.";
@@ -193,6 +203,7 @@
 "Showing cached data." = "Mostrando datos guardados.";
 "Sign in" = "Iniciar sesión";
 "Sign in in app" = "Iniciar sesión en la app";
+"Use your account to register guests and manage your data." = "Usa tu cuenta para registrar huéspedes y gestionar tus datos.";
 "Sign in required to register guests" = "Inicia sesión para registrar huéspedes";
 "Sign in on the Register tab to look up and report guests. An internet connection to the portal is required." = "Inicia sesión en la pestaña Registrar para buscar y reportar huéspedes. Necesitas conexión a internet y acceso al portal.";
 "Sign in to the guest portal" = "Inicia sesión en el portal de huéspedes";
