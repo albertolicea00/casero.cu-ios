@@ -152,7 +152,6 @@
 "Photo" = "Photo";
 "Pinned certificate not bundled. Add casero_rem_cu.cer to the app resources — see CLAUDE.md." = "Pinned certificate not bundled. Add casero_rem_cu.cer to the app resources — see CLAUDE.md.";
 "Portal returned HTTP %lld." = "Portal returned HTTP %lld.";
-"Review and send SMS" = "Review and send SMS";
 "You’ll review the prepared message in Messages before sending." = "You’ll review the prepared message in Messages before sending.";
 "Previously loaded guests remain available in Guests until the selected retention period expires. SMS/USSD requires cellular service even when no internet is needed." = "Previously loaded guests remain available in Guests until the selected retention period expires. SMS/USSD requires cellular service even when no internet is needed.";
 "Privacy" = "Privacy";
@@ -173,6 +172,10 @@
 "SMS procedure reference" = "SMS procedure reference";
 "SMS reports" = "SMS reports";
 "SMS report information" = "SMS report information";
+"Send SMS" = "Send SMS";
+"Guest" = "Guest";
+"Companion" = "Companion";
+"Confirm" = "Confirm";
 "Save guest photos" = "Save guest photos";
 "Segment" = "Segment";
 "Sending an SMS does not by itself confirm registration. iOS requires you to review and send each message in Messages." = "Sending an SMS does not by itself confirm registration. iOS requires you to review and send each message in Messages.";
@@ -183,6 +186,7 @@
 "Showing cached data from %@." = "Showing cached data from %@.";
 "Showing cached data." = "Showing cached data.";
 "Sign in" = "Sign in";
+"Sign in in app" = "Sign in in app";
 "Sign in required to register guests" = "Sign in required to register guests";
 "Sign in on the Register tab to look up and report guests. An internet connection to the portal is required." = "Sign in on the Register tab to look up and report guests. An internet connection to the portal is required.";
 "Sign in to the guest portal" = "Sign in to the guest portal";

@@ -11,51 +11,60 @@ struct LoginView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                Text("Casero")
-                    .font(.largeTitle.bold())
-                Text("Sign in to the guest portal")
-                    .foregroundStyle(.secondary)
+        NavigationStack {
+            Form {
+                Section {
+                    Text("Sign in to the guest portal")
+                        .foregroundStyle(.secondary)
+                    TextField("Username", text: $viewModel.user)
+                        .textContentType(.username)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    SecureField("Password", text: $viewModel.password)
+                        .textContentType(.password)
+                    Toggle("Remember credentials", isOn: $settings.rememberCredentials)
+                }
 
-                TextField("Username", text: $viewModel.user)
-                    .textContentType(.username)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .textFieldStyle(.roundedBorder)
-
-                SecureField("Password", text: $viewModel.password)
-                    .textContentType(.password)
-                    .textFieldStyle(.roundedBorder)
-
-                Toggle("Remember credentials", isOn: $settings.rememberCredentials)
                 if let message = viewModel.validationMessage {
-                    Text(message).font(.caption).foregroundStyle(.secondary)
+                    Section { Text(message).font(.caption).foregroundStyle(.secondary) }
                 }
                 if let message = viewModel.errorMessage {
-                    Text(message)
-                        .foregroundStyle(.red)
-                        .font(.footnote)
+                    Section { Text(message).foregroundStyle(.red).font(.footnote) }
                 }
 
-                Button {
-                    Task {
-                        if await viewModel.submit() {
-                            appState.sessionExpiredBanner = false
-                            appState.isSignedIn = true
+                Section {
+                    Button {
+                        Task {
+                            if await viewModel.submit() {
+                                appState.sessionExpiredBanner = false
+                                appState.isSignedIn = true
+                            }
+                        }
+                    } label: {
+                        Group {
+                            if viewModel.isLoading {
+                                ProgressView()
+                                    .frame(maxWidth: .infinity)
+                            } else {
+                                Text("Sign in in app")
+                                    .frame(maxWidth: .infinity)
+                            }
                         }
                     }
-                } label: {
-                    if viewModel.isLoading {
-                        ProgressView()
-                    } else {
-                        Text("Sign in").frame(maxWidth: .infinity, minHeight: 44)
+                    .buttonStyle(.borderedProminent)
+                    .disabled(!viewModel.canSubmit)
+
+                    NavigationLink {
+                        PortalPageView(path: "", title: "Official portal")
+                    } label: {
+                        Text("Open official portal")
+                            .frame(maxWidth: .infinity)
                     }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(!viewModel.canSubmit)
             }
-            .padding(24)
+            .navigationTitle("Sign in in app")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }

@@ -152,7 +152,6 @@
 "Photo" = "Foto";
 "Pinned certificate not bundled. Add casero_rem_cu.cer to the app resources — see CLAUDE.md." = "Falta el certificado de seguridad del portal en esta instalación.";
 "Portal returned HTTP %lld." = "El portal devolvió el error HTTP %lld.";
-"Review and send SMS" = "Revisar y enviar SMS";
 "You’ll review the prepared message in Messages before sending." = "Revisarás el mensaje preparado en Mensajes antes de enviarlo.";
 "Previously loaded guests remain available in Guests until the selected retention period expires. SMS/USSD requires cellular service even when no internet is needed." = "Los huéspedes cargados permanecen disponibles en Huéspedes hasta que venza el plazo de conservación seleccionado. SMS/USSD requiere cobertura celular aunque no use internet.";
 "Privacy" = "Privacidad";
@@ -173,6 +172,10 @@
 "SMS procedure reference" = "Referencia del procedimiento SMS";
 "SMS reports" = "Reportes por SMS";
 "SMS report information" = "Información de reportes SMS";
+"Send SMS" = "Enviar SMS";
+"Guest" = "Huésped";
+"Companion" = "Acompañante";
+"Confirm" = "Confirmar";
 "Save guest photos" = "Guardar fotos de huéspedes";
 "Segment" = "Filtro";
 "Sending an SMS does not by itself confirm registration. iOS requires you to review and send each message in Messages." = "Enviar un SMS no confirma por sí solo el registro. iOS requiere que revises y envíes cada mensaje en Mensajes.";
@@ -183,6 +186,7 @@
 "Showing cached data from %@." = "Mostrando datos guardados el %@.";
 "Showing cached data." = "Mostrando datos guardados.";
 "Sign in" = "Iniciar sesión";
+"Sign in in app" = "Iniciar sesión en la app";
 "Sign in required to register guests" = "Inicia sesión para registrar huéspedes";
 "Sign in on the Register tab to look up and report guests. An internet connection to the portal is required." = "Inicia sesión en la pestaña Registrar para buscar y reportar huéspedes. Necesitas conexión a internet y acceso al portal.";
 "Sign in to the guest portal" = "Inicia sesión en el portal de huéspedes";

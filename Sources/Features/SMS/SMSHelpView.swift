@@ -16,10 +16,11 @@ struct SMSHelpView: View {
             Form {
                 Section("Report by SMS") {
                     Picker("Operation", selection: $model.kind) {
-                        ForEach(SMSReportViewModel.Kind.allCases) { kind in
-                            Text(LocalizedStringKey(kind.rawValue)).tag(kind)
-                        }
+                        Text("Guest").tag(SMSReportViewModel.Kind.guest)
+                        Text("Companion").tag(SMSReportViewModel.Kind.companion)
+                        Text("Confirm").tag(SMSReportViewModel.Kind.confirmation)
                     }
+                    .pickerStyle(.segmented)
                     if model.kind == .confirmation {
                         TextField("Confirmation code without HC", text: $model.confirmationCode)
                             .textInputAutocapitalization(.characters).autocorrectionDisabled()
@@ -35,7 +36,8 @@ struct SMSHelpView: View {
                                 .keyboardType(.numberPad)
                             Toggle("The main guest's registration is confirmed", isOn: $model.mainGuestIsRegistered)
                         }
-                        TextField("Stay days", text: $model.days).keyboardType(.numberPad)
+                        TextField("Stay days", text: $model.days)
+                            .keyboardType(.numberPad)
                     }
                     if let validation = model.validationMessage {
                         Text(validation).font(.caption).foregroundStyle(.secondary)
@@ -51,9 +53,10 @@ struct SMSHelpView: View {
                     Button {
                         model.prepare()
                     } label: {
-                        Label("Review and send SMS", systemImage: "paperplane.fill")
+                        Text("Send SMS")
                             .frame(maxWidth: .infinity)
                     }
+                    .buttonStyle(.borderedProminent)
                     .disabled(model.preview == nil || !MessageComposeView.canSendText)
                     if !MessageComposeView.canSendText {
                         Label(
@@ -120,11 +123,14 @@ private struct SMSReportInfoSheet: View {
                         "Use the phone number associated with your host account. Call 18808 to request association and wait for confirmation before reporting."
                     )
                     if let url = USSDSMSReporter.dialURL(for: USSDSMSReporter.associationPhone) {
-                        Link(destination: url) {
-                            Label("Call 18808", systemImage: "phone.fill")
-                                .frame(maxWidth: .infinity)
+                        HStack {
+                            Spacer()
+                            Link(destination: url) {
+                                Label("Call 18808", systemImage: "phone.fill")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            Spacer()
                         }
-                        .buttonStyle(.borderedProminent)
                     }
                     Text("SMS does not require internet, but needs cellular service. Carrier charges may apply.")
                         .font(.caption)
@@ -140,21 +146,24 @@ private struct SMSReportInfoSheet: View {
                         onOpenSettings()
                     } label: {
                         Label("Manage phone in Settings", systemImage: "gearshape")
-                            .frame(maxWidth: .infinity)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.tertiary)
                     }
-                    .buttonStyle(.bordered)
-                    NavigationLink {
+                    .buttonStyle(.plain)
+                    NavigationLink("Open official portal") {
                         PortalPageView(path: "", title: "Official portal")
-                    } label: {
-                        Label("Open official portal", systemImage: "safari")
-                            .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.bordered)
                     Link(destination: USSDSMSReporter.instructionsURL) {
-                        Label("SMS procedure reference", systemImage: "book")
-                            .frame(maxWidth: .infinity)
+                        HStack {
+                            Label("SMS procedure reference", systemImage: "book")
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
                     }
-                    .buttonStyle(.bordered)
                 }
             }
             .navigationTitle("SMS report information")

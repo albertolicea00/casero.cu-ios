@@ -19,7 +19,7 @@ final class SMSReportViewModel: ObservableObject {
     @Published var kind: Kind = .guest
     @Published var passport = ""
     @Published var companionIdentity = ""
-    @Published var days = "1"
+    @Published var days = ""
     @Published var confirmationCode = ""
     @Published var mainGuestIsRegistered = false
     @Published var preparedMessage: PreparedMessage?

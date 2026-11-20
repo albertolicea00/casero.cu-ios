@@ -14,18 +14,11 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                communicationChannelsSection
                 accountSection
-                Section("Communication channels") {
-                    NavigationLink("Manage phones and emails") {
-                        PortalPageView(path: "ViasComunicacion", title: "Communication channels")
-                    }
-                    Text("Changes are saved directly through the official portal form.")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
                 sessionSection
-                guestRangeSection
                 cacheSection
-                exportSection
+                guestSection
                 aboutSection
                 versionFooter
             }
@@ -39,6 +32,17 @@ struct SettingsView: View {
                     .presentationDetents([.large])
                     .presentationDragIndicator(.visible)
             }
+        }
+    }
+
+    private var communicationChannelsSection: some View {
+        Section("Communication channels") {
+            NavigationLink("Manage phones and emails") {
+                PortalPageView(path: "ViasComunicacion", title: "Communication channels")
+            }
+            Text("Changes are saved directly through the official portal form.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -90,7 +94,7 @@ struct SettingsView: View {
         }
     }
 
-    private var guestRangeSection: some View {
+    private var guestSection: some View {
         Section("Guests") {
             Picker("Default date range", selection: $settings.defaultGuestRangeDays) {
                 ForEach([7, 15, 30, 60, 90, 180, 365], id: \.self) { days in
@@ -102,11 +106,6 @@ struct SettingsView: View {
             )
             .font(.caption)
             .foregroundStyle(.secondary)
-        }
-    }
-
-    private var exportSection: some View {
-        Section("Export") {
             Button {
                 isExportFormPresented = true
             } label: {
