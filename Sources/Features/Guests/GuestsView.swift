@@ -5,6 +5,9 @@ struct GuestsView: View {
     private let client: CaseroClient
     @ObservedObject private var settings: AppSettings
     @StateObject private var viewModel: GuestsViewModel
+    @State private var isDateFilterPresented = false
+    @State private var pendingFrom = Date()
+    @State private var pendingTo = Date()
 
     init(client: CaseroClient, settings: AppSettings) {
         self.client = client
@@ -38,12 +41,36 @@ struct GuestsView: View {
                         .padding(.top, 4)
                 }
 
-                DisclosureGroup("Date range") {
-                    DatePicker("From", selection: $viewModel.from, displayedComponents: .date)
-                    DatePicker("To", selection: $viewModel.to, displayedComponents: .date)
-                    Button("Apply dates") { Task { await viewModel.reload() } }
-                        .accessibilityLabel("Reload guests")
-                        .disabled(viewModel.isLoading || !appState.isSignedIn)
+                HStack(spacing: 10) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                        TextField("Name or passport", text: $viewModel.searchText)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                        if !viewModel.searchText.isEmpty {
+                            Button {
+                                viewModel.searchText = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                            }
+                            .accessibilityLabel("Clear search")
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .frame(height: 44)
+                    .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+
+                    Button {
+                        pendingFrom = viewModel.from
+                        pendingTo = viewModel.to
+                        isDateFilterPresented = true
+                    } label: {
+                        Image(systemName: "calendar")
+                            .frame(width: 44, height: 44)
+                            .background(
+                                Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                    }
+                    .accessibilityLabel("Date range")
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -79,29 +106,49 @@ struct GuestsView: View {
                 content
             }
             .background(Color(uiColor: .systemBackground).ignoresSafeArea())
-            .searchable(text: $viewModel.searchText, prompt: "Name or passport")
-            .navigationTitle("Guests")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        Task { await viewModel.reload() }
-                    } label: {
-                        if viewModel.isLoading {
-                            ProgressView()
-                        } else {
-                            Image(systemName: "arrow.clockwise").frame(minWidth: 44, minHeight: 44)
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 12) {
+                        Text("Guests").font(.headline)
+                        Button {
+                            Task { await viewModel.reload() }
+                        } label: {
+                            if viewModel.isLoading {
+                                ProgressView().frame(width: 36, height: 36)
+                            } else {
+                                Image(systemName: "arrow.clockwise").frame(width: 36, height: 36)
+                            }
                         }
+                        .accessibilityLabel("Reload guests")
+                        .disabled(viewModel.isLoading || !appState.isSignedIn)
+
+                        Button {
+                            Task { await appState.signOutCompletely() }
+                        } label: {
+                            Image(systemName: "rectangle.portrait.and.arrow.right").frame(width: 36, height: 36)
+                        }
+                        .accessibilityLabel("Sign out")
+                        .disabled(appState.isSigningOut)
                     }
-                    .accessibilityLabel("Reload guests")
-                    .disabled(viewModel.isLoading || !appState.isSignedIn)
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Sign out") {
-                        Task { await appState.signOutCompletely() }
-                    }
+            }
+            .sheet(isPresented: $isDateFilterPresented) {
+                GuestDateRangeSheet(
+                    from: $pendingFrom,
+                    to: $pendingTo,
+                    defaultDays: settings.defaultGuestRangeDays,
+                    isLoading: viewModel.isLoading
+                ) {
+                    viewModel.from = pendingFrom
+                    viewModel.to = pendingTo
+                    isDateFilterPresented = false
+                    Task { await viewModel.reload() }
                 }
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
             }
         }
         .task {
@@ -110,6 +157,10 @@ struct GuestsView: View {
         }
         .onChange(of: viewModel.guests.count) { count in appState.hasCachedGuests = count > 0 }
         .onChange(of: settings.cacheTTL) { _ in Task { await viewModel.loadFromCache() } }
+        .onChange(of: settings.defaultGuestRangeDays) { _ in
+            viewModel.applyDefaultRange()
+            if appState.isSignedIn { Task { await viewModel.reload() } }
+        }
         .onChange(of: viewModel.isSessionExpired) { expired in
             guard expired else { return }
             Task {
@@ -164,33 +215,112 @@ struct GuestsView: View {
     }
 }
 
+private struct GuestDateRangeSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var from: Date
+    @Binding var to: Date
+    let defaultDays: Int
+    let isLoading: Bool
+    let onApply: () -> Void
+
+    private var rangeLength: Int {
+        max(0, PortalDates.calendar.dateComponents([.day], from: from, to: to).day ?? 0)
+    }
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Default guest range: last \(defaultDays) days. Change this in Settings.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                HStack(alignment: .center, spacing: 8) {
+                    datePicker("From", selection: $from)
+                    Image(systemName: "arrow.right").foregroundStyle(.tertiary)
+                    datePicker("To", selection: $to)
+                }
+                .padding(12)
+                .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
+
+                if rangeLength > 180 {
+                    Label("Large date ranges may take longer to load.", systemImage: "clock")
+                        .font(.footnote)
+                        .foregroundStyle(.orange)
+                }
+
+                Button(action: onApply) {
+                    if isLoading {
+                        ProgressView().frame(maxWidth: .infinity, minHeight: 48)
+                    } else {
+                        Text("Apply dates").frame(maxWidth: .infinity, minHeight: 48)
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(from > to || isLoading)
+
+                Spacer(minLength: 0)
+            }
+            .padding()
+            .navigationTitle("Date range")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func datePicker(_ title: LocalizedStringKey, selection: Binding<Date>) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title).font(.caption).foregroundStyle(.secondary)
+            DatePicker(title, selection: selection, displayedComponents: .date)
+                .datePickerStyle(.compact)
+                .labelsHidden()
+                .accessibilityLabel(title)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
 private struct GuestRow: View {
     let guest: Guest
     let dateFormatter: DateFormatter
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            StayTimeline(guest: guest, dateFormatter: dateFormatter)
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(guest.fullName)
-                    .font(.headline)
-                    .foregroundStyle(.primary)
-                Text("Passport/ID: \(guest.identificador)")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                if let nationality = guest.nationality {
-                    Text("Nationality: \(nationality)")
-                        .font(.caption)
+            HStack(alignment: .center, spacing: 12) {
+                NationalityAvatar(nationality: guest.nationality)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(guest.fullName)
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                    Text("Passport/ID: \(guest.identificador)")
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
+                    if let nationality = guest.nationality {
+                        Text("Nationality: \(nationality)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
 
-            HStack {
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.tertiary)
+            if guest.checkIn != nil || guest.checkOut != nil {
+                HStack(alignment: .top, spacing: 8) {
+                    stayDate(title: "Check-in", date: guest.checkIn)
+                    Image(systemName: "arrow.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                        .padding(.top, 19)
+                    stayDate(title: "Check-out", date: guest.checkOut)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                if let duration = stayDuration {
+                    Label("Stay: \(duration)", systemImage: "moon.stars")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .padding(14)
@@ -198,45 +328,116 @@ private struct GuestRow: View {
         .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
         .contentShape(RoundedRectangle(cornerRadius: 16))
     }
-}
-
-private struct StayTimeline: View {
-    let guest: Guest
-    let dateFormatter: DateFormatter
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            VStack(spacing: 0) {
-                Circle().fill(Color.accentColor).frame(width: 9, height: 9)
-                Rectangle().fill(Color.secondary.opacity(0.3)).frame(width: 2, height: 15)
-                Circle().fill(Color.orange).frame(width: 9, height: 9)
-            }
-            VStack(alignment: .leading, spacing: 9) {
-                event(title: "Check-in", date: guest.checkIn)
-                event(title: "Check-out", date: guest.checkOut)
-            }
-        }
-        .accessibilityElement(children: .combine)
-    }
 
     @ViewBuilder
-    private func event(title: LocalizedStringKey, date: Date?) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+    private func stayDate(title: LocalizedStringKey, date: Date?) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title).font(.caption2).foregroundStyle(.secondary)
             if let date {
                 Text(dateFormatter.string(from: date))
-                    .font(.caption.monospacedDigit())
+                    .font(.caption.monospacedDigit().weight(.medium))
                     .foregroundStyle(.primary)
-                Text(date, style: .relative)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
             } else {
                 Text("—").font(.caption).foregroundStyle(.secondary)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var stayDuration: String? {
+        guard let checkIn = guest.checkIn, let checkOut = guest.checkOut else { return nil }
+        let days = PortalDates.calendar.dateComponents(
+            [.month, .day],
+            from: PortalDates.calendar.startOfDay(for: checkIn),
+            to: PortalDates.calendar.startOfDay(for: checkOut)
+        )
+        let months = max(0, days.month ?? 0)
+        let remainingDays = max(0, days.day ?? 0)
+        var parts: [String] = []
+        if months > 0 {
+            parts.append(months == 1 ? String(localized: "1 month") : String(localized: "\(months) months"))
+        }
+        if remainingDays > 0 || months == 0 {
+            parts.append(
+                remainingDays == 1 ? String(localized: "1 day") : String(localized: "\(remainingDays) days"))
+        }
+        return parts.joined(separator: ", ")
+    }
+}
+
+private struct NationalityAvatar: View {
+    let nationality: String?
+
+    var body: some View {
+        Text(NationalityFlag.emoji(for: nationality) ?? "🌐")
+            .font(.system(size: 26))
+            .frame(width: 48, height: 48)
+            .background(Color(uiColor: .systemBackground), in: Circle())
+            .accessibilityLabel(
+                nationality.map { String(localized: "Nationality: \($0)") } ?? "Nationality unknown")
+    }
+}
+
+private enum NationalityFlag {
+    private static let aliases: [String: String] = [
+        "CUBA": "CU",
+        "ESPANA": "ES",
+        "ESTADOS UNIDOS DE AMERICA": "US",
+        "ESTADOS UNIDOS": "US",
+        "REINO UNIDO": "GB",
+        "INGLATERRA": "GB",
+        "RUSIA": "RU",
+        "PAISES BAJOS": "NL",
+        "HOLANDA": "NL",
+        "REPUBLICA CHECA": "CZ",
+        "COREA DEL SUR": "KR",
+        "COREA DEL NORTE": "KP",
+        "REPUBLICA DOMINICANA": "DO",
+        "COSTA RICA": "CR",
+        "PUERTO RICO": "PR",
+        "VENEZUELA": "VE",
+        "MEXICO": "MX",
+        "CANADA": "CA",
+        "ALEMANIA": "DE",
+        "FRANCIA": "FR",
+        "ITALIA": "IT",
+        "PORTUGAL": "PT",
+        "BRASIL": "BR",
+        "ARGENTINA": "AR",
+        "CHILE": "CL",
+        "COLOMBIA": "CO",
+        "PANAMA": "PA",
+        "JAPON": "JP",
+        "CHINA": "CN",
+        "AUSTRALIA": "AU",
+    ]
+
+    private static let localizedCodes: [String: String] = {
+        let locales = [Locale(identifier: "es"), Locale(identifier: "en")]
+        var result: [String: String] = [:]
+        for region in Locale.Region.isoRegions {
+            let regionCode = region.identifier
+            guard regionCode.count == 2 else { continue }
+            for locale in locales {
+                if let regionName = locale.localizedString(forRegionCode: regionCode) {
+                    result[fold(regionName)] = regionCode
+                }
+            }
+        }
+        return result
+    }()
+
+    static func emoji(for nationality: String?) -> String? {
+        guard let nationality else { return nil }
+        let normalized = fold(nationality)
+        let code = aliases[normalized] ?? localizedCodes[normalized]
+        guard let code, code.count == 2 else { return nil }
+        let scalars = code.uppercased().unicodeScalars.compactMap { Unicode.Scalar(127_397 + $0.value) }
+        return String(String.UnicodeScalarView(scalars))
+    }
+
+    private static func fold(_ value: String) -> String {
+        value.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "es"))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

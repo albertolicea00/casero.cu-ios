@@ -1,5 +1,10 @@
 "%lld guests cached, last updated %@." = "%lld huéspedes guardados; última actualización: %@.";
 "1 day" = "1 día";
+"1 month" = "1 mes";
+"%lld months" = "%lld meses";
+"%lld days" = "%lld días";
+"Stay: %@" = "Estancia: %@";
+"Nationality unknown" = "Nacionalidad desconocida";
 "1 hour" = "1 hora";
 "1 week" = "1 semana";
 "3 days" = "3 días";
@@ -50,6 +55,16 @@
 "Cuban companion" = "Acompañante cubano";
 "Cuban companion (carné)" = "Acompañante cubano (carné)";
 "Date range" = "Intervalo de fechas";
+"Default date range" = "Intervalo de fechas predeterminado";
+"Default guest range: last %lld days. Change this in Settings." = "Intervalo predeterminado: últimos %lld días. Puedes cambiarlo en Ajustes.";
+"Large date ranges may take longer to load." = "Los intervalos amplios pueden tardar más en cargarse.";
+"This range is used by default when loading guests. Choose a longer range in the calendar filter when needed." = "Este intervalo se usa de forma predeterminada al cargar huéspedes. Puedes elegir uno mayor en el filtro del calendario cuando lo necesites.";
+"30 days" = "30 días";
+"60 days" = "60 días";
+"90 days" = "90 días";
+"180 days" = "180 días";
+"365 days" = "365 días";
+"Cancel" = "Cancelar";
 "Destination" = "Destino";
 "Detected lazily: only when a real request comes back as expired, never by polling in the background. If off (or no credentials saved), a banner asks you to sign in again." = "La sesión se recupera cuando una solicitud indica que venció. Si no hay credenciales guardadas, se te pedirá iniciar sesión de nuevo.";
 "Developer & official links" = "Desarrollador y enlaces oficiales";

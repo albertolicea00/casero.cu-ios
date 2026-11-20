@@ -1,5 +1,10 @@
 "%lld guests cached, last updated %@." = "%lld guests cached, last updated %@.";
 "1 day" = "1 day";
+"1 month" = "1 month";
+"%lld months" = "%lld months";
+"%lld days" = "%lld days";
+"Stay: %@" = "Stay: %@";
+"Nationality unknown" = "Nationality unknown";
 "1 hour" = "1 hour";
 "1 week" = "1 week";
 "3 days" = "3 days";
@@ -50,6 +55,16 @@
 "Cuban companion" = "Cuban companion";
 "Cuban companion (carné)" = "Cuban companion (carné)";
 "Date range" = "Date range";
+"Default date range" = "Default date range";
+"Default guest range: last %lld days. Change this in Settings." = "Default guest range: last %lld days. Change this in Settings.";
+"Large date ranges may take longer to load." = "Large date ranges may take longer to load.";
+"This range is used by default when loading guests. Choose a longer range in the calendar filter when needed." = "This range is used by default when loading guests. Choose a longer range in the calendar filter when needed.";
+"30 days" = "30 days";
+"60 days" = "60 days";
+"90 days" = "90 days";
+"180 days" = "180 days";
+"365 days" = "365 days";
+"Cancel" = "Cancel";
 "Destination" = "Destination";
 "Detected lazily: only when a real request comes back as expired, never by polling in the background. If off (or no credentials saved), a banner asks you to sign in again." = "Detected lazily: only when a real request comes back as expired, never by polling in the background. If off (or no credentials saved), a banner asks you to sign in again.";
 "Developer & official links" = "Developer & official links";

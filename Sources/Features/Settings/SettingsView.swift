@@ -22,6 +22,7 @@ struct SettingsView: View {
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 sessionSection
+                guestRangeSection
                 cacheSection
                 exportSection
                 aboutSection
@@ -82,6 +83,21 @@ struct SettingsView: View {
                     appState.hasCachedGuests = false
                 }
             }
+        }
+    }
+
+    private var guestRangeSection: some View {
+        Section("Guests") {
+            Picker("Default date range", selection: $settings.defaultGuestRangeDays) {
+                ForEach([30, 60, 90, 180, 365], id: \.self) { days in
+                    Text(LocalizedStringKey("\(days) days")).tag(days)
+                }
+            }
+            Text(
+                "This range is used by default when loading guests. Choose a longer range in the calendar filter when needed."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
     }
 
