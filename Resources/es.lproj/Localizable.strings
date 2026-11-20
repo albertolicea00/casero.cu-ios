@@ -74,7 +74,6 @@
 "Cancel" = "Cancelar";
 "Destination" = "Destino";
 "Detected lazily: only when a real request comes back as expired, never by polling in the background. If off (or no credentials saved), a banner asks you to sign in again." = "La sesión se recupera cuando una solicitud indica que venció. Si no hay credenciales guardadas, se te pedirá iniciar sesión de nuevo.";
-"Developer & official links" = "Desarrollador y enlaces oficiales";
 "Developer info" = "Desarrollador";
 "Disclaimer" = "Aviso";
 "Done" = "Listo";
@@ -88,6 +87,7 @@
 "Enter only the received confirmation code, without HC or spaces." = "Introduce solo el código de confirmación recibido, sin HC ni espacios.";
 "Enter the companion's 11-digit identity number." = "Introduce los 11 dígitos del carné del acompañante.";
 "Export" = "Exportar";
+"Export guest data" = "Exportar datos de huéspedes";
 "Foreign guest" = "Huésped extranjero";
 "Foreign guest (passport)" = "Extranjero (pasaporte)";
 "Format" = "Formato";
@@ -139,6 +139,7 @@
 "Official portal" = "Portal oficial";
 "Offline access" = "Acceso sin internet";
 "Open official portal" = "Abrir portal oficial";
+"Open source project" = "Proyecto de código abierto";
 "Operation" = "Operación";
 "PDF" = "PDF";
 "Passport number" = "Número de pasaporte";
@@ -151,7 +152,8 @@
 "Photo" = "Foto";
 "Pinned certificate not bundled. Add casero_rem_cu.cer to the app resources — see CLAUDE.md." = "Falta el certificado de seguridad del portal en esta instalación.";
 "Portal returned HTTP %lld." = "El portal devolvió el error HTTP %lld.";
-"Prepare SMS" = "Preparar SMS";
+"Review and send SMS" = "Revisar y enviar SMS";
+"You’ll review the prepared message in Messages before sending." = "Revisarás el mensaje preparado en Mensajes antes de enviarlo.";
 "Previously loaded guests remain available in Guests until the selected retention period expires. SMS/USSD requires cellular service even when no internet is needed." = "Los huéspedes cargados permanecen disponibles en Huéspedes hasta que venza el plazo de conservación seleccionado. SMS/USSD requiere cobertura celular aunque no use internet.";
 "Privacy" = "Privacidad";
 "Privacy details" = "Las credenciales solo se envían al portal oficial. Recordarlas es opcional y se guardan en el llavero de iOS. Los datos de huéspedes y las fotos opcionales se guardan en este dispositivo con protección de archivos de iOS, durante el plazo seleccionado. Los datos vencidos se eliminan al acceder a ellos. Cerrar sesión borra las credenciales y los datos guardados. Borrar datos guardados elimina huéspedes y fotos locales. Desactivar el almacenamiento de fotos elimina las fotos guardadas. Las exportaciones pueden contener datos personales; los archivos que compartas o guardes fuera de la app quedan bajo el control de su destino. El navegador integrado usa una sesión temporal. La app no incluye SDK de analítica ni publicidad. Los reportes por SMS se entregan al editor del sistema y se envían mediante tu operador solo cuando lo confirmas. La app no puede leer las respuestas del servicio; introduce los códigos recibidos manualmente.";
@@ -204,7 +206,6 @@
 "To" = "Hasta";
 "Type" = "Tipo";
 "Unconfirmed" = "Sin confirmar";
-"Unofficial iOS client. Source and issue tracker are linked from the project README." = "Cliente no oficial para iOS. El código fuente y el registro de incidencias están enlazados en el README del proyecto.";
 "Use 8–100 characters with uppercase, lowercase, a number, and a symbol." = "Usa entre 8 y 100 caracteres, con mayúsculas, minúsculas, un número y un símbolo.";
 "Use the phone number associated with your host account. Call 18808 to request association and wait for confirmation before reporting." = "Usa el número asociado a tu registro como arrendador. Llama al 18808 para solicitar la asociación y espera la confirmación antes de reportar.";
 "Username" = "Usuario";

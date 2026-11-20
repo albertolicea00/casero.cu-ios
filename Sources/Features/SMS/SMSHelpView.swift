@@ -45,15 +45,26 @@ struct SMSHelpView: View {
                     Section("Message preview") {
                         LabeledContent("Destination", value: USSDSMSReporter.smsDestination)
                         Text(preview).font(.body.monospaced()).textSelection(.enabled)
-                        if MessageComposeView.canSendText {
-                            Button("Prepare SMS") { model.prepare() }
-                        } else {
-                            Label(
-                                "This device cannot send SMS. Use the preview on your registered phone.",
-                                systemImage: "exclamationmark.triangle"
-                            )
+                    }
+                }
+                Section {
+                    Button {
+                        model.prepare()
+                    } label: {
+                        Label("Review and send SMS", systemImage: "paperplane.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .disabled(model.preview == nil || !MessageComposeView.canSendText)
+                    if !MessageComposeView.canSendText {
+                        Label(
+                            "This device cannot send SMS. Use the preview on your registered phone.",
+                            systemImage: "exclamationmark.triangle"
+                        )
+                        .font(.caption)
+                    } else {
+                        Text("You’ll review the prepared message in Messages before sending.")
                             .font(.caption)
-                        }
+                            .foregroundStyle(.secondary)
                     }
                 }
                 if let result = model.resultMessage {

@@ -74,7 +74,6 @@
 "Cancel" = "Cancel";
 "Destination" = "Destination";
 "Detected lazily: only when a real request comes back as expired, never by polling in the background. If off (or no credentials saved), a banner asks you to sign in again." = "Detected lazily: only when a real request comes back as expired, never by polling in the background. If off (or no credentials saved), a banner asks you to sign in again.";
-"Developer & official links" = "Developer & official links";
 "Developer info" = "Developer info";
 "Disclaimer" = "Disclaimer";
 "Done" = "Done";
@@ -88,6 +87,7 @@
 "Enter only the received confirmation code, without HC or spaces." = "Enter only the received confirmation code, without HC or spaces.";
 "Enter the companion's 11-digit identity number." = "Enter the companion's 11-digit identity number.";
 "Export" = "Export";
+"Export guest data" = "Export guest data";
 "Foreign guest" = "Foreign guest";
 "Foreign guest (passport)" = "Foreign guest (passport)";
 "Format" = "Format";
@@ -139,6 +139,7 @@
 "Official portal" = "Official portal";
 "Offline access" = "Offline access";
 "Open official portal" = "Open official portal";
+"Open source project" = "Open source project";
 "Operation" = "Operation";
 "PDF" = "PDF";
 "Passport number" = "Passport number";
@@ -151,7 +152,8 @@
 "Photo" = "Photo";
 "Pinned certificate not bundled. Add casero_rem_cu.cer to the app resources — see CLAUDE.md." = "Pinned certificate not bundled. Add casero_rem_cu.cer to the app resources — see CLAUDE.md.";
 "Portal returned HTTP %lld." = "Portal returned HTTP %lld.";
-"Prepare SMS" = "Prepare SMS";
+"Review and send SMS" = "Review and send SMS";
+"You’ll review the prepared message in Messages before sending." = "You’ll review the prepared message in Messages before sending.";
 "Previously loaded guests remain available in Guests until the selected retention period expires. SMS/USSD requires cellular service even when no internet is needed." = "Previously loaded guests remain available in Guests until the selected retention period expires. SMS/USSD requires cellular service even when no internet is needed.";
 "Privacy" = "Privacy";
 "Privacy details" = "Your credentials are sent only to the official portal. Remembering them is optional and stores them in the iOS Keychain. Guest data and optional photos are stored on this device with iOS file protection, subject to the selected retention period. Expired data is removed when accessed. Signing out clears credentials and cached guest data. Clear cache removes local guests and photos. Turning off photo storage removes saved photos. Exports can contain personal data; files you share or save outside this app are managed by their destination. The embedded portal browser uses an ephemeral session. This app includes no analytics or advertising SDK. SMS reports are handed to the system composer and sent through your carrier only after you confirm. The app cannot read service replies; enter received confirmation codes manually.";
@@ -204,7 +206,6 @@
 "To" = "To";
 "Type" = "Type";
 "Unconfirmed" = "Unconfirmed";
-"Unofficial iOS client. Source and issue tracker are linked from the project README." = "Unofficial iOS client. Source and issue tracker are linked from the project README.";
 "Use 8–100 characters with uppercase, lowercase, a number, and a symbol." = "Use 8–100 characters with uppercase, lowercase, a number, and a symbol.";
 "Use the phone number associated with your host account. Call 18808 to request association and wait for confirmation before reporting." = "Use the phone number associated with your host account. Call 18808 to request association and wait for confirmation before reporting.";
 "Username" = "Username";

@@ -110,7 +110,7 @@ struct SettingsView: View {
             Button {
                 isExportFormPresented = true
             } label: {
-                Label("Export", systemImage: "square.and.arrow.up")
+                Label("Export guest data", systemImage: "square.and.arrow.up")
             }
         }
     }
@@ -118,8 +118,13 @@ struct SettingsView: View {
     private var aboutSection: some View {
         Section("About") {
             VStack(alignment: .leading, spacing: 6) {
-                Label("Disclaimer", systemImage: "exclamationmark.triangle")
-                    .font(.subheadline.weight(.semibold))
+                Label {
+                    Text("Disclaimer")
+                } icon: {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.yellow)
+                }
+                .font(.subheadline.weight(.semibold))
                 Text("App disclaimer")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -128,7 +133,12 @@ struct SettingsView: View {
             .padding(.vertical, 4)
             NavigationLink("Manual") { ManualView() }
             NavigationLink("Privacy") { PrivacyView() }
-            NavigationLink("Developer & official links") { DeveloperInfoView() }
+            Link(destination: URL(string: "https://github.com/albertolicea00/casero.cu-ios")!) {
+                Label("Open source project", systemImage: "chevron.left.forwardslash.chevron.right")
+            }
+            Link(destination: URL(string: "https://casero.rem.cu/")!) {
+                Label("CASERO web portal", systemImage: "safari")
+            }
         }
     }
 
@@ -221,32 +231,6 @@ private struct ManualView: View {
                 .padding()
         }
         .navigationTitle("Manual")
-    }
-}
-
-private struct DisclaimerView: View {
-    var body: some View {
-        ScrollView {
-            Text("App disclaimer")
-                .padding()
-        }
-        .navigationTitle("Disclaimer")
-    }
-}
-
-private struct DeveloperInfoView: View {
-    var body: some View {
-        Form {
-            Section("Official channels") {
-                Link("CASERO web portal", destination: URL(string: "https://casero.rem.cu/")!)
-            }
-            Section("This app") {
-                Text("Unofficial iOS client. Source and issue tracker are linked from the project README.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .navigationTitle("Developer info")
     }
 }
 
