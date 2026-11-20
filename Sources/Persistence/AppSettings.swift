@@ -37,6 +37,7 @@ final class AppSettings: ObservableObject {
         static let saveImages = "settings.saveImages"
         static let autoReauth = "settings.autoReauth"
         static let rememberCredentials = "settings.rememberCredentials"
+        static let defaultGuestRangeDays = "settings.defaultGuestRangeDays"
     }
 
     private let defaults: UserDefaults
@@ -63,6 +64,10 @@ final class AppSettings: ObservableObject {
         }
     }
 
+    @Published var defaultGuestRangeDays: Int {
+        didSet { defaults.set(defaultGuestRangeDays, forKey: Keys.defaultGuestRangeDays) }
+    }
+
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         let storedTTL = defaults.object(forKey: Keys.cacheTTL) as? Int
@@ -70,5 +75,7 @@ final class AppSettings: ObservableObject {
         saveImages = defaults.object(forKey: Keys.saveImages) as? Bool ?? true
         autoReauth = defaults.object(forKey: Keys.autoReauth) as? Bool ?? false
         rememberCredentials = defaults.object(forKey: Keys.rememberCredentials) as? Bool ?? false
+        let storedRange = defaults.object(forKey: Keys.defaultGuestRangeDays) as? Int
+        defaultGuestRangeDays = [30, 60, 90, 180, 365].contains(storedRange ?? 90) ? (storedRange ?? 90) : 90
     }
 }

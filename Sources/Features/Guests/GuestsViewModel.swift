@@ -15,8 +15,8 @@ final class GuestsViewModel: ObservableObject {
         var id: String { rawValue }
     }
 
-    @Published var from = PortalDates.calendar.date(byAdding: .month, value: -3, to: Date()) ?? Date()
-    @Published var to = Date()
+    @Published var from: Date
+    @Published var to: Date
     @Published var guests: [Guest] = []
     @Published var segment: Segment = .active
     @Published var sortOrder: SortOrder = .newestFirst
@@ -35,6 +35,15 @@ final class GuestsViewModel: ObservableObject {
         self.client = client
         self.cache = cache
         self.settings = settings
+        let today = Date()
+        from = PortalDates.calendar.date(byAdding: .day, value: -settings.defaultGuestRangeDays, to: today) ?? today
+        to = today
+    }
+
+    func applyDefaultRange() {
+        let today = Date()
+        from = PortalDates.calendar.date(byAdding: .day, value: -settings.defaultGuestRangeDays, to: today) ?? today
+        to = today
     }
 
     var filteredGuests: [Guest] {
