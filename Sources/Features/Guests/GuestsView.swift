@@ -345,6 +345,11 @@ private struct GuestRow: View {
                     stayDate(title: "Check-out", date: guest.checkOut)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                if let checkIn = guest.checkIn {
+                    Text(GuestStayText.age(of: checkIn))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 if let duration = GuestStayText.duration(for: guest) {
                     HStack(spacing: 6) {
                         Image(systemName: "moon.stars")
@@ -352,11 +357,6 @@ private struct GuestRow: View {
                     }
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.secondary)
-                }
-                if let checkIn = guest.checkIn {
-                    Text(GuestStayText.age(of: checkIn))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
                 }
             }
         }

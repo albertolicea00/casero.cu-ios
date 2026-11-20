@@ -206,41 +206,36 @@ private struct StayTimeline: View {
     let guest: Guest
 
     var body: some View {
-        HStack(alignment: .top, spacing: 8) {
-            dateColumn(title: "Check-in", date: guest.checkIn, icon: "arrow.right.to.line", color: .accentColor)
-            Image(systemName: "arrow.right")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.tertiary)
-                .frame(width: 18)
-                .padding(.top, 12)
-            dateColumn(title: "Check-out", date: guest.checkOut, icon: "arrow.left.to.line", color: .orange)
+        VStack(spacing: 12) {
+            dateRow(title: "Check-in", date: guest.checkIn, icon: "arrow.right.to.line", color: .accentColor)
+            dateRow(title: "Check-out", date: guest.checkOut, icon: "arrow.left.to.line", color: .orange)
         }
     }
 
-    private func dateColumn(
+    private func dateRow(
         title: LocalizedStringKey,
         date: Date?,
         icon: String,
         color: Color
     ) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 5) {
-                Image(systemName: icon).foregroundStyle(color)
-                Text(title).foregroundStyle(.secondary)
-            }
-            .font(.caption.weight(.medium))
-            if let date {
-                Text(PortalDates.display(date))
-                    .font(.subheadline.monospacedDigit().weight(.medium))
-                    .foregroundStyle(.primary)
-                Text(GuestStayText.age(of: date))
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            } else {
-                Text("—").font(.subheadline).foregroundStyle(.secondary)
+        HStack(alignment: .center, spacing: 10) {
+            Label(title, systemImage: icon)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+            Spacer(minLength: 8)
+            VStack(alignment: .trailing, spacing: 3) {
+                if let date {
+                    Text(PortalDates.display(date))
+                        .font(.subheadline.monospacedDigit().weight(.medium))
+                        .foregroundStyle(.primary)
+                    Text(GuestStayText.age(of: date))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("—").font(.subheadline).foregroundStyle(.secondary)
+                }
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

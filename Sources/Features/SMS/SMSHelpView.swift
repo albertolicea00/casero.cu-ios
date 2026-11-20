@@ -6,7 +6,6 @@ struct SMSHelpView: View {
     @StateObject private var model = SMSReportViewModel()
     @State private var isInfoPresented = false
     @State private var selectedReportKind = SMSReportViewModel.Kind.guest
-    @State private var isConfirmationMode = false
     let onOpenSettings: () -> Void
 
     init(onOpenSettings: @escaping () -> Void = {}) {
@@ -23,34 +22,23 @@ struct SMSHelpView: View {
                             Text("Companion").tag(SMSReportViewModel.Kind.companion)
                         }
                         .onChange(of: selectedReportKind) { kind in
-                            isConfirmationMode = false
                             model.kind = kind
                         }
                         .pickerStyle(.segmented)
                         .labelsHidden()
                     }
 
-                    inputCard
+                    reportInputCard
+                    messagePreview(for: selectedReportKind)
+                    sendSMSButton(for: selectedReportKind)
 
-                    if let preview = model.preview {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Message preview").font(.headline)
-                            LabeledContent("Destination", value: USSDSMSReporter.smsDestination)
-                            Text(preview).font(.body.monospaced()).textSelection(.enabled)
-                        }
-                        .padding(16)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
-                    }
-
-                    Button {
-                        model.prepare()
-                    } label: {
-                        Text("Send SMS")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(model.preview == nil || !MessageComposeView.canSendText)
+                    Text("Confirm received code")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 4)
+                    confirmationInputCard
+                    messagePreview(for: .confirmation)
+                    sendSMSButton(for: .confirmation)
 
                     if !MessageComposeView.canSendText {
                         Label(
@@ -64,23 +52,6 @@ struct SMSHelpView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, 4)
-                    }
-
-                    if isConfirmationMode {
-                        Button("Back to guest or companion") {
-                            isConfirmationMode = false
-                            model.kind = selectedReportKind
-                            model.confirmationCode = ""
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.secondary)
-                    } else {
-                        Button("Confirm received code") {
-                            selectedReportKind = model.kind
-                            isConfirmationMode = true
-                            model.kind = .confirmation
-                        }
-                        .buttonStyle(.bordered)
                     }
 
                     if let result = model.resultMessage {
@@ -123,40 +94,73 @@ struct SMSHelpView: View {
         }
     }
 
-    private var inputCard: some View {
+    private var reportInputCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if isConfirmationMode {
-                TextField("Confirmation code without HC", text: $model.confirmationCode)
-                    .textContentType(.oneTimeCode)
-                    .textInputAutocapitalization(.characters)
-                    .autocorrectionDisabled()
-                Text(
-                    "Check the name and nationality in the service reply before confirming. Requests expire after six hours; start a new report if that time has passed."
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            } else {
-                TextField("Guest passport", text: $model.passport)
-                    .textInputAutocapitalization(.characters)
-                    .autocorrectionDisabled()
-                if model.kind == .companion {
-                    Divider()
-                    TextField("Companion identity number", text: $model.companionIdentity)
-                        .keyboardType(.numberPad)
-                    Divider()
-                    Toggle("The main guest's registration is confirmed", isOn: $model.mainGuestIsRegistered)
-                }
+            TextField("Guest passport", text: $model.passport)
+                .textInputAutocapitalization(.characters)
+                .autocorrectionDisabled()
+            if selectedReportKind == .companion {
                 Divider()
-                TextField("Stay days", text: $model.days)
+                TextField("Companion identity number", text: $model.companionIdentity)
                     .keyboardType(.numberPad)
+                Divider()
+                Toggle("The main guest's registration is confirmed", isOn: $model.mainGuestIsRegistered)
             }
-            if let validation = model.validationMessage {
+            Divider()
+            TextField("Stay days", text: $model.days)
+                .keyboardType(.numberPad)
+            if let validation = model.validationMessage(for: selectedReportKind) {
                 Text(validation).font(.caption).foregroundStyle(.secondary)
             }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private var confirmationInputCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            TextField("Confirmation code without HC", text: $model.confirmationCode)
+                .textContentType(.oneTimeCode)
+                .textInputAutocapitalization(.characters)
+                .autocorrectionDisabled()
+            Text(
+                "Check the name and nationality in the service reply before confirming. Requests expire after six hours; start a new report if that time has passed."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            if let validation = model.validationMessage(for: .confirmation) {
+                Text(validation).font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    @ViewBuilder
+    private func messagePreview(for kind: SMSReportViewModel.Kind) -> some View {
+        if let preview = model.preview(for: kind) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Message preview").font(.headline)
+                LabeledContent("Destination", value: USSDSMSReporter.smsDestination)
+                Text(preview).font(.body.monospaced()).textSelection(.enabled)
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
+        }
+    }
+
+    private func sendSMSButton(for kind: SMSReportViewModel.Kind) -> some View {
+        Button {
+            model.prepare(kind: kind)
+        } label: {
+            Text("Send SMS")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.borderedProminent)
+        .disabled(model.preview(for: kind) == nil || !MessageComposeView.canSendText)
     }
 }
 

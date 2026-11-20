@@ -25,16 +25,22 @@ final class SMSReportViewModel: ObservableObject {
     @Published var preparedMessage: PreparedMessage?
     @Published private(set) var resultMessage: String?
 
-    var preview: String? { try? messageBody() }
+    var preview: String? { preview(for: kind) }
+
+    func preview(for kind: Kind) -> String? { try? messageBody(for: kind) }
 
     var validationMessage: String? {
+        validationMessage(for: kind)
+    }
+
+    func validationMessage(for kind: Kind) -> String? {
         do {
-            _ = try messageBody()
+            _ = try messageBody(for: kind)
             return nil
         } catch { return error.localizedDescription }
     }
 
-    private func messageBody() throws -> String {
+    private func messageBody(for kind: Kind) throws -> String {
         switch kind {
         case .guest:
             return try USSDSMSReporter.reportBody(passport: passport, days: days)
@@ -51,8 +57,8 @@ final class SMSReportViewModel: ObservableObject {
         }
     }
 
-    func prepare() {
-        guard let preview else { return }
+    func prepare(kind: Kind) {
+        guard let preview = preview(for: kind) else { return }
         resultMessage = nil
         preparedMessage = PreparedMessage(body: preview, kind: kind)
     }
@@ -66,13 +72,12 @@ final class SMSReportViewModel: ObservableObject {
                     localized:
                         "Confirmation SMS sent. The report is complete only when the service returns a registration code."
                 )
+                confirmationCode = ""
             } else {
                 resultMessage = String(
                     localized:
                         "Request SMS sent. Wait for the reply, check the name and nationality, then enter the received confirmation code."
                 )
-                kind = .confirmation
-                confirmationCode = ""
             }
         case .cancelled:
             resultMessage = String(localized: "Message cancelled. No report was confirmed.")
