@@ -10,7 +10,7 @@ final class ConnectivityMonitor: ObservableObject {
     @Published private(set) var isConnected = true
 
     private let monitor = NWPathMonitor()
-    private let queue = DispatchQueue(label: "com.caserocu.ios.connectivity")
+    private let queue = DispatchQueue(label: "com.casero.cu.connectivity")
 
     init() {
         monitor.pathUpdateHandler = { [weak self] path in

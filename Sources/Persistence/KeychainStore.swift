@@ -8,7 +8,7 @@ import Security
 /// data, never tokens scraped from the portal.
 enum KeychainStore {
 
-    private static let service = "com.caserocu.ios.portal"
+    private static let service = "com.casero.cu.portal"
 
     enum Key: String {
         case username
