@@ -65,11 +65,6 @@ struct GuestDetailView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
-                if let nationality = guest.nationality {
-                    Text(nationality)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -80,14 +75,17 @@ struct GuestDetailView: View {
         VStack(spacing: 8) {
             Divider()
             HStack(spacing: 12) {
-                Spacer(minLength: 0)
-                if let nationality = guest.nationality,
-                    let flag = NationalityFlag.emoji(for: nationality)
-                {
-                    Text(flag)
-                        .font(.body)
-                        .accessibilityLabel("Nationality: \(nationality)")
+                if let nationality = guest.nationality {
+                    HStack(spacing: 5) {
+                        if let flag = NationalityFlag.emoji(for: nationality) {
+                            Text(flag).accessibilityHidden(true)
+                        }
+                        Text(nationality)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 }
+                Spacer(minLength: 8)
                 Label(
                     guest.birthDate.map(PortalDates.display) ?? String(localized: "Birth date unavailable"),
                     systemImage: "birthday.cake"
