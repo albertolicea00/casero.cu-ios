@@ -11,6 +11,10 @@ final class AppSettings: ObservableObject {
         case oneDay = 86400
         case threeDays = 259200
         case oneWeek = 604800
+        case oneMonth = 2_592_000
+        case threeMonths = 7_776_000
+        case sixMonths = 15_552_000
+        case twelveMonths = 31_536_000
         case forever = 0
 
         var id: Int { rawValue }
@@ -22,6 +26,10 @@ final class AppSettings: ObservableObject {
             case .oneDay: return String(localized: "1 day")
             case .threeDays: return String(localized: "3 days")
             case .oneWeek: return String(localized: "1 week")
+            case .oneMonth: return String(localized: "1 month")
+            case .threeMonths: return String(localized: "3 months")
+            case .sixMonths: return String(localized: "6 months")
+            case .twelveMonths: return String(localized: "12 months")
             case .forever: return String(localized: "Never expire")
             }
         }
@@ -71,11 +79,11 @@ final class AppSettings: ObservableObject {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         let storedTTL = defaults.object(forKey: Keys.cacheTTL) as? Int
-        cacheTTL = storedTTL.flatMap(CacheTTL.init(rawValue:)) ?? .oneDay
+        cacheTTL = storedTTL.flatMap(CacheTTL.init(rawValue:)) ?? .oneWeek
         saveImages = defaults.object(forKey: Keys.saveImages) as? Bool ?? true
         autoReauth = defaults.object(forKey: Keys.autoReauth) as? Bool ?? false
         rememberCredentials = defaults.object(forKey: Keys.rememberCredentials) as? Bool ?? false
         let storedRange = defaults.object(forKey: Keys.defaultGuestRangeDays) as? Int
-        defaultGuestRangeDays = [30, 60, 90, 180, 365].contains(storedRange ?? 90) ? (storedRange ?? 90) : 90
+        defaultGuestRangeDays = [7, 15, 30, 60, 90, 180, 365].contains(storedRange ?? 90) ? (storedRange ?? 90) : 90
     }
 }

@@ -4,6 +4,7 @@ struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
     @ObservedObject private var settings: AppSettings
     @StateObject private var viewModel: SettingsViewModel
+    @State private var isExportFormPresented = false
 
     init(client: CaseroClient, settings: AppSettings) {
         self.settings = settings
@@ -26,14 +27,17 @@ struct SettingsView: View {
                 cacheSection
                 exportSection
                 aboutSection
+                versionFooter
             }
             .navigationTitle("Settings")
             .task { await viewModel.refreshCacheSummary() }
             .onChange(of: settings.saveImages) { enabled in
                 if !enabled { Task { await PhotoCache.shared.clear() } }
             }
-            .sheet(item: $viewModel.exportedFile, onDismiss: viewModel.removeExport) { file in
-                ShareSheet(items: [file.url])
+            .sheet(isPresented: $isExportFormPresented) {
+                ExportFormSheet(viewModel: viewModel)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
             }
         }
     }
@@ -89,7 +93,7 @@ struct SettingsView: View {
     private var guestRangeSection: some View {
         Section("Guests") {
             Picker("Default date range", selection: $settings.defaultGuestRangeDays) {
-                ForEach([30, 60, 90, 180, 365], id: \.self) { days in
+                ForEach([7, 15, 30, 60, 90, 180, 365], id: \.self) { days in
                     Text(LocalizedStringKey("\(days) days")).tag(days)
                 }
             }
@@ -103,44 +107,109 @@ struct SettingsView: View {
 
     private var exportSection: some View {
         Section("Export") {
-            DatePicker("From", selection: $viewModel.exportFrom, displayedComponents: .date)
-            DatePicker("To", selection: $viewModel.exportTo, displayedComponents: .date)
-            Picker("Format", selection: $viewModel.exportFormat) {
-                ForEach(ExportService.Format.allCases) { format in
-                    Text(format.rawValue).tag(format)
-                }
-            }
-            if viewModel.exportFormat == .pdf {
-                Toggle("Include photos", isOn: $viewModel.includePhotosInPDF)
-            }
-            Text(
-                "Built from the guests already cached on this device — reload the Guests tab first to include recent data."
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
             Button {
-                Task { await viewModel.export() }
+                isExportFormPresented = true
             } label: {
-                if viewModel.isExporting {
-                    ProgressView()
-                } else {
-                    Text("Export")
-                }
-            }
-            .disabled(viewModel.isExporting)
-            if let message = viewModel.noticeMessage { Text(message).foregroundStyle(.secondary).font(.caption) }
-            if let message = viewModel.errorMessage {
-                Text(message).foregroundStyle(.red).font(.caption)
+                Label("Export", systemImage: "square.and.arrow.up")
             }
         }
     }
 
     private var aboutSection: some View {
         Section("About") {
+            VStack(alignment: .leading, spacing: 6) {
+                Label("Disclaimer", systemImage: "exclamationmark.triangle")
+                    .font(.subheadline.weight(.semibold))
+                Text("App disclaimer")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.vertical, 4)
             NavigationLink("Manual") { ManualView() }
-            NavigationLink("Disclaimer") { DisclaimerView() }
             NavigationLink("Privacy") { PrivacyView() }
             NavigationLink("Developer & official links") { DeveloperInfoView() }
+        }
+    }
+
+    private var versionFooter: some View {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+        return Section {
+            VStack(spacing: 4) {
+                Text("Version \(version) (\(build))")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Link("by @albertolicea00", destination: URL(string: "https://github.com/albertolicea00")!)
+                    .font(.caption)
+                    .tint(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+            .listRowBackground(Color.clear)
+        }
+    }
+}
+
+private struct ExportFormSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var viewModel: SettingsViewModel
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Date range") {
+                    DatePicker("From", selection: $viewModel.exportFrom, displayedComponents: .date)
+                    DatePicker("To", selection: $viewModel.exportTo, displayedComponents: .date)
+                }
+                Section("Format") {
+                    Picker("Format", selection: $viewModel.exportFormat) {
+                        ForEach(ExportService.Format.allCases) { format in
+                            Text(format.rawValue).tag(format)
+                        }
+                    }
+                    if viewModel.exportFormat == .pdf {
+                        Toggle("Include photos", isOn: $viewModel.includePhotosInPDF)
+                    }
+                }
+                Section {
+                    Text(viewModel.cacheSummary)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(
+                        "Built from the guests already cached on this device — reload the Guests tab first to include recent data."
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    Button {
+                        Task { await viewModel.export() }
+                    } label: {
+                        if viewModel.isExporting {
+                            ProgressView()
+                                .frame(maxWidth: .infinity)
+                        } else {
+                            Text("Create export")
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .disabled(viewModel.isExporting)
+                    if let message = viewModel.noticeMessage {
+                        Text(message).foregroundStyle(.secondary).font(.caption)
+                    }
+                    if let message = viewModel.errorMessage {
+                        Text(message).foregroundStyle(.red).font(.caption)
+                    }
+                }
+            }
+            .navigationTitle("Export")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .sheet(item: $viewModel.exportedFile, onDismiss: viewModel.removeExport) { file in
+            ShareSheet(items: [file.url])
         }
     }
 }

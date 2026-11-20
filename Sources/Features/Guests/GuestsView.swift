@@ -6,7 +6,7 @@ struct GuestsView: View {
     @ObservedObject private var settings: AppSettings
     @StateObject private var viewModel: GuestsViewModel
     @State private var isDateFilterPresented = false
-    @State private var isShowingSignOutConfirmation = false
+    @State private var isLoginPresented = false
     @State private var pendingFrom = Date()
     @State private var pendingTo = Date()
 
@@ -27,12 +27,6 @@ struct GuestsView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if !appState.isSignedIn {
-                    Text("Sign in on Register to refresh portal data.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal)
-                }
                 if viewModel.isOffline {
                     Label(offlineCaption, systemImage: "icloud.slash")
                         .font(.caption)
@@ -127,29 +121,8 @@ struct GuestsView: View {
                         .frame(minWidth: 44, minHeight: 44)
                         .accessibilityLabel("Reload guests")
                         .disabled(viewModel.isLoading || !appState.isSignedIn)
-
-                        Button {
-                            isShowingSignOutConfirmation = true
-                        } label: {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                        }
-                        .frame(minWidth: 44, minHeight: 44)
-                        .accessibilityLabel("Sign out")
-                        .disabled(appState.isSigningOut)
                     }
                 }
-            }
-            .confirmationDialog(
-                "Sign out?",
-                isPresented: $isShowingSignOutConfirmation,
-                titleVisibility: .visible
-            ) {
-                Button("Sign out", role: .destructive) {
-                    Task { await appState.signOutCompletely() }
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Sign out of the portal account?")
             }
             .sheet(isPresented: $isDateFilterPresented) {
                 GuestDateRangeSheet(
@@ -166,6 +139,27 @@ struct GuestsView: View {
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
             }
+            .sheet(isPresented: $isLoginPresented) {
+                LoginView(client: client, settings: settings)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
+            }
+            .safeAreaInset(edge: .bottom, alignment: .trailing, spacing: 0) {
+                if !appState.isSignedIn {
+                    HStack {
+                        Spacer()
+                        Button {
+                            isLoginPresented = true
+                        } label: {
+                            Label("Sign in", systemImage: "person.crop.circle.badge.plus")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .clipShape(Capsule())
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                }
+            }
         }
         .task {
             await viewModel.loadFromCache()
@@ -176,6 +170,12 @@ struct GuestsView: View {
         .onChange(of: settings.defaultGuestRangeDays) { _ in
             viewModel.applyDefaultRange()
             if appState.isSignedIn { Task { await viewModel.reload() } }
+        }
+        .onChange(of: appState.isSignedIn) { signedIn in
+            if signedIn {
+                isLoginPresented = false
+                Task { await viewModel.reload() }
+            }
         }
         .onChange(of: viewModel.isSessionExpired) { expired in
             guard expired else { return }
@@ -201,6 +201,9 @@ struct GuestsView: View {
                 ProgressView().frame(maxHeight: .infinity)
             } else if let message = viewModel.errorMessage {
                 VStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.system(size: 34))
+                        .foregroundStyle(.orange)
                     Text(message).foregroundStyle(.red).multilineTextAlignment(.center)
                     Button("Retry") { Task { await viewModel.reload() } }
                         .buttonStyle(.bordered)
@@ -208,7 +211,15 @@ struct GuestsView: View {
                 .padding()
                 .frame(maxHeight: .infinity)
             } else {
-                Text("No guests in this range.").foregroundStyle(.secondary).frame(maxHeight: .infinity)
+                VStack(spacing: 10) {
+                    Image(systemName: "person.2")
+                        .font(.system(size: 38, weight: .regular))
+                        .foregroundStyle(.tertiary)
+                    Text("No guests in this range.")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         } else {
             ScrollView {

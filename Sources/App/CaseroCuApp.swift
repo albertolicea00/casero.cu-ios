@@ -112,6 +112,7 @@ struct MainTabView: View {
 
     @EnvironmentObject private var appState: AppState
     @State private var selection: Tab = .sms
+    @State private var isRegisterLoginPresented = false
     let client: CaseroClient
 
     var body: some View {
@@ -127,43 +128,68 @@ struct MainTabView: View {
                     .tabItem { Label("SMS", systemImage: "message.fill") }
                     .tag(Tab.sms)
 
-                AuthGate(client: client) {
-                    RegisterGuestView(client: client)
-                }
+                AuthGate(
+                    isActive: selection == .register,
+                    onSignIn: { isRegisterLoginPresented = true }
+                ) { RegisterGuestView(client: client) }
                 .tabItem { Label("Register", systemImage: "person.badge.plus") }
                 .tag(Tab.register)
 
-                Group {
-                    if appState.isSignedIn || appState.hasCachedGuests {
-                        GuestsView(client: client, settings: appState.settings)
-                    } else {
-                        LoginView(client: client, settings: appState.settings)
-                    }
-                }
-                .tabItem { Label("Guests", systemImage: "person.2.fill") }
-                .tag(Tab.guests)
+                GuestsView(client: client, settings: appState.settings)
+                    .tabItem { Label("Guests", systemImage: "person.2.fill") }
+                    .tag(Tab.guests)
 
                 SettingsView(client: client, settings: appState.settings)
                     .tabItem { Label("Settings", systemImage: "gearshape.fill") }
                     .tag(Tab.settings)
             }
         }
+        .sheet(isPresented: $isRegisterLoginPresented) {
+            LoginView(client: client, settings: appState.settings)
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+        }
+        .onChange(of: selection) { tab in
+            if tab == .register && !appState.isSignedIn {
+                isRegisterLoginPresented = true
+            }
+        }
+        .onChange(of: appState.isSignedIn) { signedIn in
+            if signedIn { isRegisterLoginPresented = false }
+        }
     }
 }
 
-/// Shows `LoginView` in place of any portal-backed tab's content until the
-/// user signs in, instead of blocking the whole app (SMS reporting needs no
-/// account).
+/// Keeps registration locked until the login sheet succeeds; SMS remains
+/// available without a portal account.
 private struct AuthGate<Content: View>: View {
     @EnvironmentObject private var appState: AppState
-    let client: CaseroClient
+    let isActive: Bool
+    let onSignIn: () -> Void
     @ViewBuilder let content: () -> Content
 
     var body: some View {
         if appState.isSignedIn {
             content()
         } else {
-            LoginView(client: client, settings: appState.settings)
+            VStack(spacing: 12) {
+                Image(systemName: "person.badge.key")
+                    .font(.system(size: 38))
+                    .foregroundStyle(.tertiary)
+                Text("Sign in required to register guests")
+                    .font(.headline)
+                    .multilineTextAlignment(.center)
+                Text("Sign in to the guest portal")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Button("Sign in", action: onSignIn)
+                    .buttonStyle(.borderedProminent)
+            }
+            .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .onAppear {
+                if isActive { onSignIn() }
+            }
         }
     }
 }
