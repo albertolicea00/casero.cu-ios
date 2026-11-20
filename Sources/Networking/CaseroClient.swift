@@ -34,7 +34,9 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
         super.init()
         configuration.httpCookieStorage = HTTPCookieStorage.shared
         configuration.httpCookieAcceptPolicy = .always
-        configuration.timeoutIntervalForRequest = 20
+        configuration.timeoutIntervalForRequest = 45
+        configuration.timeoutIntervalForResource = 90
+        configuration.waitsForConnectivity = true
         configuration.urlCache = nil
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
         configuration.httpAdditionalHeaders = ["User-Agent": Self.userAgent]
@@ -317,7 +319,7 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
         } catch let error as PortalError {
             throw error
         } catch {
-            throw PortalError.unreachable
+            throw PortalError.transportError(for: error)
         }
     }
 

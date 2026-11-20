@@ -44,6 +44,8 @@
 "Confirmation code without HC" = "Código de confirmación sin HC";
 "Could not build export: %@" = "No se pudo generar la exportación: %@";
 "Could not reach the portal (only reachable from inside Cuba)." = "No se pudo conectar al portal. Solo es accesible desde Cuba.";
+"Could not connect to the portal. Check your internet connection and try again. Portal access may be limited to networks in Cuba." = "No se pudo conectar al portal. Comprueba tu conexión a internet e inténtalo de nuevo. El acceso puede estar limitado a redes en Cuba.";
+"A secure connection to the portal could not be established. Check your network and device date and time. Portal access may be limited to networks in Cuba." = "No se pudo establecer una conexión segura con el portal. Comprueba tu red y la fecha y hora del dispositivo. El acceso puede estar limitado a redes en Cuba.";
 "Could not validate the portal form. Please try again." = "No se pudo validar el formulario del portal. Inténtalo de nuevo.";
 "Cuban companion" = "Acompañante cubano";
 "Cuban companion (carné)" = "Acompañante cubano (carné)";
@@ -95,6 +97,7 @@
 "No companions." = "Sin acompañantes.";
 "No guests in this range." = "No hay huéspedes en este intervalo.";
 "No internet connection. The portal is only reachable from inside Cuba." = "Sin conexión a internet. El portal solo es accesible desde Cuba.";
+"No internet connection. Check your Wi-Fi or mobile data." = "Sin conexión a internet. Comprueba el Wi-Fi o los datos móviles.";
 "Nothing cached yet — reload the Guests tab first." = "No hay datos guardados. Actualiza primero la pestaña Huéspedes.";
 "Official channels" = "Canales oficiales";
 "Official portal" = "Portal oficial";

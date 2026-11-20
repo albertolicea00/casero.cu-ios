@@ -101,7 +101,7 @@ private struct PortalWebView: UIViewRepresentable {
         private func fail(_ error: Error) {
             if (error as NSError).code == NSURLErrorCancelled { return }
             parent.isLoading = false
-            parent.errorMessage = PortalError.unreachable.localizedDescription
+            parent.errorMessage = PortalError.transportError(for: error).localizedDescription
         }
     }
 }

@@ -181,7 +181,7 @@ private struct ConnectivityBanner: View {
         Group {
             if !connectivity.isConnected {
                 Label(
-                    "No internet connection. The portal is only reachable from inside Cuba.", systemImage: "wifi.slash"
+                    "No internet connection. Check your Wi-Fi or mobile data.", systemImage: "wifi.slash"
                 )
                 .font(.footnote.weight(.semibold))
                 .frame(maxWidth: .infinity)

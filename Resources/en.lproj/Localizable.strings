@@ -44,6 +44,8 @@
 "Confirmation code without HC" = "Confirmation code without HC";
 "Could not build export: %@" = "Could not build export: %@";
 "Could not reach the portal (only reachable from inside Cuba)." = "Could not reach the portal (only reachable from inside Cuba).";
+"Could not connect to the portal. Check your internet connection and try again. Portal access may be limited to networks in Cuba." = "Could not connect to the portal. Check your internet connection and try again. Portal access may be limited to networks in Cuba.";
+"A secure connection to the portal could not be established. Check your network and device date and time. Portal access may be limited to networks in Cuba." = "A secure connection to the portal could not be established. Check your network and device date and time. Portal access may be limited to networks in Cuba.";
 "Could not validate the portal form. Please try again." = "Could not validate the portal form. Please try again.";
 "Cuban companion" = "Cuban companion";
 "Cuban companion (carné)" = "Cuban companion (carné)";
@@ -95,6 +97,7 @@
 "No companions." = "No companions.";
 "No guests in this range." = "No guests in this range.";
 "No internet connection. The portal is only reachable from inside Cuba." = "No internet connection. The portal is only reachable from inside Cuba.";
+"No internet connection. Check your Wi-Fi or mobile data." = "No internet connection. Check your Wi-Fi or mobile data.";
 "Nothing cached yet — reload the Guests tab first." = "Nothing cached yet — reload the Guests tab first.";
 "Official channels" = "Official channels";
 "Official portal" = "Official portal";

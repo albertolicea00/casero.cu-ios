@@ -14,6 +14,8 @@ enum PortalError: LocalizedError {
     case http(Int)
     /// Transport failure — most often the portal being unreachable from outside Cuba.
     case unreachable
+    /// TLS negotiation failed or the server certificate could not be validated.
+    case secureConnection
     case rejected(String)
     case invalidResponse
 
@@ -35,7 +37,30 @@ enum PortalError: LocalizedError {
         case .http(let code):
             return String(localized: "Portal returned HTTP \(code).")
         case .unreachable:
-            return String(localized: "Could not reach the portal (only reachable from inside Cuba).")
+            return String(
+                localized:
+                    "Could not connect to the portal. Check your internet connection and try again. Portal access may be limited to networks in Cuba."
+            )
+        case .secureConnection:
+            return String(
+                localized:
+                    "A secure connection to the portal could not be established. Check your network and device date and time. Portal access may be limited to networks in Cuba."
+            )
+        }
+    }
+
+    static func transportError(for error: Error) -> PortalError {
+        let error = error as NSError
+        guard error.domain == NSURLErrorDomain else { return .unreachable }
+        switch error.code {
+        case NSURLErrorSecureConnectionFailed,
+            NSURLErrorServerCertificateUntrusted,
+            NSURLErrorServerCertificateHasBadDate,
+            NSURLErrorServerCertificateHasUnknownRoot,
+            NSURLErrorServerCertificateNotYetValid:
+            return .secureConnection
+        default:
+            return .unreachable
         }
     }
 }
