@@ -32,6 +32,9 @@ struct SMSHelpView: View {
                     messagePreview(for: selectedReportKind)
                     sendSMSButton(for: selectedReportKind)
 
+                    Divider()
+                        .padding(.vertical, 6)
+
                     confirmationSection
 
                     if !MessageComposeView.canSendText {
@@ -89,22 +92,29 @@ struct SMSHelpView: View {
     }
 
     private var reportInputCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            TextField("Guest passport", text: $model.passport)
-                .textInputAutocapitalization(.characters)
-                .autocorrectionDisabled()
-                .smsInputField()
-            if selectedReportKind == .companion {
-                TextField("Companion identity number", text: $model.companionIdentity)
+        VStack(alignment: .leading, spacing: 6) {
+            VStack(spacing: 0) {
+                TextField("Guest passport", text: $model.passport)
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
+                    .padding(.vertical, 12)
+                if selectedReportKind == .companion {
+                    Divider()
+                    TextField("Companion identity number", text: $model.companionIdentity)
+                        .keyboardType(.numberPad)
+                        .padding(.vertical, 12)
+                    Divider()
+                    Toggle("The main guest's registration is confirmed", isOn: $model.mainGuestIsRegistered)
+                        .padding(.vertical, 12)
+                }
+                Divider()
+                TextField("Stay days", text: $model.days)
                     .keyboardType(.numberPad)
-                    .smsInputField()
-                Toggle("The main guest's registration is confirmed", isOn: $model.mainGuestIsRegistered)
-                    .padding(12)
-                    .background(Color(uiColor: .systemBackground), in: RoundedRectangle(cornerRadius: 10))
+                    .padding(.vertical, 12)
             }
-            TextField("Stay days", text: $model.days)
-                .keyboardType(.numberPad)
-                .smsInputField()
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
             if let validation = model.validationMessage(for: selectedReportKind) {
                 Label(validation, systemImage: "info.circle")
                     .font(.caption)
@@ -112,18 +122,20 @@ struct SMSHelpView: View {
                     .padding(.horizontal, 4)
             }
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
     }
 
     private var confirmationInputCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            TextField("Confirmation code without HC", text: $model.confirmationCode)
-                .textContentType(.oneTimeCode)
-                .textInputAutocapitalization(.characters)
-                .autocorrectionDisabled()
-                .smsInputField()
+        VStack(alignment: .leading, spacing: 6) {
+            VStack(spacing: 0) {
+                TextField("Confirmation code without HC", text: $model.confirmationCode)
+                    .textContentType(.oneTimeCode)
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
+                    .padding(.vertical, 12)
+            }
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
             if let validation = model.validationMessage(for: .confirmation) {
                 Label(validation, systemImage: "info.circle")
                     .font(.caption)
@@ -131,9 +143,6 @@ struct SMSHelpView: View {
                     .padding(.horizontal, 4)
             }
         }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
     }
 
     private var confirmationSection: some View {
@@ -158,15 +167,13 @@ struct SMSHelpView: View {
             }
 
             confirmationInputCard
+            Text(
+                "Check the name and nationality in the service reply before confirming. Requests expire after six hours; start a new report if that time has passed."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
             messagePreview(for: .confirmation)
             sendSMSButton(for: .confirmation)
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(uiColor: .tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
-        .overlay {
-            RoundedRectangle(cornerRadius: 20)
-                .strokeBorder(Color(uiColor: .separator).opacity(0.22), lineWidth: 1)
         }
     }
 
@@ -193,15 +200,6 @@ struct SMSHelpView: View {
         }
         .buttonStyle(.borderedProminent)
         .disabled(model.preview(for: kind) == nil || !MessageComposeView.canSendText)
-    }
-}
-
-extension View {
-    fileprivate func smsInputField() -> some View {
-        padding(.horizontal, 12)
-            .padding(.vertical, 11)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(uiColor: .systemBackground), in: RoundedRectangle(cornerRadius: 10))
     }
 }
 
