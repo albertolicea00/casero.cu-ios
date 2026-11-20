@@ -16,13 +16,16 @@ struct GuestDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
-                stayCard
+            VStack(alignment: .leading, spacing: 10) {
+                sectionHeading("Personal data")
                 personalCard
-                photoCard
+                photoAction
+
+                sectionHeading("Stay timeline")
+                stayCard
 
                 if !isCompanion {
-                    companionsCard
+                    companionsSection
                     NavigationLink {
                         PortalPageView(path: "Huespedes/HuespedesRegistrados", title: "Guest details")
                     } label: {
@@ -43,108 +46,127 @@ struct GuestDetailView: View {
         }
     }
 
-    private var stayCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Stay timeline").font(.headline)
-            StayDateLine(title: "Check-in", date: guest.checkIn, color: .accentColor)
-            StayDateLine(title: "Check-out", date: guest.checkOut, color: .orange)
-        }
-        .guestCard()
+    private func sectionHeading(_ title: LocalizedStringKey) -> some View {
+        Text(title)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 4)
     }
 
     private var personalCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Personal data").font(.headline)
-            Text(guest.fullName).font(.title3.weight(.semibold)).textSelection(.enabled)
-            LabeledContent("Passport/ID", value: guest.identificador)
-                .textSelection(.enabled)
-            if let nationality = guest.nationality {
-                LabeledContent("Nationality", value: nationality)
+        HStack(alignment: .top, spacing: 14) {
+            GuestAvatar(guest: guest, photo: photo, size: 58)
+            VStack(alignment: .leading, spacing: 7) {
+                Text(guest.fullName)
+                    .font(.title3.weight(.semibold))
+                    .textSelection(.enabled)
+                Text("Passport/ID: \(guest.identificador)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+                if let nationality = guest.nationality {
+                    HStack(spacing: 6) {
+                        if let flag = NationalityFlag.emoji(for: nationality) {
+                            Text(flag).accessibilityHidden(true)
+                        }
+                        Text(nationality)
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                }
+                if let date = guest.birthDate {
+                    Text("Birth date: \(PortalDates.display(date))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
-            if let date = guest.birthDate {
-                LabeledContent("Birth date", value: PortalDates.display(date))
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .guestCard()
     }
 
-    private var photoCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Photo").font(.headline)
-            if let photo {
-                Image(uiImage: photo)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxHeight: 260)
-                    .frame(maxWidth: .infinity)
-                    .accessibilityLabel("Guest photo")
-            }
-            if let photoError {
-                Text(photoError).font(.caption).foregroundStyle(.red)
-            }
+    private var photoAction: some View {
+        VStack(alignment: .leading, spacing: 4) {
             Button {
                 Task { await loadPhoto() }
             } label: {
-                if isLoadingPhoto {
-                    ProgressView().frame(maxWidth: .infinity, minHeight: 44)
-                } else {
-                    Label(photo == nil ? "Load photo" : "Reload photo", systemImage: "arrow.clockwise")
-                        .frame(maxWidth: .infinity, minHeight: 44)
+                Group {
+                    if isLoadingPhoto {
+                        ProgressView()
+                    } else {
+                        Label(photo == nil ? "Load photo" : "Reload photo", systemImage: "arrow.clockwise")
+                    }
                 }
+                .font(.caption)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
             .disabled(isLoadingPhoto)
+            if let photoError {
+                Text(photoError).font(.caption2).foregroundStyle(.red)
+            }
+        }
+        .padding(.horizontal, 5)
+    }
+
+    private var stayCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            StayDateLine(title: "Check-in", date: guest.checkIn, color: .accentColor)
+            StayDateLine(title: "Check-out", date: guest.checkOut, color: .orange)
+            if let summary = GuestStayText.summary(for: guest) {
+                Divider()
+                Label(summary, systemImage: "moon.stars")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .guestCard()
     }
 
-    private var companionsCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
+    private var companionsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Companions").font(.headline)
+                sectionHeading("Companions")
                 Spacer()
                 if didLoadCompanions {
                     Text("\(companions.count)")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.tertiary)
                 }
             }
 
             if didLoadCompanions && companions.isEmpty && companionsError == nil {
-                Text("No companions.").font(.subheadline).foregroundStyle(.secondary)
+                Text("No companions.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
-            if !companions.isEmpty {
-                VStack(spacing: 0) {
-                    ForEach(Array(companions.enumerated()), id: \.element.id) { index, companion in
-                        CompanionSummary(guest: companion)
-                        if index < companions.count - 1 {
-                            Divider().padding(.leading, 12)
-                        }
-                    }
-                }
-                .background(Color(uiColor: .systemBackground).opacity(0.65), in: RoundedRectangle(cornerRadius: 12))
+            ForEach(companions) { companion in
+                CompanionSummary(guest: companion, client: client, settings: settings)
             }
             if let companionsError {
                 Text(companionsError).font(.caption).foregroundStyle(.red)
             }
-
             Button {
                 Task { await loadCompanions() }
             } label: {
-                if isLoadingCompanions {
-                    ProgressView().frame(maxWidth: .infinity, minHeight: 44)
-                } else {
-                    Label(
-                        didLoadCompanions ? "Reload companions" : "Load companions",
-                        systemImage: "arrow.clockwise"
-                    )
-                    .frame(maxWidth: .infinity, minHeight: 44)
+                Group {
+                    if isLoadingCompanions {
+                        ProgressView()
+                    } else {
+                        Label(
+                            didLoadCompanions ? "Reload companions" : "Load companions",
+                            systemImage: "arrow.clockwise"
+                        )
+                    }
                 }
+                .font(.caption)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
             .disabled(isLoadingCompanions || guest.stayId.isEmpty)
+            .padding(.horizontal, 5)
         }
-        .guestCard()
     }
 
     private func loadPhoto() async {
@@ -157,7 +179,9 @@ struct GuestDetailView: View {
                 for: guest, isCompanion: isCompanion)
         } catch PortalError.sessionExpired {
             await appState.reportSessionExpired()
-        } catch { photoError = error.localizedDescription }
+        } catch {
+            photoError = error.localizedDescription
+        }
     }
 
     private func loadCompanions() async {
@@ -170,7 +194,9 @@ struct GuestDetailView: View {
             didLoadCompanions = true
         } catch PortalError.sessionExpired {
             await appState.reportSessionExpired()
-        } catch { companionsError = error.localizedDescription }
+        } catch {
+            companionsError = error.localizedDescription
+        }
     }
 }
 
@@ -181,13 +207,13 @@ private struct StayDateLine: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Circle().fill(color).frame(width: 9, height: 9)
+            Circle().fill(color).frame(width: 8, height: 8)
             Text(title).font(.subheadline.weight(.semibold))
-            Spacer(minLength: 4)
+            Spacer(minLength: 8)
             if let date {
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(PortalDates.display(date)).font(.subheadline.monospacedDigit())
-                    Text(date, style: .relative).font(.caption).foregroundStyle(.secondary)
+                    Text(GuestStayText.age(of: date)).font(.caption).foregroundStyle(.secondary)
                 }
             } else {
                 Text("—").foregroundStyle(.secondary)
@@ -197,37 +223,132 @@ private struct StayDateLine: View {
 }
 
 private struct CompanionSummary: View {
+    @EnvironmentObject private var appState: AppState
     let guest: Guest
+    let client: CaseroClient
+    let settings: AppSettings
+    @State private var photo: UIImage?
+    @State private var photoError: String?
+    @State private var isLoadingPhoto = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(guest.fullName).font(.subheadline.weight(.semibold))
-            Text("Passport/ID: \(guest.identificador)").font(.caption).foregroundStyle(.secondary)
-            if let nationality = guest.nationality {
-                Text("Nationality: \(nationality)").font(.caption).foregroundStyle(.secondary)
-            }
-            HStack(spacing: 12) {
-                if let checkIn = guest.checkIn {
-                    Label {
-                        Text("Check-in: \(PortalDates.display(checkIn)) · ") + Text(checkIn, style: .relative)
-                    } icon: {
-                        Image(systemName: "arrow.right.to.line")
-                    }
-                }
-                if let checkOut = guest.checkOut {
-                    Label {
-                        Text("Check-out: \(PortalDates.display(checkOut)) · ") + Text(checkOut, style: .relative)
-                    } icon: {
-                        Image(systemName: "arrow.left.to.line")
-                    }
-                }
-            }
-            .font(.caption2)
-            .foregroundStyle(.secondary)
-            .labelStyle(.titleAndIcon)
+        VStack(alignment: .leading, spacing: 3) {
+            companionCard.guestCard()
+            photoAction
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
+        .task(id: guest.id) {
+            photo = await GuestPhotoService(client: client, settings: settings).cachedImage(
+                for: guest, isCompanion: true)
+        }
+    }
+
+    private var companionCard: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(alignment: .top, spacing: 12) {
+                GuestAvatar(guest: guest, photo: photo, size: 46)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(guest.fullName)
+                        .font(.subheadline.weight(.semibold))
+                        .textSelection(.enabled)
+                    Text("Passport/ID: \(guest.identificador)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    if let nationality = guest.nationality {
+                        HStack(spacing: 5) {
+                            if let flag = NationalityFlag.emoji(for: nationality) {
+                                Text(flag).accessibilityHidden(true)
+                            }
+                            Text(nationality)
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            if guest.checkIn != nil || guest.checkOut != nil {
+                Divider().padding(.vertical, 3)
+                StayDateLine(title: "Check-in", date: guest.checkIn, color: .accentColor)
+                StayDateLine(title: "Check-out", date: guest.checkOut, color: .orange)
+                if let summary = GuestStayText.summary(for: guest) {
+                    Label(summary, systemImage: "moon.stars")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+    }
+
+    private var photoAction: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Button {
+                Task { await loadPhoto() }
+            } label: {
+                Group {
+                    if isLoadingPhoto {
+                        ProgressView()
+                    } else {
+                        Label(photo == nil ? "Load photo" : "Reload photo", systemImage: "arrow.clockwise")
+                    }
+                }
+                .font(.caption2)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
+            .disabled(isLoadingPhoto)
+            if let photoError {
+                Text(photoError).font(.caption2).foregroundStyle(.red)
+            }
+        }
+        .padding(.leading, 10)
+    }
+
+    private func loadPhoto() async {
+        guard !isLoadingPhoto else { return }
+        isLoadingPhoto = true
+        photoError = nil
+        defer { isLoadingPhoto = false }
+        do {
+            photo = try await GuestPhotoService(client: client, settings: settings).image(
+                for: guest, isCompanion: true)
+        } catch PortalError.sessionExpired {
+            await appState.reportSessionExpired()
+        } catch {
+            photoError = error.localizedDescription
+        }
+    }
+}
+
+private struct GuestAvatar: View {
+    let guest: Guest
+    let photo: UIImage?
+    let size: CGFloat
+
+    var body: some View {
+        Group {
+            if let photo {
+                Image(uiImage: photo)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Text(initials)
+                    .font(.system(size: size * 0.34, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(uiColor: .tertiarySystemFill))
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .accessibilityLabel(guest.fullName)
+    }
+
+    private var initials: String {
+        let parts = guest.fullName.split(whereSeparator: \.isWhitespace)
+        let first = parts.first?.prefix(1) ?? "?"
+        let last = parts.dropFirst().last?.prefix(1) ?? ""
+        return (String(first) + String(last)).uppercased()
     }
 }
 
@@ -236,5 +357,54 @@ extension View {
         padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+enum GuestStayText {
+    static func duration(for guest: Guest) -> String? {
+        guard let checkIn = guest.checkIn, let checkOut = guest.checkOut else { return nil }
+        let count = max(
+            0,
+            PortalDates.calendar.dateComponents(
+                [.day],
+                from: PortalDates.calendar.startOfDay(for: checkIn),
+                to: PortalDates.calendar.startOfDay(for: checkOut)
+            ).day ?? 0
+        )
+        return count == 1 ? String(localized: "1 night") : String(localized: "\(count) nights")
+    }
+
+    static func age(of date: Date, relativeTo now: Date = .now) -> String {
+        let calendar = PortalDates.calendar
+        let date = calendar.startOfDay(for: date)
+        let today = calendar.startOfDay(for: now)
+        let isFuture = date > today
+        let components = calendar.dateComponents(
+            [.year, .month, .day],
+            from: isFuture ? today : date,
+            to: isFuture ? date : today
+        )
+
+        var units: [String] = []
+        if let years = components.year, years > 0 {
+            units.append(years == 1 ? String(localized: "1 year") : String(localized: "\(years) years"))
+        }
+        if let months = components.month, months > 0 {
+            units.append(months == 1 ? String(localized: "1 month") : String(localized: "\(months) months"))
+        }
+        if let days = components.day, days > 0 {
+            units.append(days == 1 ? String(localized: "1 day") : String(localized: "\(days) days"))
+        }
+
+        guard !units.isEmpty else { return String(localized: "Today") }
+        let duration = ListFormatter.localizedString(byJoining: units)
+        let format = String(localized: isFuture ? "In %@" : "%@ ago")
+        return String.localizedStringWithFormat(format, duration)
+    }
+
+    static func summary(for guest: Guest, relativeTo now: Date = .now) -> String? {
+        guard let duration = duration(for: guest), let checkIn = guest.checkIn else { return nil }
+        let age = age(of: checkIn, relativeTo: now)
+        return String.localizedStringWithFormat(String(localized: "Stay: %@ (%@)"), duration, age)
     }
 }

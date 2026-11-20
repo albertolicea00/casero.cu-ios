@@ -10,6 +10,12 @@
 "12 months" = "12 meses";
 "%lld months" = "%lld meses";
 "%lld days" = "%lld días";
+"1 year" = "1 año";
+"%lld years" = "%lld años";
+"%@ ago" = "hace %@";
+"In %@" = "en %@";
+"Today" = "hoy";
+"Stay: %@ (%@)" = "Estancia: %@ (%@)";
 "Stay: %@" = "Estancia: %@";
 "Nationality unknown" = "Nacionalidad desconocida";
 "1 hour" = "1 hora";

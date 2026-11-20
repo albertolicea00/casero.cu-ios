@@ -340,10 +340,14 @@ private struct GuestRow: View {
                     stayDate(title: "Check-out", date: guest.checkOut)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                if let duration = stayDuration {
-                    Label("Stay: \(duration)", systemImage: "moon.stars")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
+                if let summary = GuestStayText.summary(for: guest) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "moon.stars")
+                        Text(summary)
+                    }
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
@@ -361,11 +365,6 @@ private struct GuestRow: View {
                 Text(dateFormatter.string(from: date))
                     .font(.caption.monospacedDigit().weight(.medium))
                     .foregroundStyle(.primary)
-                if PortalDates.calendar.isDateInToday(date) {
-                    Text("Now").font(.caption2).foregroundStyle(.secondary)
-                } else {
-                    Text(date, style: .relative).font(.caption2).foregroundStyle(.secondary)
-                }
             } else {
                 Text("—").font(.caption).foregroundStyle(.secondary)
             }
@@ -373,21 +372,9 @@ private struct GuestRow: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var stayDuration: String? {
-        guard let checkIn = guest.checkIn, let checkOut = guest.checkOut else { return nil }
-        let count = max(
-            0,
-            PortalDates.calendar.dateComponents(
-                [.day],
-                from: PortalDates.calendar.startOfDay(for: checkIn),
-                to: PortalDates.calendar.startOfDay(for: checkOut)
-            ).day ?? 0
-        )
-        return count == 1 ? String(localized: "1 night") : String(localized: "\(count) nights")
-    }
 }
 
-private enum NationalityFlag {
+enum NationalityFlag {
     private static let aliases: [String: String] = [
         "CUBA": "CU",
         "ESPANA": "ES",
