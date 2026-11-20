@@ -34,6 +34,7 @@
 "Apply dates" = "Aplicar fechas";
 "Auto re-authenticate on expiry" = "Recuperar la sesión al vencer";
 "Before the first report" = "Antes del primer reporte";
+"Fill in the fields above to send the SMS." = "Rellena los campos de arriba para enviar el SMS.";
 "Use the phone number associated with your host account. Request phone association and wait for confirmation before reporting." = "Usa el número asociado a tu registro como arrendador. Solicita la asociación del teléfono y espera la confirmación antes de reportar.";
 "Each guest and companion needs a separate report. Check the reply's name and nationality, then send the confirmation code when prompted." = "Cada huésped y acompañante requiere un reporte separado. Comprueba el nombre y la nacionalidad de la respuesta y luego envía el código de confirmación cuando se te solicite.";
 "Birth date" = "Fecha de nacimiento";

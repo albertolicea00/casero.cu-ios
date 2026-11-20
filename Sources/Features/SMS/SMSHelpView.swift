@@ -164,14 +164,37 @@ struct SMSHelpView: View {
     }
 
     private func sendSMSButton(for kind: SMSReportViewModel.Kind) -> some View {
-        Button {
-            model.prepare(kind: kind)
-        } label: {
-            Text("Preview SMS")
-                .frame(maxWidth: .infinity)
+        VStack(spacing: 8) {
+            Button {
+                model.prepare(kind: kind)
+            } label: {
+                Text("Preview SMS")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(SMSPreviewButtonStyle())
+            .disabled(model.preview(for: kind) == nil || !MessageComposeView.canSendText)
+
+            if model.preview(for: kind) == nil {
+                Label("Fill in the fields above to send the SMS.", systemImage: "lock.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
-        .buttonStyle(.borderedProminent)
-        .disabled(model.preview(for: kind) == nil || !MessageComposeView.canSendText)
+    }
+}
+
+private struct SMSPreviewButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.body.weight(.semibold))
+            .foregroundStyle(.white)
+            .padding(.vertical, 14)
+            .background(
+                Color.accentColor.opacity(isEnabled ? (configuration.isPressed ? 0.82 : 1) : 0.55),
+                in: RoundedRectangle(cornerRadius: 14)
+            )
     }
 }
 

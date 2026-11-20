@@ -34,6 +34,7 @@
 "Apply dates" = "Apply dates";
 "Auto re-authenticate on expiry" = "Auto re-authenticate on expiry";
 "Before the first report" = "Before the first report";
+"Fill in the fields above to send the SMS." = "Fill in the fields above to send the SMS.";
 "Use the phone number associated with your host account. Request phone association and wait for confirmation before reporting." = "Use the phone number associated with your host account. Request phone association and wait for confirmation before reporting.";
 "Each guest and companion needs a separate report. Check the reply's name and nationality, then send the confirmation code when prompted." = "Each guest and companion needs a separate report. Check the reply's name and nationality, then send the confirmation code when prompted.";
 "Birth date" = "Birth date";
