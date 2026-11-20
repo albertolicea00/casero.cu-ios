@@ -106,33 +106,31 @@ struct GuestsView: View {
                 content
             }
             .background(Color(uiColor: .systemBackground).ignoresSafeArea())
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Guests")
+            .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    HStack(spacing: 12) {
-                        Text("Guests").font(.headline)
-                        Button {
-                            Task { await viewModel.reload() }
-                        } label: {
-                            if viewModel.isLoading {
-                                ProgressView().frame(width: 36, height: 36)
-                            } else {
-                                Image(systemName: "arrow.clockwise").frame(width: 36, height: 36)
-                            }
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button {
+                        Task { await viewModel.reload() }
+                    } label: {
+                        if viewModel.isLoading {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "arrow.clockwise")
                         }
-                        .accessibilityLabel("Reload guests")
-                        .disabled(viewModel.isLoading || !appState.isSignedIn)
-
-                        Button {
-                            Task { await appState.signOutCompletely() }
-                        } label: {
-                            Image(systemName: "rectangle.portrait.and.arrow.right").frame(width: 36, height: 36)
-                        }
-                        .accessibilityLabel("Sign out")
-                        .disabled(appState.isSigningOut)
                     }
+                    .accessibilityLabel("Reload guests")
+                    .disabled(viewModel.isLoading || !appState.isSignedIn)
+
+                    Button {
+                        Task { await appState.signOutCompletely() }
+                    } label: {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                    }
+                    .accessibilityLabel("Sign out")
+                    .disabled(appState.isSigningOut)
                 }
             }
             .sheet(isPresented: $isDateFilterPresented) {
@@ -263,11 +261,6 @@ private struct GuestDateRangeSheet: View {
             .padding()
             .navigationTitle("Date range")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-            }
         }
     }
 
