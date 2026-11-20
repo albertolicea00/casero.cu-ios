@@ -309,10 +309,16 @@ private struct GuestRow: View {
                     stayDate(title: "Check-out", date: guest.checkOut)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                if let duration = stayDuration {
-                    Label("Stay: \(duration)", systemImage: "moon.stars")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
+                if let duration = stayDuration, let checkIn = guest.checkIn {
+                    HStack(spacing: 3) {
+                        Label("Stay: \(duration)", systemImage: "moon.stars")
+                        Text("(")
+                        Text(checkIn, style: .relative)
+                        Text(")")
+                    }
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .accessibilityElement(children: .combine)
                 }
             }
         }
