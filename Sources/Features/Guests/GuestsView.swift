@@ -283,45 +283,43 @@ private struct GuestRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 5) {
-                Text(guest.fullName)
-                    .font(.headline)
-                    .foregroundStyle(.primary)
-                Label("Passport/ID: \(guest.identificador)", systemImage: "person.text.rectangle")
+                HStack(spacing: 6) {
+                    Text(guest.fullName)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    if let nationality = guest.nationality,
+                        let flag = NationalityFlag.emoji(for: nationality)
+                    {
+                        Text(flag).accessibilityLabel("Nationality: \(nationality)")
+                    }
+                }
+                .font(.headline)
+                .foregroundStyle(.primary)
+                Text("Passport/ID: \(guest.identificador)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 if let nationality = guest.nationality {
-                    HStack(spacing: 5) {
-                        Image(systemName: "globe")
-                        Text("Nationality: \(nationality)")
-                        if let flag = NationalityFlag.emoji(for: nationality) {
-                            Text(flag)
-                        }
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    Text("Nationality: \(nationality)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
 
             if guest.checkIn != nil || guest.checkOut != nil {
-                HStack(alignment: .top, spacing: 8) {
+                HStack(alignment: .center, spacing: 8) {
                     stayDate(title: "Check-in", date: guest.checkIn)
                     Image(systemName: "arrow.right")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.tertiary)
-                        .padding(.top, 19)
+                        .frame(width: 18)
                     stayDate(title: "Check-out", date: guest.checkOut)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                if let duration = stayDuration, let checkIn = guest.checkIn {
-                    HStack(spacing: 3) {
-                        Label("Stay: \(duration)", systemImage: "moon.stars")
-                        Text("(")
-                        Text(checkIn, style: .relative)
-                        Text(")")
-                    }
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.secondary)
-                    .accessibilityElement(children: .combine)
+                if let duration = stayDuration {
+                    Label("Stay: \(duration)", systemImage: "moon.stars")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
                 }
             }
         }
@@ -339,6 +337,11 @@ private struct GuestRow: View {
                 Text(dateFormatter.string(from: date))
                     .font(.caption.monospacedDigit().weight(.medium))
                     .foregroundStyle(.primary)
+                if PortalDates.calendar.isDateInToday(date) {
+                    Text("Now").font(.caption2).foregroundStyle(.secondary)
+                } else {
+                    Text(date, style: .relative).font(.caption2).foregroundStyle(.secondary)
+                }
             } else {
                 Text("—").font(.caption).foregroundStyle(.secondary)
             }

@@ -114,6 +114,7 @@
 "Message could not be sent. Check cellular service and try again." = "No se pudo enviar el mensaje. Revisa la cobertura celular e inténtalo de nuevo.";
 "Message preview" = "Vista previa del mensaje";
 "Name" = "Nombre";
+"Now" = "Ahora";
 "Name or passport" = "Nombre o pasaporte";
 "Nationality" = "Nacionalidad";
 "Nationality: %@" = "Nacionalidad: %@";
