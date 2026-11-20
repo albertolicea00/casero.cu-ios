@@ -34,7 +34,6 @@ struct SMSHelpView: View {
                     }
 
                     reportInputCard
-                    messagePreview(for: selectedReportKind)
                     sendSMSButton(for: selectedReportKind)
 
                     Divider()
@@ -160,22 +159,7 @@ struct SMSHelpView: View {
             }
 
             confirmationInputCard
-            messagePreview(for: .confirmation)
             sendSMSButton(for: .confirmation)
-        }
-    }
-
-    @ViewBuilder
-    private func messagePreview(for kind: SMSReportViewModel.Kind) -> some View {
-        if let preview = model.preview(for: kind) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Message preview").font(.headline)
-                LabeledContent("Destination", value: USSDSMSReporter.smsDestination)
-                Text(preview).font(.body.monospaced()).textSelection(.enabled)
-            }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
         }
     }
 
