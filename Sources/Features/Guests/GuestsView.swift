@@ -282,20 +282,23 @@ private struct GuestRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .center, spacing: 12) {
-                NationalityAvatar(nationality: guest.nationality)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(guest.fullName)
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-                    Text("Passport/ID: \(guest.identificador)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    if let nationality = guest.nationality {
+            VStack(alignment: .leading, spacing: 5) {
+                Text(guest.fullName)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                Label("Passport/ID: \(guest.identificador)", systemImage: "person.text.rectangle")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                if let nationality = guest.nationality {
+                    HStack(spacing: 5) {
+                        Image(systemName: "globe")
                         Text("Nationality: \(nationality)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        if let flag = NationalityFlag.emoji(for: nationality) {
+                            Text(flag)
+                        }
                     }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 }
             }
 
@@ -345,35 +348,15 @@ private struct GuestRow: View {
 
     private var stayDuration: String? {
         guard let checkIn = guest.checkIn, let checkOut = guest.checkOut else { return nil }
-        let days = PortalDates.calendar.dateComponents(
-            [.month, .day],
-            from: PortalDates.calendar.startOfDay(for: checkIn),
-            to: PortalDates.calendar.startOfDay(for: checkOut)
+        let count = max(
+            0,
+            PortalDates.calendar.dateComponents(
+                [.day],
+                from: PortalDates.calendar.startOfDay(for: checkIn),
+                to: PortalDates.calendar.startOfDay(for: checkOut)
+            ).day ?? 0
         )
-        let months = max(0, days.month ?? 0)
-        let remainingDays = max(0, days.day ?? 0)
-        var parts: [String] = []
-        if months > 0 {
-            parts.append(months == 1 ? String(localized: "1 month") : String(localized: "\(months) months"))
-        }
-        if remainingDays > 0 || months == 0 {
-            parts.append(
-                remainingDays == 1 ? String(localized: "1 day") : String(localized: "\(remainingDays) days"))
-        }
-        return parts.joined(separator: ", ")
-    }
-}
-
-private struct NationalityAvatar: View {
-    let nationality: String?
-
-    var body: some View {
-        Text(NationalityFlag.emoji(for: nationality) ?? "🌐")
-            .font(.system(size: 26))
-            .frame(width: 48, height: 48)
-            .background(Color(uiColor: .systemBackground), in: Circle())
-            .accessibilityLabel(
-                nationality.map { String(localized: "Nationality: \($0)") } ?? "Nationality unknown")
+        return count == 1 ? String(localized: "1 night") : String(localized: "\(count) nights")
     }
 }
 

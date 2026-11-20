@@ -1,5 +1,7 @@
 "%lld guests cached, last updated %@." = "%lld guests cached, last updated %@.";
 "1 day" = "1 day";
+"1 night" = "1 night";
+"%lld nights" = "%lld nights";
 "1 month" = "1 month";
 "%lld months" = "%lld months";
 "%lld days" = "%lld days";
