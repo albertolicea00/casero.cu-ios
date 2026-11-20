@@ -280,6 +280,12 @@ private struct CompanionSummary: View {
                     Text("Passport/ID: \(guest.identificador)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                    if !guest.stayId.isEmpty, let companionId = guest.companionId {
+                        Text("Registration info: \(guest.stayId).\(companionId)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+                    }
                     if let nationality = guest.nationality {
                         HStack(spacing: 5) {
                             if let flag = NationalityFlag.emoji(for: nationality) {
@@ -289,6 +295,11 @@ private struct CompanionSummary: View {
                         }
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                    }
+                    if let birthDate = guest.birthDate {
+                        Text("Birth date: \(PortalDates.display(birthDate))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

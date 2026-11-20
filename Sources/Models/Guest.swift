@@ -15,6 +15,7 @@ struct Guest: Codable, Identifiable {
     let nationality: String?
     let sex: String?
     let stayId: String
+    let companionId: String?
     /// Present on `RegistrarHuesped` responses: "OK" or an error message per person.
     let response: String?
 
@@ -30,6 +31,7 @@ struct Guest: Codable, Identifiable {
         case nationality = "DescNacionalidad"
         case sex = "Sexo"
         case stayId = "EstanciaId"
+        case companionId = "Id"
         case response = "Respuesta"
     }
 
@@ -44,6 +46,7 @@ struct Guest: Codable, Identifiable {
         try container.encodeIfPresent(nationality, forKey: .nationality)
         try container.encodeIfPresent(sex, forKey: .sex)
         try container.encode(stayId, forKey: .stayId)
+        try container.encodeIfPresent(companionId, forKey: .companionId)
         try container.encodeIfPresent(response, forKey: .response)
     }
 
@@ -64,6 +67,13 @@ struct Guest: Codable, Identifiable {
         nationality = try? container.decode(String.self, forKey: .nationality)
         sex = try? container.decode(String.self, forKey: .sex)
         stayId = (try? container.decode(String.self, forKey: .stayId)) ?? ""
+        if let stringId = try? container.decode(String.self, forKey: .companionId) {
+            companionId = stringId
+        } else if let numericId = try? container.decode(Int.self, forKey: .companionId) {
+            companionId = String(numericId)
+        } else {
+            companionId = nil
+        }
         response = try? container.decode(String.self, forKey: .response)
         guard !identificador.isEmpty, !fullName.isEmpty else { throw PortalError.invalidResponse }
     }
