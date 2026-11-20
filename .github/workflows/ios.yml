@@ -1,0 +1,37 @@
+name: iOS checks
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install project generator
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate
+      - name: Select an available iPhone simulator
+        run: |
+          xcrun simctl list devices available --json > "$RUNNER_TEMP/devices.json"
+          python3 - <<'PY' >> "$GITHUB_ENV"
+          import json, os
+          from pathlib import Path
+          devices = json.loads((Path(os.environ['RUNNER_TEMP']) / 'devices.json').read_text())['devices']
+          phone = next(d for runtime, values in devices.items() if 'iOS' in runtime for d in values if d['name'].startswith('iPhone'))
+          print('SIMULATOR_ID=' + phone['udid'])
+          PY
+      - name: Run simulator tests
+        run: >-
+          xcodebuild -scheme CaseroCu
+          -destination "platform=iOS Simulator,id=$SIMULATOR_ID"
+          -parallel-testing-enabled NO
+          CODE_SIGNING_ALLOWED=NO test
+      - name: Check Swift formatting
+        run: xcrun swift-format lint --strict --recursive Sources Tests
+      - name: Check whitespace
+        run: git diff --check
