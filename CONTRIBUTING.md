@@ -20,6 +20,8 @@ changes to the iOS client.
    ```bash
    git clone https://github.com/<your-username>/casero.cu-ios.git
    cd casero.cu-ios
+   brew install xcodegen
+   xcodegen generate
    open CaseroCu.xcodeproj
    ```
 
@@ -62,7 +64,7 @@ add tool or AI attribution trailers.
 ## Pull requests
 
 1. Make sure the project builds (`xcodebuild ... build`).
-2. Run the tests and linter (`xcodebuild ... test`, `swiftlint`).
+2. Run the tests and formatter checks (`xcodebuild ... test`, `xcrun swift-format lint --strict --recursive Sources Tests`).
 3. Fill in the [pull request template](.github/PULL_REQUEST_TEMPLATE.md).
 4. Link any issue the PR closes (`Closes #123`).
 5. Keep PRs focused — one logical change per PR.

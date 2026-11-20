@@ -18,11 +18,30 @@ Native iOS client for Cuban lodging hosts to submit guest reports to the officia
 
 ## ✨ Features
 
-- 📋 **Guest registration** via two channels:
-  - 📞 **USSD / SMS codes** — works offline, no data connection needed
-  - 🌐 **Web portal API** — authenticates against `casero.rem.cu` and mirrors browser requests
-- 👥 List active & registered guests with companions
-- 📱 Manage communication channels (phones & emails)
+- Portal sign-in with scoped certificate pinning, cookies, and anti-forgery tokens.
+- Foreign guest and Cuban companion lookups and batch registration, with validation
+  and retention of unconfirmed registrations.
+- Guest lists with all pages, date selection, search, active/history filters, and
+  offline access to retained data after reopening the app.
+- Guest details, optional photo caching, and companion lookup with an official
+  portal fallback.
+- Phone/email management through the authenticated official portal form embedded
+  in an ephemeral browser. No undocumented write endpoint is guessed.
+- CSV/Excel and PDF exports from the complete cached date range.
+- Optional Keychain credentials, recovery of expired sessions, cache retention,
+  and local data deletion on sign-out.
+- English and Spanish UI, manual, and privacy information.
+
+SMS reporting is available without portal login: guest reports, Cuban companion
+reports, and the separate confirmation SMS are prepared for **7344** with the
+**HC** prefix. Phone association instructions use **18808**. iOS asks the user to
+review and send each message; only the service's final registration code confirms
+the report. See the [published procedure](https://cubatramite.com/reporte-a-inmigracion-del-registro-de-turistas-extranjeros-hospedados-en-viviendas-de-alquiler/)
+and [SMS contract](CLAUDE.md#sms-reporting-contract).
+
+**Release status:** simulator tests cover synthetic data and mocked requests.
+Live registration and the assumed companion request contract still need
+verification from Cuba. See [release checks](RELEASE.md).
 
 ## 🛠 Tech Stack
 
@@ -46,14 +65,27 @@ Rather than using a single cross-platform framework (e.g., Flutter or React Nati
 ```bash
 git clone https://github.com/albertolicea00/casero.cu-ios.git
 cd casero.cu-ios
+brew install xcodegen
+xcodegen generate
 open CaseroCu.xcodeproj
 ```
 
-Build from CLI:
+The Xcode project is generated and intentionally ignored by Git. The public portal
+certificate, assets, localizations, and privacy manifest are included by
+`project.yml`. Xcode and XcodeGen must be installed on macOS.
+
+Build and test with an available simulator (choose its identifier using
+`xcrun simctl list devices available`):
 
 ```bash
-xcodebuild -scheme CaseroCu -destination 'platform=iOS Simulator,name=iPhone 15' build
+xcodebuild -scheme CaseroCu -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+xcodebuild -scheme CaseroCu -destination 'platform=iOS Simulator,id=<SIMULATOR_ID>' -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=NO test
+xcrun swift-format lint --strict --recursive Sources Tests
 ```
+
+Run **Actions → iOS checks → Run workflow** manually to generate the project
+and run tests on an available iPhone simulator. Pushes and pull requests do not
+start this workflow automatically. Tests never log in to the real portal or submit guest reports.
 
 > 🔐 Signing material (`*.p12`, `*.mobileprovision`, `*.p8`) is never committed.
 

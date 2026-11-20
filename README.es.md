@@ -15,13 +15,19 @@ Cliente nativo iOS para que los arrendadores de casas particulares en Cuba repor
 > **Unofficial project.** Not affiliated with CIDP-MININT or any government entity. Talks to the official portal using the host's own credentials, the same way a browser does. We are not responsible for changes to `casero.rem.cu`, USSD/SMS codes, or any issues arising from using this software. Use at your own risk. Always verify guest registrations through official channels.
 ---
 
-## ✨ Funcionalidades
+## Implementation status
 
-- 📋 **Registro de huéspedes** por dos vías:
-  - 📞 **Códigos USSD / SMS** — funciona sin conexión a internet
-  - 🌐 **API del portal web** — se autentica contra `casero.rem.cu` y replica las peticiones del navegador
-- 👥 Lista de huéspedes activos y registrados, con acompañantes
-- 📱 Gestión de vías de comunicación (teléfonos y correos)
+The app includes portal login, validated batch registration, paginated guest
+lists, offline data, photos, CSV/PDF exports, and an English/Spanish interface.
+Phones and emails are managed through the embedded official portal form.
+
+SMS reporting to **7344** is implemented with the **HC** prefix, stay days,
+companion reports, and the separate confirmation exchange. Phone association
+instructions use **18808**. The user reviews and sends each message through iOS.
+
+Live portal verification from Cuba and distribution setup remain external
+release requirements. See [README.md](README.md) and [RELEASE.md](RELEASE.md) for
+current build instructions and remaining checks.
 
 ## 🛠 Stack Tecnológico
 
@@ -45,13 +51,15 @@ En lugar de utilizar una tecnología híbrida o multiplataforma (como Flutter o 
 ```bash
 git clone https://github.com/albertolicea00/casero.cu-ios.git
 cd casero.cu-ios
+brew install xcodegen
+xcodegen generate
 open CaseroCu.xcodeproj
 ```
 
 Compilar desde CLI:
 
 ```bash
-xcodebuild -scheme CaseroCu -destination 'platform=iOS Simulator,name=iPhone 15' build
+xcodebuild -scheme CaseroCu -destination 'generic/platform=iOS Simulator' build
 ```
 
 > 🔐 El material de firma (`*.p12`, `*.mobileprovision`, `*.p8`) nunca se sube al repositorio.

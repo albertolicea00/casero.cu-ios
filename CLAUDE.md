@@ -132,6 +132,29 @@ validation): 8–100 chars, regex
 - **Reachability:** the portal is only reachable from inside Cuba. Expect
   connection failures elsewhere and surface them clearly; fall back to USSD/SMS.
 
+## SMS reporting contract
+
+The supplied reference material documents SMS, not a USSD dial string:
+
+- Destination: `7344`.
+- Associate the host's phone first by calling `18808` and waiting for confirmation.
+- Foreign guest request: `HC<passport> <stay days>`.
+- Cuban companion request: `HC<main guest passport> <companion identity number> <stay days>`.
+  Confirm the main guest's registration before reporting companions.
+- The first reply supplies guest data and a confirmation code. After reviewing
+  that data, send `HC<confirmation code>` to the same destination.
+- Only the final registration code establishes that the service registered the
+  report. Sending an SMS alone is not registration success.
+- Each person has a separate exchange. Confirmation requests expire after six
+  hours according to the published instructions.
+- iOS presents `MFMessageComposeViewController`; the user sends each message.
+  Never auto-send, read SMS inbox contents, or invent a USSD command.
+
+References: the SMS procedure section of the sibling web project's `index.html`
+and [the supplied published guide](https://cubatramite.com/reporte-a-inmigracion-del-registro-de-turistas-extranjeros-hospedados-en-viviendas-de-alquiler/).
+These describe the format; physical carrier acceptance still requires a device
+with the host's registered number.
+
 ## What not to do
 
 - Do not hardcode credentials, tokens, cookies, or real guest data anywhere.
