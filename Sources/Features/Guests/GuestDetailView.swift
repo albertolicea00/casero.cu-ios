@@ -20,7 +20,6 @@ struct GuestDetailView: View {
             VStack(alignment: .leading, spacing: 10) {
                 sectionHeading("Personal data")
                 personalCard
-                personalMetadata
                 photoAction
 
                 sectionHeading("Stay timeline")
@@ -52,27 +51,21 @@ struct GuestDetailView: View {
     }
 
     private var personalCard: some View {
-        HStack(alignment: .top, spacing: 14) {
-            GuestAvatar(guest: guest, photo: photo, size: 58)
-            VStack(alignment: .leading, spacing: 7) {
-                HStack(alignment: .top, spacing: 6) {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 14) {
+                GuestAvatar(guest: guest, photo: photo, size: 58)
+                VStack(alignment: .leading, spacing: 7) {
                     Text(guest.fullName)
                         .font(.title3.weight(.semibold))
                         .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("Passport/ID: \(guest.identificador)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
                 }
-                Text("Passport/ID: \(guest.identificador)")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .guestCard()
-    }
 
-    private var personalMetadata: some View {
-        VStack(spacing: 8) {
             Divider()
             HStack(spacing: 12) {
                 if let nationality = guest.nationality {
@@ -86,15 +79,12 @@ struct GuestDetailView: View {
                     .foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 8)
-                Label(
-                    guest.birthDate.map(PortalDates.display) ?? String(localized: "Birth date unavailable"),
-                    systemImage: "birthday.cake"
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                Label(guest.birthDate.map(PortalDates.display) ?? "--", systemImage: "birthday.cake")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
-        .padding(.horizontal, 4)
+        .guestCard()
     }
 
     private var photoAction: some View {
@@ -313,11 +303,9 @@ private struct CompanionSummary: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     }
-                    if let birthDate = guest.birthDate {
-                        Text("Birth date: \(PortalDates.display(birthDate))")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+                    Label(guest.birthDate.map(PortalDates.display) ?? "--", systemImage: "birthday.cake")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
