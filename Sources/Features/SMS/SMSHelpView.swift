@@ -16,6 +16,11 @@ struct SMSHelpView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    Text("You’ll review the prepared message in Messages before sending.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 4)
+
                     VStack(alignment: .leading, spacing: 8) {
                         Picker("Operation", selection: $selectedReportKind) {
                             Text("Guest").tag(SMSReportViewModel.Kind.guest)
@@ -44,11 +49,6 @@ struct SMSHelpView: View {
                         )
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    } else {
-                        Text("You’ll review the prepared message in Messages before sending.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, 4)
                     }
 
                     if let result = model.resultMessage {
@@ -158,7 +158,7 @@ struct SMSHelpView: View {
                         .font(.headline)
                         .foregroundStyle(.primary)
                     Text(
-                        "Check the reply's name and nationality. Confirmation codes expire after six hours."
+                        "Check the name and nationality in the service reply before confirming. Requests expire after six hours; start a new report if that time has passed."
                     )
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -167,11 +167,6 @@ struct SMSHelpView: View {
             }
 
             confirmationInputCard
-            Text(
-                "Check the name and nationality in the service reply before confirming. Requests expire after six hours; start a new report if that time has passed."
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
             messagePreview(for: .confirmation)
             sendSMSButton(for: .confirmation)
         }
