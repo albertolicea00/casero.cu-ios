@@ -13,9 +13,9 @@ final class GuestPhotoService {
         self.cache = cache
     }
 
-    func image(for guest: Guest, isCompanion: Bool = false) async throws -> UIImage {
+    func image(for guest: Guest, isCompanion: Bool = false, forceRefresh: Bool = false) async throws -> UIImage {
         guard let url = cacheURL(for: guest, isCompanion: isCompanion) else { throw PortalError.invalidResponse }
-        if settings.saveImages,
+        if !forceRefresh, settings.saveImages,
             let data = await cache.data(for: url, ttl: settings.cacheTTL.interval),
             let image = UIImage(data: data)
         {

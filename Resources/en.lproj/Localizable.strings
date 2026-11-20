@@ -18,7 +18,8 @@
 "In %@" = "In %@";
 "Today" = "Today";
 "Stay: %@" = "Stay: %@";
-"Registration info: %@" = "Registration info: %@";
+"ID" = "ID";
+"Stay ID" = "Stay ID";
 "Nationality unknown" = "Nationality unknown";
 "1 hour" = "1 hour";
 "1 week" = "1 week";
@@ -38,7 +39,6 @@
 "Fill in the fields above to send the SMS." = "Fill in the fields above to send the SMS.";
 "Use the phone number associated with your host account. Request phone association and wait for confirmation before reporting." = "Use the phone number associated with your host account. Request phone association and wait for confirmation before reporting.";
 "Each guest and companion needs a separate report. Check the reply's name and nationality, then send the confirmation code when prompted." = "Each guest and companion needs a separate report. Check the reply's name and nationality, then send the confirmation code when prompted.";
-"Birth date" = "Birth date";
 "Built from the guests already cached on this device — reload the Guests tab first to include recent data." = "Built from the guests already cached on this device — reload the Guests tab first to include recent data.";
 "CASERO web portal" = "CASERO web portal";
 "CSV / Excel" = "CSV / Excel";
@@ -125,8 +125,10 @@
 "Keep guest data for" = "Keep guest data for";
 "Last result" = "Last result";
 "Load companions" = "Load companions";
+"Load companion photos" = "Load companion photos";
 "Load photo" = "Load photo";
 "Reload companions" = "Reload companions";
+"Reload companion photos" = "Reload companion photos";
 "Reload photo" = "Reload photo";
 "Newest first" = "Newest first";
 "Oldest first" = "Oldest first";

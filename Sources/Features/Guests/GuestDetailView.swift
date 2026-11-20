@@ -13,7 +13,10 @@ struct GuestDetailView: View {
     @State private var companionsError: String?
     @State private var isLoadingPhoto = false
     @State private var isLoadingCompanions = false
+    @State private var isLoadingCompanionPhotos = false
     @State private var didLoadCompanions = false
+    @State private var companionPhotos: [String: UIImage] = [:]
+    @State private var companionPhotoError: String?
 
     var body: some View {
         ScrollView {
@@ -35,8 +38,11 @@ struct GuestDetailView: View {
         .navigationTitle(isCompanion ? "Companion details" : "Guest details")
         .navigationBarTitleDisplayMode(.inline)
         .task(id: guest.id + (isCompanion ? "-companion" : "-guest")) {
-            photo = await GuestPhotoService(client: client, settings: settings).cachedImage(
-                for: guest, isCompanion: isCompanion)
+            let photoService = GuestPhotoService(client: client, settings: settings)
+            photo = await photoService.cachedImage(for: guest, isCompanion: isCompanion)
+            if photo == nil {
+                Task { await loadPhoto() }
+            }
             if !isCompanion {
                 await restoreCachedCompanions()
             }
@@ -55,9 +61,18 @@ struct GuestDetailView: View {
             HStack(alignment: .top, spacing: 14) {
                 GuestAvatar(guest: guest, photo: photo, size: 58)
                 VStack(alignment: .leading, spacing: 7) {
-                    Text(guest.fullName)
-                        .font(.title3.weight(.semibold))
-                        .textSelection(.enabled)
+                    HStack(alignment: .top, spacing: 6) {
+                        Text(guest.fullName)
+                            .font(.title3.weight(.semibold))
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        if let nationality = guest.nationality,
+                            let flag = NationalityFlag.emoji(for: nationality)
+                        {
+                            Text(flag)
+                                .accessibilityLabel("Nationality: \(nationality)")
+                        }
+                    }
                     Text("Passport/ID: \(guest.identificador)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -67,33 +82,39 @@ struct GuestDetailView: View {
             }
 
             Divider()
-            HStack(spacing: 12) {
-                if let nationality = guest.nationality {
-                    HStack(spacing: 5) {
-                        if let flag = NationalityFlag.emoji(for: nationality) {
-                            Text(flag).accessibilityHidden(true)
-                        }
-                        Text(nationality)
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                }
-                Spacer(minLength: 8)
-                Label(
-                    guest.birthDateForDisplay(assumingCuban: isCompanion).map(PortalDates.display) ?? "--",
-                    systemImage: "birthday.cake"
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
+            registrationIdentifiers
         }
         .guestCard()
+    }
+
+    private var registrationIdentifiers: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Stay ID")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Text(guest.stayId)
+                    .font(.caption.weight(.bold))
+                    .textSelection(.enabled)
+            }
+            if isCompanion {
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("ID")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text(guest.companionId ?? "--")
+                        .font(.caption.weight(.bold))
+                        .textSelection(.enabled)
+                }
+            }
+        }
     }
 
     private var photoAction: some View {
         VStack(alignment: .trailing, spacing: 4) {
             Button {
-                Task { await loadPhoto() }
+                Task { await loadPhoto(forceRefresh: true) }
             } label: {
                 Group {
                     if isLoadingPhoto {
@@ -151,39 +172,63 @@ struct GuestDetailView: View {
                     .foregroundStyle(.secondary)
             }
             ForEach(companions) { companion in
-                CompanionSummary(guest: companion, client: client, settings: settings)
+                CompanionSummary(guest: companion, photo: companionPhotos[companion.id])
+            }
+            if !companions.isEmpty {
+                HStack {
+                    Spacer()
+                    Button {
+                        Task { await loadCompanionPhotos(onlyIfMissing: false, forceRefresh: true) }
+                    } label: {
+                        if isLoadingCompanionPhotos {
+                            ProgressView()
+                                .frame(minWidth: 160, minHeight: 36)
+                        } else {
+                            Text(hasAllCompanionPhotos ? "Reload companion photos" : "Load companion photos")
+                                .frame(minHeight: 36)
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(isLoadingCompanionPhotos)
+                }
+            }
+            if let companionPhotoError {
+                Text(companionPhotoError)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             }
             if let companionsError {
                 Text(companionsError).font(.caption).foregroundStyle(.red)
             }
-            HStack {
-                Spacer()
-                Button {
-                    Task { await loadCompanions() }
-                } label: {
-                    if isLoadingCompanions {
-                        ProgressView()
-                            .frame(minWidth: 128, minHeight: 36)
-                    } else {
-                        Text(didLoadCompanions ? "Reload companions" : "Load companions")
-                            .frame(minWidth: 128, minHeight: 36)
-                    }
+            Button {
+                Task { await loadCompanions() }
+            } label: {
+                if isLoadingCompanions {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, minHeight: 48)
+                } else {
+                    Text(didLoadCompanions ? "Reload companions" : "Load companions")
+                        .frame(maxWidth: .infinity, minHeight: 48)
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.regular)
-                .disabled(isLoadingCompanions || guest.stayId.isEmpty)
             }
+            .buttonStyle(.borderedProminent)
+            .disabled(isLoadingCompanions || guest.stayId.isEmpty)
         }
     }
 
-    private func loadPhoto() async {
+    private var hasAllCompanionPhotos: Bool {
+        !companions.isEmpty && companions.allSatisfy { companionPhotos[$0.id] != nil }
+    }
+
+    private func loadPhoto(forceRefresh: Bool = false) async {
         guard !isLoadingPhoto else { return }
         isLoadingPhoto = true
         photoError = nil
         defer { isLoadingPhoto = false }
         do {
             photo = try await GuestPhotoService(client: client, settings: settings).image(
-                for: guest, isCompanion: isCompanion)
+                for: guest, isCompanion: isCompanion, forceRefresh: forceRefresh)
         } catch PortalError.sessionExpired {
             await appState.reportSessionExpired()
         } catch {
@@ -199,8 +244,10 @@ struct GuestDetailView: View {
         do {
             companions = try await client.listCompanions(estanciaId: guest.stayId, pageSize: 100)
             didLoadCompanions = true
+            companionPhotos = [:]
             await GuestCache.shared.saveCompanions(companions, for: guest.stayId)
             onCompanionsLoaded?(companions.count)
+            await loadCompanionPhotos(onlyIfMissing: true)
         } catch PortalError.sessionExpired {
             await appState.reportSessionExpired()
         } catch {
@@ -219,6 +266,33 @@ struct GuestDetailView: View {
         companions = snapshot.companions
         didLoadCompanions = true
         onCompanionsLoaded?(companions.count)
+        await loadCompanionPhotos(onlyIfMissing: true)
+    }
+
+    private func loadCompanionPhotos(onlyIfMissing: Bool, forceRefresh: Bool = false) async {
+        guard !isLoadingCompanionPhotos, !companions.isEmpty else { return }
+        isLoadingCompanionPhotos = true
+        companionPhotoError = nil
+        defer { isLoadingCompanionPhotos = false }
+        let photoService = GuestPhotoService(client: client, settings: settings)
+
+        for companion in companions {
+            if onlyIfMissing,
+                let cachedPhoto = await photoService.cachedImage(for: companion, isCompanion: true)
+            {
+                companionPhotos[companion.id] = cachedPhoto
+                continue
+            }
+            do {
+                companionPhotos[companion.id] = try await photoService.image(
+                    for: companion, isCompanion: true, forceRefresh: forceRefresh)
+            } catch PortalError.sessionExpired {
+                await appState.reportSessionExpired()
+                return
+            } catch {
+                companionPhotoError = error.localizedDescription
+            }
+        }
     }
 }
 
@@ -260,23 +334,11 @@ private struct StayTimeline: View {
 }
 
 private struct CompanionSummary: View {
-    @EnvironmentObject private var appState: AppState
     let guest: Guest
-    let client: CaseroClient
-    let settings: AppSettings
-    @State private var photo: UIImage?
-    @State private var photoError: String?
-    @State private var isLoadingPhoto = false
+    let photo: UIImage?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            companionCard.guestCard()
-            photoAction
-        }
-        .task(id: guest.id) {
-            photo = await GuestPhotoService(client: client, settings: settings).cachedImage(
-                for: guest, isCompanion: true)
-        }
+        companionCard.guestCard()
     }
 
     private var companionCard: some View {
@@ -290,30 +352,28 @@ private struct CompanionSummary: View {
                     Text("Passport/ID: \(guest.identificador)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    if !guest.stayId.isEmpty, let companionId = guest.companionId {
-                        Text("Registration info: \(guest.stayId).\(companionId)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .textSelection(.enabled)
-                    }
-                    if let nationality = guest.nationality {
-                        HStack(spacing: 5) {
-                            if let flag = NationalityFlag.emoji(for: nationality) {
-                                Text(flag).accessibilityHidden(true)
-                            }
-                            Text(nationality)
-                        }
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    }
-                    Label(
-                        guest.birthDateForDisplay(assumingCuban: true).map(PortalDates.display) ?? "--",
-                        systemImage: "birthday.cake"
-                    )
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            Divider().padding(.vertical, 3)
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Stay ID")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text(guest.stayId)
+                        .font(.caption.weight(.bold))
+                        .textSelection(.enabled)
+                }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("ID")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text(guest.companionId ?? "--")
+                        .font(.caption.weight(.bold))
+                        .textSelection(.enabled)
+                }
             }
             if guest.checkIn != nil || guest.checkOut != nil {
                 Divider().padding(.vertical, 3)
@@ -330,44 +390,6 @@ private struct CompanionSummary: View {
         }
     }
 
-    private var photoAction: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Button {
-                Task { await loadPhoto() }
-            } label: {
-                Group {
-                    if isLoadingPhoto {
-                        ProgressView()
-                    } else {
-                        Label(photo == nil ? "Load photo" : "Reload photo", systemImage: "arrow.clockwise")
-                    }
-                }
-                .font(.caption2)
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(.secondary)
-            .disabled(isLoadingPhoto)
-            if let photoError {
-                Text(photoError).font(.caption2).foregroundStyle(.red)
-            }
-        }
-        .padding(.leading, 10)
-    }
-
-    private func loadPhoto() async {
-        guard !isLoadingPhoto else { return }
-        isLoadingPhoto = true
-        photoError = nil
-        defer { isLoadingPhoto = false }
-        do {
-            photo = try await GuestPhotoService(client: client, settings: settings).image(
-                for: guest, isCompanion: true)
-        } catch PortalError.sessionExpired {
-            await appState.reportSessionExpired()
-        } catch {
-            photoError = error.localizedDescription
-        }
-    }
 }
 
 private struct GuestAvatar: View {

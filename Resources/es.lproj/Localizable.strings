@@ -18,7 +18,8 @@
 "In %@" = "en %@";
 "Today" = "hoy";
 "Stay: %@" = "Estancia: %@";
-"Registration info: %@" = "Info. Registro: %@";
+"ID" = "ID";
+"Stay ID" = "ID de estancia";
 "Nationality unknown" = "Nacionalidad desconocida";
 "1 hour" = "1 hora";
 "1 week" = "1 semana";
@@ -38,7 +39,6 @@
 "Fill in the fields above to send the SMS." = "Rellena los campos de arriba para enviar el SMS.";
 "Use the phone number associated with your host account. Request phone association and wait for confirmation before reporting." = "Usa el número asociado a tu registro como arrendador. Solicita la asociación del teléfono y espera la confirmación antes de reportar.";
 "Each guest and companion needs a separate report. Check the reply's name and nationality, then send the confirmation code when prompted." = "Cada huésped y acompañante requiere un reporte separado. Comprueba el nombre y la nacionalidad de la respuesta y luego envía el código de confirmación cuando se te solicite.";
-"Birth date" = "Fecha de nacimiento";
 "Built from the guests already cached on this device — reload the Guests tab first to include recent data." = "Se exportan los huéspedes guardados en este dispositivo. Actualiza la pestaña Huéspedes para incluir los datos recientes.";
 "CASERO web portal" = "Portal web de CASERO";
 "CSV / Excel" = "CSV / Excel";
@@ -125,8 +125,10 @@
 "Keep guest data for" = "Conservar datos durante";
 "Last result" = "Último resultado";
 "Load companions" = "Cargar acompañantes";
+"Load companion photos" = "Cargar fotos de acompañantes";
 "Load photo" = "Cargar foto";
 "Reload companions" = "Actualizar acompañantes";
+"Reload companion photos" = "Actualizar fotos de acompañantes";
 "Reload photo" = "Actualizar foto";
 "Newest first" = "Más recientes primero";
 "Oldest first" = "Más antiguos primero";
