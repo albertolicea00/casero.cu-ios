@@ -232,11 +232,12 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
         -> Data
     {
         return try await authenticated {
+            let givenName = name.split(whereSeparator: \.isWhitespace).first.map(String.init) ?? ""
             var components = URLComponents(
                 url: Self.baseURL.appending(path: "Huespedes/ObtenerFotoDiie"), resolvingAgainstBaseURL: false)!
             components.queryItems = [
                 URLQueryItem(name: "pasap", value: passport),
-                URLQueryItem(name: "nomb", value: name),
+                URLQueryItem(name: "nomb", value: givenName),
                 URLQueryItem(name: "apel1", value: ""),
                 URLQueryItem(name: "apel2", value: ""),
                 URLQueryItem(name: "ciud", value: nationalityCode),

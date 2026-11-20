@@ -17,6 +17,7 @@ struct GuestDetailView: View {
     @State private var didLoadCompanions = false
     @State private var companionPhotos: [String: UIImage] = [:]
     @State private var companionPhotoError: String?
+    @State private var isNationalityTooltipVisible = false
 
     var body: some View {
         ScrollView {
@@ -65,12 +66,52 @@ struct GuestDetailView: View {
                         Text(guest.fullName)
                             .font(.title3.weight(.semibold))
                             .textSelection(.enabled)
+                            .lineLimit(1)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                        if !isCompanion {
+                            VStack(alignment: .trailing, spacing: 1) {
+                                Text("Stay ID")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                Text(guest.stayId)
+                                    .font(.caption.weight(.bold))
+                                    .textSelection(.enabled)
+                            }
+                        }
                         if let nationality = guest.nationality,
                             let flag = NationalityFlag.emoji(for: nationality)
                         {
-                            Text(flag)
-                                .accessibilityLabel("Nationality: \(nationality)")
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.15)) {
+                                    isNationalityTooltipVisible.toggle()
+                                }
+                            } label: {
+                                Text(flag)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Nationality: \(nationality)")
+                            .overlay(alignment: .bottomTrailing) {
+                                if isNationalityTooltipVisible {
+                                    Text(nationality)
+                                        .font(.caption.weight(.medium))
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(.regularMaterial, in: Capsule())
+                                        .overlay(Capsule().strokeBorder(.quaternary, lineWidth: 1))
+                                        .shadow(color: .black.opacity(0.12), radius: 6, y: 3)
+                                        .fixedSize()
+                                        .offset(y: 30)
+                                        .zIndex(1)
+                                }
+                            }
+                            .task(id: isNationalityTooltipVisible) {
+                                guard isNationalityTooltipVisible else { return }
+                                try? await Task.sleep(nanoseconds: 1_800_000_000)
+                                guard !Task.isCancelled else { return }
+                                withAnimation(.easeInOut(duration: 0.15)) {
+                                    isNationalityTooltipVisible = false
+                                }
+                            }
                         }
                     }
                     Text("Passport/ID: \(guest.identificador)")
@@ -81,8 +122,10 @@ struct GuestDetailView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            Divider()
-            registrationIdentifiers
+            if isCompanion {
+                Divider()
+                registrationIdentifiers
+            }
         }
         .guestCard()
     }
@@ -182,13 +225,17 @@ struct GuestDetailView: View {
                     } label: {
                         if isLoadingCompanionPhotos {
                             ProgressView()
-                                .frame(minWidth: 160, minHeight: 36)
-                        } else {
-                            Text(hasAllCompanionPhotos ? "Reload companion photos" : "Load companion photos")
                                 .frame(minHeight: 36)
+                        } else {
+                            Label(
+                                hasAllCompanionPhotos ? "Reload companion photos" : "Load companion photos",
+                                systemImage: "arrow.clockwise"
+                            )
+                            .font(.caption)
                         }
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.secondary)
                     .disabled(isLoadingCompanionPhotos)
                 }
             }
