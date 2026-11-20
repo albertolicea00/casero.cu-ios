@@ -79,9 +79,12 @@ struct GuestDetailView: View {
                     .foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 8)
-                Label(guest.birthDate.map(PortalDates.display) ?? "--", systemImage: "birthday.cake")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Label(
+                    guest.birthDateForDisplay(assumingCuban: isCompanion).map(PortalDates.display) ?? "--",
+                    systemImage: "birthday.cake"
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
         }
         .guestCard()
@@ -303,9 +306,12 @@ private struct CompanionSummary: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     }
-                    Label(guest.birthDate.map(PortalDates.display) ?? "--", systemImage: "birthday.cake")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    Label(
+                        guest.birthDateForDisplay(assumingCuban: true).map(PortalDates.display) ?? "--",
+                        systemImage: "birthday.cake"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }

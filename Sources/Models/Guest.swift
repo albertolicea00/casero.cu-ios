@@ -21,6 +21,14 @@ struct Guest: Codable, Identifiable {
 
     var id: String { "\(stayId)|\(identificador)|\(checkIn?.timeIntervalSince1970 ?? 0)" }
 
+    func birthDateForDisplay(assumingCuban: Bool = false) -> Date? {
+        if let birthDate { return birthDate }
+        let isCuban =
+            assumingCuban || nationality?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() == "CUBA"
+        guard isCuban else { return nil }
+        return CubanIdentity.birthDate(from: identificador)
+    }
+
     private enum CodingKeys: String, CodingKey {
         case fullName = "Biografico"
         case identificador = "Identificador"
@@ -76,6 +84,35 @@ struct Guest: Codable, Identifiable {
         }
         response = try? container.decode(String.self, forKey: .response)
         guard !identificador.isEmpty, !fullName.isEmpty else { throw PortalError.invalidResponse }
+    }
+}
+
+enum CubanIdentity {
+    static func birthDate(from identityNumber: String) -> Date? {
+        let digits = Array(identityNumber.filter(\.isNumber))
+        guard digits.count == 11,
+            let yearPart = Int(String(digits[0...1])),
+            let month = Int(String(digits[2...3])),
+            let day = Int(String(digits[4...5])),
+            let centuryCode = digits[6].wholeNumberValue
+        else { return nil }
+
+        let year: Int
+        switch centuryCode {
+        case 0...5: year = 1900 + yearPart
+        case 6...8: year = 2000 + yearPart
+        case 9: year = 1800 + yearPart
+        default: return nil
+        }
+
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+        components.day = day
+        guard let date = PortalDates.calendar.date(from: components) else { return nil }
+        let parsed = PortalDates.calendar.dateComponents([.year, .month, .day], from: date)
+        guard parsed.year == year, parsed.month == month, parsed.day == day else { return nil }
+        return date
     }
 }
 
