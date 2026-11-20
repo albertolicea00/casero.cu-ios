@@ -4,6 +4,7 @@ struct LoginView: View {
     @EnvironmentObject private var appState: AppState
     @ObservedObject private var settings: AppSettings
     @StateObject private var viewModel: LoginViewModel
+    @State private var isPasswordVisible = false
 
     init(client: CaseroClient, settings: AppSettings) {
         self.settings = settings
@@ -15,6 +16,10 @@ struct LoginView: View {
             ScrollView {
                 VStack(spacing: 18) {
                     VStack(spacing: 6) {
+                        Image(systemName: "person.crop.circle.fill")
+                            .font(.system(size: 42))
+                            .foregroundStyle(.tint)
+                            .accessibilityHidden(true)
                         Text("Sign in to the guest portal")
                             .font(.title2.weight(.semibold))
                             .multilineTextAlignment(.center)
@@ -33,16 +38,35 @@ struct LoginView: View {
                             .autocorrectionDisabled()
                             .padding(.vertical, 12)
                         Divider()
-                        SecureField("Password", text: $viewModel.password)
+                        HStack(spacing: 8) {
+                            Group {
+                                if isPasswordVisible {
+                                    TextField("Password", text: $viewModel.password)
+                                } else {
+                                    SecureField("Password", text: $viewModel.password)
+                                }
+                            }
                             .textContentType(.password)
-                            .padding(.vertical, 12)
-                        Divider()
-                        Toggle("Remember credentials", isOn: $settings.rememberCredentials)
-                            .padding(.vertical, 8)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+
+                            Button {
+                                isPasswordVisible.toggle()
+                            } label: {
+                                Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(isPasswordVisible ? "Hide password" : "Show password")
+                        }
+                        .padding(.vertical, 12)
                     }
                     .padding(.horizontal, 16)
                     .background(
                         Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
+
+                    Toggle("Remember credentials", isOn: $settings.rememberCredentials)
+                        .padding(.horizontal, 4)
 
                     if let message = viewModel.validationMessage {
                         Text(message)

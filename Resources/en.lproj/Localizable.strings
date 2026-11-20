@@ -136,7 +136,7 @@
 "Look up" = "Look up";
 "Manage phones and emails" = "Manage phones and emails";
 "Manage phone in Settings" = "Manage phone in Settings";
-"Manual" = "Manual";
+"User Manual" = "User Manual";
 "Manual instructions" = "SMS: use your associated host phone to send a guest or companion report to 7344. Review and send the prepared message, wait for the service reply, check the guest data, and send HC followed by the received confirmation code. Registration is complete only after the service returns a registration code. Associate your phone through 18808 first.\n\nRegister: sign in, look up a guest, review their data and dates, add them to the queue, then submit. Unconfirmed people remain in the queue; check the portal before retrying.\n\nGuests: select a date range, load all pages, search, filter, and open details and photos. Retained data is available offline.\n\nSettings: configure session recovery, data retention, photos, exports, and communication channels.";
 "Message cancelled. No report was confirmed." = "Message cancelled. No report was confirmed.";
 "Message could not be sent. Check cellular service and try again." = "Message could not be sent. Check cellular service and try again.";
@@ -172,7 +172,9 @@
 "Portal returned HTTP %lld." = "Portal returned HTTP %lld.";
 "You’ll review the prepared message in Messages before sending." = "You’ll review the prepared message in Messages before sending.";
 "Previously loaded guests remain available in Guests until the selected retention period expires. SMS/USSD requires cellular service even when no internet is needed." = "Previously loaded guests remain available in Guests until the selected retention period expires. SMS/USSD requires cellular service even when no internet is needed.";
-"Privacy" = "Privacy";
+"Privacy Policy & Terms" = "Privacy Policy & Terms";
+"Show password" = "Show password"; // pragma: allowlist secret
+"Hide password" = "Hide password"; // pragma: allowlist secret
 "Privacy details" = "Your credentials are sent only to the official portal. Remembering them is optional and stores them in the iOS Keychain. Guest data and optional photos are stored on this device with iOS file protection, subject to the selected retention period. Expired data is removed when accessed. Signing out clears credentials and cached guest data. Clear cache removes local guests and photos. Turning off photo storage removes saved photos. Exports can contain personal data; files you share or save outside this app are managed by their destination. The embedded portal browser uses an ephemeral session. This app includes no analytics or advertising SDK. SMS reports are handed to the system composer and sent through your carrier only after you confirm. The app cannot read service replies; enter received confirmation codes manually.";
 "Ready to register (%lld)" = "Ready to register (%lld)";
 "Register" = "Register";

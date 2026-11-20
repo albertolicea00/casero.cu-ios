@@ -112,10 +112,7 @@ struct GuestDetailView: View {
 
     private var stayCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            StayDateLine(
-                title: "Check-in", date: guest.checkIn, color: .accentColor, systemImage: "arrow.right.to.line")
-            StayDateLine(
-                title: "Check-out", date: guest.checkOut, color: .orange, systemImage: "arrow.left.to.line")
+            StayTimeline(guest: guest)
             if let duration = GuestStayText.duration(for: guest) {
                 Divider()
                 Label(
@@ -205,29 +202,45 @@ struct GuestDetailView: View {
     }
 }
 
-private struct StayDateLine: View {
-    let title: LocalizedStringKey
-    let date: Date?
-    let color: Color
-    let systemImage: String
+private struct StayTimeline: View {
+    let guest: Guest
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: systemImage)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(color)
+        HStack(alignment: .top, spacing: 8) {
+            dateColumn(title: "Check-in", date: guest.checkIn, icon: "arrow.right.to.line", color: .accentColor)
+            Image(systemName: "arrow.right")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.tertiary)
                 .frame(width: 18)
-            Text(title).font(.subheadline.weight(.semibold))
-            Spacer(minLength: 8)
+                .padding(.top, 12)
+            dateColumn(title: "Check-out", date: guest.checkOut, icon: "arrow.left.to.line", color: .orange)
+        }
+    }
+
+    private func dateColumn(
+        title: LocalizedStringKey,
+        date: Date?,
+        icon: String,
+        color: Color
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 5) {
+                Image(systemName: icon).foregroundStyle(color)
+                Text(title).foregroundStyle(.secondary)
+            }
+            .font(.caption.weight(.medium))
             if let date {
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(PortalDates.display(date)).font(.subheadline.monospacedDigit())
-                    Text(GuestStayText.age(of: date)).font(.caption).foregroundStyle(.secondary)
-                }
+                Text(PortalDates.display(date))
+                    .font(.subheadline.monospacedDigit().weight(.medium))
+                    .foregroundStyle(.primary)
+                Text(GuestStayText.age(of: date))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
             } else {
-                Text("—").foregroundStyle(.secondary)
+                Text("—").font(.subheadline).foregroundStyle(.secondary)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -277,10 +290,7 @@ private struct CompanionSummary: View {
             }
             if guest.checkIn != nil || guest.checkOut != nil {
                 Divider().padding(.vertical, 3)
-                StayDateLine(
-                    title: "Check-in", date: guest.checkIn, color: .accentColor, systemImage: "arrow.right.to.line")
-                StayDateLine(
-                    title: "Check-out", date: guest.checkOut, color: .orange, systemImage: "arrow.left.to.line")
+                StayTimeline(guest: guest)
                 if let duration = GuestStayText.duration(for: guest) {
                     Label(
                         String.localizedStringWithFormat(String(localized: "Stay: %@"), duration),

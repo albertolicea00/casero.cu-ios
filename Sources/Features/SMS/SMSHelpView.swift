@@ -16,15 +16,13 @@ struct SMSHelpView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Operation")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
                         Picker("Operation", selection: $model.kind) {
                             Text("Guest").tag(SMSReportViewModel.Kind.guest)
                             Text("Companion").tag(SMSReportViewModel.Kind.companion)
                             Text("Confirm").tag(SMSReportViewModel.Kind.confirmation)
                         }
                         .pickerStyle(.segmented)
+                        .labelsHidden()
                     }
 
                     inputCard
@@ -72,20 +70,6 @@ struct SMSHelpView: View {
                                 Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
                     }
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("After sending").font(.headline)
-                        Text(
-                            "Each guest and companion requires a separate report. The first reply supplies a confirmation code. Send HC followed by that code to 7344, then wait for the registration code that confirms the report."
-                        )
-                        Text(
-                            "Sending an SMS does not by itself confirm registration. iOS requires you to review and send each message in Messages."
-                        )
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    }
-                    .padding(16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
                 }
                 .padding()
             }
@@ -134,10 +118,13 @@ struct SMSHelpView: View {
                     .textInputAutocapitalization(.characters)
                     .autocorrectionDisabled()
                 if model.kind == .companion {
+                    Divider()
                     TextField("Companion identity number", text: $model.companionIdentity)
                         .keyboardType(.numberPad)
+                    Divider()
                     Toggle("The main guest's registration is confirmed", isOn: $model.mainGuestIsRegistered)
                 }
+                Divider()
                 TextField("Stay days", text: $model.days)
                     .keyboardType(.numberPad)
             }
@@ -201,9 +188,8 @@ private struct SMSReportInfoSheet: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
 
+                    infoHeading("How to report by SMS")
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("How to report by SMS")
-                            .font(.headline)
                         instructionStep(
                             number: "1",
                             title: "Associate your host phone",
@@ -228,6 +214,7 @@ private struct SMSReportInfoSheet: View {
                             description:
                                 "The report is complete only after the service returns a final registration code. Each person needs a separate exchange. Confirmation requests expire after six hours; start a new report if one expires."
                         )
+                        Divider()
                         Text(
                             "Guest: HC<PASSPORT> <STAY_DAYS>\nCompanion: HC<MAIN_PASSPORT> <ID_NUMBER> <STAY_DAYS>\nConfirm: HC<CONFIRMATION_CODE>"
                         )
@@ -239,8 +226,8 @@ private struct SMSReportInfoSheet: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
 
+                    infoHeading("Instructions and portal")
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Instructions and portal").font(.headline)
                         Text(
                             "If you already have an account, associate or update your phone from Settings > Communication channels, or use the official portal."
                         )
@@ -255,14 +242,15 @@ private struct SMSReportInfoSheet: View {
                         onOpenSettings()
                     } label: {
                         HStack {
-                            Label("Manage phone in Settings", systemImage: "gearshape")
                             Spacer()
-                            Image(systemName: "chevron.right")
+                            Label("Manage phone in Settings", systemImage: "gearshape")
+                            Image(systemName: "arrow.up.right")
                                 .font(.caption.weight(.semibold))
-                                .foregroundStyle(.tertiary)
+                            Spacer()
                         }
                     }
                     .buttonStyle(.plain)
+                    .foregroundStyle(.tint)
 
                     NavigationLink {
                         PortalPageView(path: "", title: "Official portal")

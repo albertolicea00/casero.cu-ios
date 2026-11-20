@@ -39,10 +39,17 @@ struct GuestsView: View {
 
                 HStack(spacing: 10) {
                     HStack(spacing: 8) {
-                        Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
                         TextField("Name or passport", text: $viewModel.searchText)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
+                            .padding(.leading, 24)
+                            .textFieldStyle(.roundedBorder)
+                            .overlay(alignment: .leading) {
+                                Image(systemName: "magnifyingglass")
+                                    .foregroundStyle(.secondary)
+                                    .padding(.leading, 8)
+                                    .accessibilityHidden(true)
+                            }
                         if !viewModel.searchText.isEmpty {
                             Button {
                                 viewModel.searchText = ""
@@ -52,9 +59,6 @@ struct GuestsView: View {
                             .accessibilityLabel("Clear search")
                         }
                     }
-                    .padding(.horizontal, 12)
-                    .frame(height: 44)
-                    .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
 
                     Button {
                         pendingFrom = viewModel.from
@@ -63,9 +67,8 @@ struct GuestsView: View {
                     } label: {
                         Image(systemName: "calendar")
                             .frame(width: 44, height: 44)
-                            .background(
-                                Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
                     }
+                    .buttonStyle(.bordered)
                     .accessibilityLabel("Date range")
                 }
                 .padding(.horizontal)
@@ -93,6 +96,7 @@ struct GuestsView: View {
                         Image(systemName: "arrow.up.arrow.down")
                             .frame(width: 44, height: 36)
                             .contentShape(Rectangle())
+                            .foregroundStyle(.secondary)
                     }
                     .accessibilityLabel("Sort guests")
                 }
@@ -323,6 +327,12 @@ private struct GuestRow: View {
                         .lineLimit(1)
                         .truncationMode(.tail)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                    if let nationality = guest.nationality,
+                        let flag = NationalityFlag.emoji(for: nationality)
+                    {
+                        Text(flag)
+                            .accessibilityLabel("Nationality: \(nationality)")
+                    }
                 }
                 .font(.headline)
                 .foregroundStyle(.primary)

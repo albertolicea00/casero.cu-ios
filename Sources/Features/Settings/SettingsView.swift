@@ -82,15 +82,15 @@ struct SettingsView: View {
                 }
             }
             Toggle("Save guest photos", isOn: $settings.saveImages)
-            Text(viewModel.cacheSummary)
-                .font(.caption)
-                .foregroundStyle(.secondary)
             Button("Clear cache", role: .destructive) {
                 Task {
                     await viewModel.clearCache()
                     appState.hasCachedGuests = false
                 }
             }
+            Text(viewModel.cacheSummary)
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -101,16 +101,16 @@ struct SettingsView: View {
                     Text(LocalizedStringKey("\(days) days")).tag(days)
                 }
             }
-            Text(
-                "This range is used by default when loading guests. Choose a longer range in the calendar filter when needed."
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
             Button {
                 isExportFormPresented = true
             } label: {
                 Label("Export guest data", systemImage: "square.and.arrow.up")
             }
+            Text(
+                "This range is used by default when loading guests. Choose a longer range in the calendar filter when needed."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
     }
 
@@ -130,8 +130,8 @@ struct SettingsView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.vertical, 4)
-            NavigationLink("Manual") { ManualView() }
-            NavigationLink("Privacy") { PrivacyView() }
+            NavigationLink("User Manual") { ManualView() }
+            NavigationLink("Privacy Policy & Terms") { PrivacyView() }
             Link(destination: URL(string: "https://github.com/albertolicea00/casero.cu-ios")!) {
                 Label("Open source project", systemImage: "chevron.left.forwardslash.chevron.right")
             }
@@ -229,13 +229,13 @@ private struct ManualView: View {
             Text("Manual instructions")
                 .padding()
         }
-        .navigationTitle("Manual")
+        .navigationTitle("User Manual")
     }
 }
 
 private struct PrivacyView: View {
     var body: some View {
         ScrollView { Text("Privacy details").padding() }
-            .navigationTitle("Privacy")
+            .navigationTitle("Privacy Policy & Terms")
     }
 }
