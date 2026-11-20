@@ -30,13 +30,6 @@ struct GuestDetailView: View {
 
                 if !isCompanion {
                     companionsSection
-                    NavigationLink {
-                        PortalPageView(path: "Huespedes/HuespedesRegistrados", title: "Guest details")
-                    } label: {
-                        Label("View in official portal", systemImage: "arrow.up.right.square")
-                            .frame(maxWidth: .infinity, minHeight: 48)
-                    }
-                    .buttonStyle(.bordered)
                 }
             }
             .padding()
@@ -139,8 +132,8 @@ struct GuestDetailView: View {
                 }
                 .font(.caption)
             }
-            .buttonStyle(.plain)
-            .foregroundStyle(.secondary)
+            .buttonStyle(.bordered)
+            .controlSize(.small)
             .disabled(isLoadingCompanions || guest.stayId.isEmpty)
         }
         .padding(.horizontal, 5)
