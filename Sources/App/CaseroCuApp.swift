@@ -103,7 +103,15 @@ struct RootView: View {
 }
 
 struct MainTabView: View {
+    private enum Tab: Hashable {
+        case sms
+        case register
+        case guests
+        case settings
+    }
+
     @EnvironmentObject private var appState: AppState
+    @State private var selection: Tab = .sms
     let client: CaseroClient
 
     var body: some View {
@@ -114,14 +122,16 @@ struct MainTabView: View {
             }
             ConnectivityBanner(connectivity: appState.connectivity)
 
-            TabView {
+            TabView(selection: $selection) {
                 SMSHelpView()
                     .tabItem { Label("SMS", systemImage: "message.fill") }
+                    .tag(Tab.sms)
 
                 AuthGate(client: client) {
                     RegisterGuestView(client: client)
                 }
                 .tabItem { Label("Register", systemImage: "person.badge.plus") }
+                .tag(Tab.register)
 
                 Group {
                     if appState.isSignedIn || appState.hasCachedGuests {
@@ -131,9 +141,11 @@ struct MainTabView: View {
                     }
                 }
                 .tabItem { Label("Guests", systemImage: "person.2.fill") }
+                .tag(Tab.guests)
 
                 SettingsView(client: client, settings: appState.settings)
                     .tabItem { Label("Settings", systemImage: "gearshape.fill") }
+                    .tag(Tab.settings)
             }
         }
     }
