@@ -117,6 +117,7 @@
 "Loading" = "Loading";
 "Look up" = "Look up";
 "Manage phones and emails" = "Manage phones and emails";
+"Manage phone in Settings" = "Manage phone in Settings";
 "Manual" = "Manual";
 "Manual instructions" = "SMS: use your associated host phone to send a guest or companion report to 7344. Review and send the prepared message, wait for the service reply, check the guest data, and send HC followed by the received confirmation code. Registration is complete only after the service returns a registration code. Associate your phone through 18808 first.\n\nRegister: sign in, look up a guest, review their data and dates, add them to the queue, then submit. Unconfirmed people remain in the queue; check the portal before retrying.\n\nGuests: select a date range, load all pages, search, filter, and open details and photos. Retained data is available offline.\n\nSettings: configure session recovery, data retention, photos, exports, and communication channels.";
 "Message cancelled. No report was confirmed." = "Message cancelled. No report was confirmed.";
@@ -169,6 +170,7 @@
 "SMS does not require internet, but needs cellular service. Carrier charges may apply." = "SMS does not require internet, but needs cellular service. Carrier charges may apply.";
 "SMS procedure reference" = "SMS procedure reference";
 "SMS reports" = "SMS reports";
+"SMS report information" = "SMS report information";
 "Save guest photos" = "Save guest photos";
 "Segment" = "Segment";
 "Sending an SMS does not by itself confirm registration. iOS requires you to review and send each message in Messages." = "Sending an SMS does not by itself confirm registration. iOS requires you to review and send each message in Messages.";

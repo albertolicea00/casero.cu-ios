@@ -101,27 +101,22 @@ struct GuestsView: View {
                 content
             }
             .background(Color(uiColor: .systemBackground).ignoresSafeArea())
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Guests")
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    HStack(spacing: 4) {
-                        Text("Guests").font(.headline)
-                        Button {
-                            Task { await viewModel.reload() }
-                        } label: {
-                            if viewModel.isLoading {
-                                ProgressView()
-                            } else {
-                                Image(systemName: "arrow.clockwise")
-                            }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        Task { await viewModel.reload() }
+                    } label: {
+                        if viewModel.isLoading {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "arrow.clockwise")
                         }
-                        .frame(minWidth: 44, minHeight: 44)
-                        .accessibilityLabel("Reload guests")
-                        .disabled(viewModel.isLoading || !appState.isSignedIn)
                     }
+                    .accessibilityLabel("Reload guests")
+                    .disabled(viewModel.isLoading || !appState.isSignedIn)
                 }
             }
             .sheet(isPresented: $isDateFilterPresented) {

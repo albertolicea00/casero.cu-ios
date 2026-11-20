@@ -124,9 +124,11 @@ struct MainTabView: View {
             ConnectivityBanner(connectivity: appState.connectivity)
 
             TabView(selection: $selection) {
-                SMSHelpView()
-                    .tabItem { Label("SMS", systemImage: "message.fill") }
-                    .tag(Tab.sms)
+                SMSHelpView {
+                    selection = .settings
+                }
+                .tabItem { Label("SMS", systemImage: "message.fill") }
+                .tag(Tab.sms)
 
                 AuthGate(
                     isActive: selection == .register,
@@ -172,21 +174,34 @@ private struct AuthGate<Content: View>: View {
         if appState.isSignedIn {
             content()
         } else {
-            VStack(spacing: 12) {
-                Image(systemName: "person.badge.key")
-                    .font(.system(size: 38))
-                    .foregroundStyle(.tertiary)
-                Text("Sign in required to register guests")
-                    .font(.headline)
-                    .multilineTextAlignment(.center)
-                Text("Sign in to the guest portal")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                Button("Sign in", action: onSignIn)
-                    .buttonStyle(.borderedProminent)
+            NavigationStack {
+                VStack(spacing: 12) {
+                    Image(systemName: "person.badge.key")
+                        .font(.system(size: 38))
+                        .foregroundStyle(.tertiary)
+                    Text("Sign in required to register guests")
+                        .font(.headline)
+                        .multilineTextAlignment(.center)
+                    Text("Sign in to the guest portal")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .navigationTitle("Register")
+                .safeAreaInset(edge: .bottom, alignment: .trailing, spacing: 0) {
+                    HStack {
+                        Spacer()
+                        Button(action: onSignIn) {
+                            Label("Sign in", systemImage: "person.crop.circle.badge.plus")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .clipShape(Capsule())
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                }
             }
-            .padding()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .onAppear {
                 if isActive { onSignIn() }
             }

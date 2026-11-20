@@ -4,20 +4,16 @@ import SwiftUI
 /// Carrier SMS reports remain accessible without a portal account or mobile data.
 struct SMSHelpView: View {
     @StateObject private var model = SMSReportViewModel()
+    @State private var isInfoPresented = false
+    let onOpenSettings: () -> Void
+
+    init(onOpenSettings: @escaping () -> Void = {}) {
+        self.onOpenSettings = onOpenSettings
+    }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Before the first report") {
-                    Text(
-                        "Use the phone number associated with your host account. Call 18808 to request association and wait for confirmation before reporting."
-                    )
-                    if let url = USSDSMSReporter.dialURL(for: USSDSMSReporter.associationPhone) {
-                        Link("Call 18808", destination: url)
-                    }
-                    Text("SMS does not require internet, but needs cellular service. Carrier charges may apply.")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
                 Section("Report by SMS") {
                     Picker("Operation", selection: $model.kind) {
                         ForEach(SMSReportViewModel.Kind.allCases) { kind in
@@ -72,21 +68,90 @@ struct SMSHelpView: View {
                     )
                     .font(.caption).foregroundStyle(.secondary)
                 }
-                Section("Instructions and portal") {
-                    Link("SMS procedure reference", destination: USSDSMSReporter.instructionsURL)
-                    NavigationLink("Open official portal") {
-                        PortalPageView(path: "", title: "Official portal")
-                    }
-                }
             }
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("SMS reports")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isInfoPresented = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
+                    .accessibilityLabel("SMS report information")
+                }
+            }
             .onChange(of: model.passport) { _ in model.mainGuestIsRegistered = false }
             .sheet(item: $model.preparedMessage) { message in
                 MessageComposeView(recipients: [USSDSMSReporter.smsDestination], body: message.body) { result in
                     model.finished(result, kind: message.kind)
                 }
                 .interactiveDismissDisabled()
+            }
+            .sheet(isPresented: $isInfoPresented) {
+                SMSReportInfoSheet(onOpenSettings: onOpenSettings)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
+            }
+        }
+    }
+}
+
+private struct SMSReportInfoSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let onOpenSettings: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Before the first report") {
+                    Text(
+                        "Use the phone number associated with your host account. Call 18808 to request association and wait for confirmation before reporting."
+                    )
+                    if let url = USSDSMSReporter.dialURL(for: USSDSMSReporter.associationPhone) {
+                        Link(destination: url) {
+                            Label("Call 18808", systemImage: "phone.fill")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    Text("SMS does not require internet, but needs cellular service. Carrier charges may apply.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Section("Instructions and portal") {
+                    Text(
+                        "If you already have an account, associate or update your phone from Settings > Communication channels, or use the official portal."
+                    )
+                    .font(.subheadline)
+                    Button {
+                        dismiss()
+                        onOpenSettings()
+                    } label: {
+                        Label("Manage phone in Settings", systemImage: "gearshape")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    NavigationLink {
+                        PortalPageView(path: "", title: "Official portal")
+                    } label: {
+                        Label("Open official portal", systemImage: "safari")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    Link(destination: USSDSMSReporter.instructionsURL) {
+                        Label("SMS procedure reference", systemImage: "book")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+            .navigationTitle("SMS report information")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
             }
         }
     }
