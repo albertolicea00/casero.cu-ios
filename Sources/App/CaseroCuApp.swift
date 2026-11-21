@@ -24,6 +24,8 @@ final class AppState: ObservableObject {
     /// Set once a lazily-detected session expiry could not be silently recovered.
     /// Drives the "session lost, tap to sign in" banner instead of an immediate bounce.
     @Published var sessionExpiredBanner = false
+    /// Bumped after the portal accepts a registration so Guests reloads.
+    @Published private(set) var registrationsVersion = 0
 
     let client = CaseroClient()
     let settings = AppSettings()
@@ -87,6 +89,10 @@ final class AppState: ObservableObject {
     func restoreSession() async {
         guard !isSignedIn, await recoverSession() else { return }
         isSignedIn = true
+    }
+
+    func didRegisterGuests() {
+        registrationsVersion += 1
     }
 
     /// Called by any feature view model that catches `PortalError.sessionExpired`.

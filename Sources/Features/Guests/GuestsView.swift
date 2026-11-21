@@ -124,6 +124,9 @@ struct GuestsView: View {
             viewModel.applyDefaultRange()
             if appState.isSignedIn { Task { await viewModel.reload() } }
         }
+        .onChange(of: appState.registrationsVersion) { _ in
+            if appState.isSignedIn { Task { await viewModel.reload() } }
+        }
         .onChange(of: appState.isSignedIn) { signedIn in
             if signedIn {
                 Task { await viewModel.reload() }

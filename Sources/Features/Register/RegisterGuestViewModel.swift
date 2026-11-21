@@ -68,6 +68,8 @@ final class RegisterGuestViewModel: ObservableObject {
     /// Registration errors, shown with the queue.
     @Published private(set) var errorMessage: String?
     @Published private(set) var lastSubmission: [Guest]?
+    /// Queued people whose registration was sent but never confirmed (answer lost).
+    @Published private(set) var uncertainIDs: Set<String> = []
     @Published private(set) var isSessionExpired = false
 
     private let client: any PortalServing
@@ -207,11 +209,14 @@ final class RegisterGuestViewModel: ObservableObject {
 
     func removeFromQueue(_ offsets: IndexSet) {
         guard !isSubmitting else { return }
+        for index in offsets { uncertainIDs.remove(queue[index].identificador.uppercased()) }
         queue.remove(atOffsets: offsets)
     }
 
-    func submit() async {
-        guard canSubmit else { return }
+    /// Returns `true` when the portal accepted at least one person.
+    @discardableResult
+    func submit() async -> Bool {
+        guard canSubmit else { return false }
         isSubmitting = true
         errorMessage = nil
         lastSubmission = nil
@@ -223,17 +228,27 @@ final class RegisterGuestViewModel: ObservableObject {
                 result.filter { $0.response == "OK" && !$0.identificador.isEmpty }.map { $0.identificador.uppercased() }
             )
             queue.removeAll { accepted.contains($0.identificador.uppercased()) }
+            uncertainIDs.subtract(accepted)
             if !queue.isEmpty {
                 errorMessage = String(
                     localized:
                         "Some registrations were not confirmed. They remain in the queue. Verify the portal before retrying to avoid duplicate reports."
                 )
             }
+            return !accepted.isEmpty
         } catch PortalError.sessionExpired {
             isSessionExpired = true
+        } catch PortalError.registrationUncertain {
+            uncertainIDs.formUnion(queue.map { $0.identificador.uppercased() })
+            errorMessage = PortalError.registrationUncertain.errorDescription
         } catch {
             errorMessage = (error as? PortalError)?.errorDescription ?? error.localizedDescription
         }
+        return false
+    }
+
+    func isUncertain(_ entry: GuestRegistration) -> Bool {
+        uncertainIDs.contains(entry.identificador.uppercased())
     }
 
     /// Closes the result sheet without adding anyone.

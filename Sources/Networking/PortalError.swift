@@ -18,11 +18,19 @@ enum PortalError: LocalizedError {
     case secureConnection
     case rejected(String)
     case invalidResponse
+    /// The registration POST was sent but no answer arrived (connection lost,
+    /// timeout, server error). The portal may or may not have registered it.
+    case registrationUncertain
 
     var errorDescription: String? {
         switch self {
         case .rejected(let message):
             return message
+        case .registrationUncertain:
+            return String(
+                localized:
+                    "The connection was lost after sending. The portal may have registered these people. Check Guests or the official portal before retrying, to avoid duplicate reports."
+            )
         case .invalidResponse:
             return String(
                 localized: "The portal returned an unexpected response. Please try again or use the official portal.")

@@ -194,10 +194,13 @@ struct RegisterGuestView: View {
             SubmitSummarySheet(
                 entries: viewModel.queue,
                 photos: queuePhotos,
+                uncertainIDs: viewModel.uncertainIDs,
                 onCancel: { isConfirmingSubmit = false },
                 onConfirm: {
                     isConfirmingSubmit = false
-                    Task { await viewModel.submit() }
+                    Task {
+                        if await viewModel.submit() { appState.didRegisterGuests() }
+                    }
                 }
             )
             .presentationDetents([.large])
@@ -222,6 +225,7 @@ struct RegisterGuestView: View {
         RegistrationCard(
             entry: entry,
             photo: queuePhotos[entry.identificador],
+            isUncertain: viewModel.isUncertain(entry),
             onRemove: viewModel.isSubmitting ? nil : { pendingRemoval = entry }
         )
     }
@@ -234,19 +238,12 @@ struct RegisterGuestView: View {
 
     private func lastResultSection(_ results: [Guest]) -> some View {
         section("Last result") {
-            InputCard {
-                ForEach(Array(results.enumerated()), id: \.element.id) { index, guest in
-                    if index > 0 { Divider() }
-                    VStack(alignment: .leading) {
-                        Label(
-                            Self.displayName(guest.fullName),
-                            systemImage: guest.response == "OK" ? "checkmark.circle.fill" : "xmark.circle.fill"
-                        )
-                        .foregroundStyle(guest.response == "OK" ? .green : .red)
-                        Text(guest.response ?? String(localized: "Unconfirmed")).font(.caption)
-                    }
-                    .padding(.vertical, 12)
-                }
+            ForEach(Array(results.enumerated()), id: \.offset) { _, guest in
+                RegistrationResultCard(
+                    guest: guest,
+                    name: Self.displayName(guest.fullName),
+                    photo: queuePhotos[guest.identificador]
+                )
             }
         }
     }
@@ -327,10 +324,18 @@ private struct PersonDetails: View {
 private struct RegistrationCard: View {
     let entry: GuestRegistration
     let photo: UIImage?
+    /// Sent once without an answer: may already be registered.
+    var isUncertain = false
     let onRemove: (() -> Void)?
 
     var body: some View {
         InputCard {
+            if isUncertain {
+                Label("Sent without confirmation. Check Guests before retrying.", systemImage: "questionmark.circle.fill")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.orange)
+                    .padding(.top, 12)
+            }
             PersonDetails(
                 name: RegisterText.fullName(entry),
                 identificador: entry.identificador,
@@ -355,6 +360,73 @@ private struct RegistrationCard: View {
                 }
             }
             .padding(.vertical, 10)
+        }
+    }
+}
+
+/// One person of a `RegistrarHuesped` answer: status, the person card and the
+/// stay ID the portal assigned (companions get `<guest stay>.1`, `.2`, …), which
+/// can be copied.
+private struct RegistrationResultCard: View {
+    let guest: Guest
+    let name: String
+    let photo: UIImage?
+    @State private var copied = false
+
+    private var accepted: Bool { guest.response == "OK" }
+
+    var body: some View {
+        InputCard {
+            Label(
+                accepted ? String(localized: "Registered") : (guest.response ?? String(localized: "Unconfirmed")),
+                systemImage: accepted ? "checkmark.circle.fill" : "xmark.circle.fill"
+            )
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(accepted ? .green : .red)
+            .padding(.top, 12)
+            PersonDetails(
+                name: name,
+                identificador: guest.identificador,
+                nationality: guest.nationality,
+                birthDate: guest.birthDate,
+                photo: photo
+            )
+            .zIndex(1)
+            if !guest.stayId.isEmpty {
+                Divider()
+                HStack(spacing: 3) {
+                    Text("Stay ID").foregroundStyle(.secondary)
+                    Text(":").foregroundStyle(.secondary)
+                    Text(guest.stayId)
+                        .font(.body.monospacedDigit().weight(.bold))
+                        .textSelection(.enabled)
+                    Spacer(minLength: 8)
+                    Button {
+                        UIPasteboard.general.string = guest.stayId
+                        withAnimation { copied = true }
+                    } label: {
+                        Label(copied ? "Copied" : "Copy", systemImage: copied ? "checkmark" : "doc.on.doc")
+                            .labelStyle(.iconOnly)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.tint)
+                    .accessibilityLabel(copied ? "Copied" : "Copy stay ID")
+                }
+                .font(.subheadline)
+                .padding(.vertical, 10)
+                .task(id: copied) {
+                    guard copied else { return }
+                    try? await Task.sleep(nanoseconds: 1_500_000_000)
+                    withAnimation { copied = false }
+                }
+            }
+            if let checkIn = guest.checkIn, let checkOut = guest.checkOut {
+                Divider()
+                Label(RegisterText.stay(from: checkIn, to: checkOut), systemImage: "moon.stars")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, 10)
+            }
         }
     }
 }
@@ -387,6 +459,7 @@ private enum RegisterText {
 private struct SubmitSummarySheet: View {
     let entries: [GuestRegistration]
     let photos: [String: UIImage]
+    var uncertainIDs: Set<String> = []
     let onCancel: () -> Void
     let onConfirm: () -> Void
 
@@ -399,7 +472,9 @@ private struct SubmitSummarySheet: View {
                         .foregroundStyle(.secondary)
                         .padding(.horizontal, 4)
                     ForEach(Array(entries.enumerated()), id: \.offset) { _, entry in
-                        RegistrationCard(entry: entry, photo: photos[entry.identificador], onRemove: nil)
+                        RegistrationCard(
+                            entry: entry, photo: photos[entry.identificador], isUncertain: isUncertain(entry),
+                            onRemove: nil)
                     }
                     Label(
                         "Check names, documents and dates. This app cannot undo a registration once the portal accepts it.",
@@ -427,6 +502,10 @@ private struct SubmitSummarySheet: View {
                 }
             }
         }
+    }
+
+    private func isUncertain(_ entry: GuestRegistration) -> Bool {
+        uncertainIDs.contains(entry.identificador.uppercased())
     }
 
     private var header: String {

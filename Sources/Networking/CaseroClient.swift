@@ -232,8 +232,21 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
                 ("personas", personas),
                 ("__RequestVerificationToken", token),
             ])
-            let text = try await postForJSON("Huespedes/RegistrarHuesped", body: body, referer: "Huespedes")
-            return try Self.decodeGuestOrArray(Data(text.utf8))
+            let text: String
+            do {
+                text = try await postForJSON("Huespedes/RegistrarHuesped", body: body, referer: "Huespedes")
+            } catch PortalError.unreachable {
+                // The form was already sent: losing the answer does not mean nothing was registered.
+                throw PortalError.registrationUncertain
+            } catch PortalError.http(let code) where code >= 500 {
+                throw PortalError.registrationUncertain
+            }
+            let data = Data(text.utf8)
+            if let failure = try? JSONDecoder().decode(PortalFailure.self, from: data), !failure.success {
+                throw PortalError.rejected(
+                    failure.message ?? String(localized: "The portal rejected the registration."))
+            }
+            return try Self.decodeGuestOrArray(data)
         }
     }
 
@@ -372,7 +385,8 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
     }
 }
 
-/// Error envelope returned by `ValidarPersonaDiie` / `ValidarPersonaSuin`.
+/// Error envelope returned by `ValidarPersonaDiie` / `ValidarPersonaSuin`, and
+/// assumed for `RegistrarHuesped` (not captured there yet).
 private struct PortalFailure: Decodable {
     let success: Bool
     let message: String?
