@@ -28,15 +28,18 @@
 "Copied" = "Copiado";
 "Copy" = "Copiar";
 "Copy stay ID" = "Copiar ID de estancia";
+"First name (only the first one)" = "Nombre (solo el primero)";
 "From (country)" = "De";
 "Guest registration — not completed" = "Registro de huéspedes — no completado";
 "Guest registration — partly registered" = "Registro de huéspedes — registrado en parte";
 "Guest registration — prepared" = "Registro de huéspedes — preparado";
 "Guest registration — registered" = "Registro de huéspedes — registrado";
 "If it keeps failing, report these people by SMS from the SMS tab, or save this PDF and take it to the nearest immigration office." = "Si sigue fallando, reporta a estas personas por SMS desde la pestaña SMS, o guarda este PDF y llévalo a la oficina de inmigración más cercana.";
+"If the person has a second given name, try without it." = "Si la persona tiene segundo nombre, prueba sin él.";
 "If the registration cannot be completed, report these people by SMS from the SMS tab, or take this document to the nearest immigration office and report them there." = "Si no se puede completar el registro, reporta a estas personas por SMS desde la pestaña SMS, o lleva este documento a la oficina de inmigración más cercana y repórtalas allí.";
 "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal." = "Busca a cada persona, indica las fechas de estancia y agrégala al registro. Toca Reportar personas para enviarlas al portal oficial.";
 "Not confirmed" = "No confirmado";
+"Not found. If the person has a second given name, try without it." = "No encontrada. Si la persona tiene segundo nombre, prueba sin él.";
 "Not registered" = "No registrado";
 "Not registered: %@" = "No registrado: %@";
 "Passport/ID: %@" = "Pasaporte/carné: %@";
@@ -78,6 +81,7 @@
 "Stay: %@" = "Estancia: %@";
 "ID" = "ID";
 "Stay ID" = "ID de estancia";
+"Try without the second given name. Example: JUAN · PEREZ · GOMEZ finds JUAN CARLOS PEREZ GOMEZ." = "Prueba sin el segundo nombre. Ejemplo: JUAN · PEREZ · GOMEZ encuentra a JUAN CARLOS PEREZ GOMEZ.";
 "Unknown date" = "Fecha desconocida";
 "Cuba" = "Cuba";
 "Scroll by date" = "Desplazarse por fecha";

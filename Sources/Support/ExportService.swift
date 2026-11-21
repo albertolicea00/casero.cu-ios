@@ -130,7 +130,7 @@ enum ExportService {
 
         func row(_ entry: GuestRegistration, status: String?) -> RegistrationRow {
             RegistrationRow(
-                name: "\(entry.firstName) \(entry.lastName1) \(entry.lastName2)",
+                name: "\(entry.firstName) \(entry.middleName) \(entry.lastName1) \(entry.lastName2)",
                 identificador: entry.identificador, nationality: entry.nationalityName, birthDate: entry.birthDate,
                 checkIn: entry.checkIn, checkOut: entry.checkOut, status: status, stayId: nil)
         }

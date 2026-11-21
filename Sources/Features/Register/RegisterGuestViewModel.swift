@@ -168,7 +168,10 @@ final class RegisterGuestViewModel: ObservableObject {
             // Results open in a sheet. A single match goes straight to its card;
             // several are listed first so the host picks the right person.
             if people.isEmpty {
-                lookupErrorMessage = String(localized: "Person not found.")
+                lookupErrorMessage =
+                    kind == .foreignGuestByName
+                    ? String(localized: "Not found. If the person has a second given name, try without it.")
+                    : String(localized: "Person not found.")
             } else {
                 candidates = people
                 if people.count == 1 { foundPerson = people[0] }
@@ -177,6 +180,9 @@ final class RegisterGuestViewModel: ObservableObject {
             return
         } catch PortalError.sessionExpired {
             isSessionExpired = true
+        } catch PortalError.rejected(let message) where kind == .foreignGuestByName {
+            // The portal matches the first given name only; suggest dropping the second.
+            lookupErrorMessage = message + " " + String(localized: "If the person has a second given name, try without it.")
         } catch {
             lookupErrorMessage = (error as? PortalError)?.errorDescription ?? error.localizedDescription
         }
@@ -186,7 +192,8 @@ final class RegisterGuestViewModel: ObservableObject {
     func addToQueue() {
         guard canAdd, let person = foundPerson, let birthDate = person.birthDate else { return }
         let registration = GuestRegistration(
-            firstName: [person.firstName, person.middleName ?? ""].filter { !$0.isEmpty }.joined(separator: " "),
+            firstName: person.firstName,
+            middleName: person.middleName ?? "",
             lastName1: person.lastName1 ?? "",
             lastName2: person.lastName2 ?? "",
             identificador: person.identificador,

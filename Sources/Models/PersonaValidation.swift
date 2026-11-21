@@ -55,10 +55,14 @@ struct PersonaValidation: Decodable {
 /// A person queued for `Huespedes/RegistrarHuesped`, built from a validated
 /// `PersonaValidation` plus the stay's dates.
 ///
-/// Portal wire format (one entry, `|`-joined for multiple):
-/// `NOMBRE**APELLIDO1*APELLIDO2,IDENTIFICADOR,NACIONALIDAD,SEXO,dd/MM/yy(nac),dd/MM/yy(entrada),dd/MM/yy(salida),PROCEDENCIA`
+/// Portal wire format (one entry, `|`-joined for multiple), confirmed against a
+/// browser capture:
+/// `NOMBRE*NOMBRE2*APELLIDO1*APELLIDO2,IDENTIFICADOR,NACIONALIDAD,SEXO,dd/MM/yy(nac),dd/MM/yy(entrada),dd/MM/yy(salida),PROCEDENCIA`
+/// An empty second name leaves `**` (`JEREMIAS**ARTEAGA*CHARIS`).
 struct GuestRegistration {
     let firstName: String
+    /// Second given name (`Nombre2`); empty when the person has none.
+    var middleName: String = ""
     let lastName1: String
     let lastName2: String
     let identificador: String
@@ -82,10 +86,10 @@ struct GuestRegistration {
         return formatter
     }()
 
-    /// Encodes one `personas` segment. `**` separates first/last1, `*` separates last1/last2.
+    /// Encodes one `personas` segment: the four name parts joined by `*`.
     var wireFormat: String {
         [
-            "\(firstName)**\(lastName1)*\(lastName2)",
+            "\(firstName)*\(middleName)*\(lastName1)*\(lastName2)",
             identificador,
             nationalityCode,
             sex,

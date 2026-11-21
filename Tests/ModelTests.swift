@@ -3,6 +3,26 @@ import XCTest
 @testable import CaseroCu
 
 final class ModelTests: XCTestCase {
+    /// Mirrors a browser capture of `RegistrarHuesped` (synthetic names/IDs, real
+    /// shape): four `*`-joined name parts, `**` when there is no second name.
+    func testRegistrationWireFormatMatchesPortal() {
+        func date(_ ms: Double) -> Date { Date(timeIntervalSince1970: ms / 1000) }
+        let checkIn = date(1_794_978_000_000)
+        let checkOut = date(1_795_237_200_000)
+        let guest = GuestRegistration(
+            firstName: "TESTA", lastName1: "UNO", lastName2: "DOS", identificador: "X0000001",
+            nationalityCode: "201", sex: "M", birthDate: date(122_533_200_000),
+            checkIn: checkIn, checkOut: checkOut, procedenciaCode: "201")
+        let companion = GuestRegistration(
+            firstName: "TESTB", middleName: "MEDIO", lastName1: "TRES", lastName2: "CUATRO",
+            identificador: "00000000001", nationalityCode: "247", sex: "F", birthDate: date(481_611_600_000),
+            checkIn: checkIn, checkOut: checkOut, procedenciaCode: "247")
+        XCTAssertEqual(
+            [guest, companion].map(\.wireFormat).joined(separator: "|"),
+            "TESTA**UNO*DOS,X0000001,201,M,19/11/73,18/11/26,21/11/26,201|"
+                + "TESTB*MEDIO*TRES*CUATRO,00000000001,247,F,06/04/85,18/11/26,21/11/26,247")
+    }
+
     func testPortalDatesKeepBirthDatesBefore1970() {
         XCTAssertNotNil(DotNetDate.parse("/Date(-315619200000)/"))
         XCTAssertEqual(DotNetDate.parse("/Date(0)/"), Date(timeIntervalSince1970: 0))

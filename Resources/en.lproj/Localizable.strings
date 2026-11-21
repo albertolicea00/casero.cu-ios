@@ -28,15 +28,18 @@
 "Copied" = "Copied";
 "Copy" = "Copy";
 "Copy stay ID" = "Copy stay ID";
+"First name (only the first one)" = "First name (only the first one)";
 "From (country)" = "From";
 "Guest registration — not completed" = "Guest registration — not completed";
 "Guest registration — partly registered" = "Guest registration — partly registered";
 "Guest registration — prepared" = "Guest registration — prepared";
 "Guest registration — registered" = "Guest registration — registered";
 "If it keeps failing, report these people by SMS from the SMS tab, or save this PDF and take it to the nearest immigration office." = "If it keeps failing, report these people by SMS from the SMS tab, or save this PDF and take it to the nearest immigration office.";
+"If the person has a second given name, try without it." = "If the person has a second given name, try without it.";
 "If the registration cannot be completed, report these people by SMS from the SMS tab, or take this document to the nearest immigration office and report them there." = "If the registration cannot be completed, report these people by SMS from the SMS tab, or take this document to the nearest immigration office and report them there.";
 "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal." = "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal.";
 "Not confirmed" = "Not confirmed";
+"Not found. If the person has a second given name, try without it." = "Not found. If the person has a second given name, try without it.";
 "Not registered" = "Not registered";
 "Not registered: %@" = "Not registered: %@";
 "Passport/ID: %@" = "Passport/ID: %@";
@@ -78,6 +81,7 @@
 "Stay: %@" = "Stay: %@";
 "ID" = "ID";
 "Stay ID" = "Stay ID";
+"Try without the second given name. Example: JUAN · PEREZ · GOMEZ finds JUAN CARLOS PEREZ GOMEZ." = "Try without the second given name. Example: JUAN · PEREZ · GOMEZ finds JUAN CARLOS PEREZ GOMEZ.";
 "Unknown date" = "Unknown date";
 "Cuba" = "Cuba";
 "Scroll by date" = "Scroll by date";

@@ -93,7 +93,7 @@ struct RegisterGuestView: View {
             InputCard {
                 Group {
                     if viewModel.lookupKind == .foreignGuestByName {
-                        TextField("First name", text: $viewModel.firstName)
+                        TextField("First name (only the first one)", text: $viewModel.firstName)
                             .padding(.vertical, 12)
                         Divider()
                         TextField("First surname", text: $viewModel.lastName1)
@@ -117,6 +117,16 @@ struct RegisterGuestView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 4)
+            if viewModel.lookupKind == .foreignGuestByName {
+                // The portal matches on the first given name only; a second name finds nobody.
+                Label(
+                    "Try without the second given name. Example: JUAN · PEREZ · GOMEZ finds JUAN CARLOS PEREZ GOMEZ.",
+                    systemImage: "lightbulb"
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 4)
+            }
         }
     }
 
@@ -489,7 +499,7 @@ private enum RegisterText {
     }
 
     static func fullName(_ entry: GuestRegistration) -> String {
-        "\(entry.firstName) \(entry.lastName1) \(entry.lastName2)"
+        "\(entry.firstName) \(entry.middleName) \(entry.lastName1) \(entry.lastName2)"
             .split(whereSeparator: \.isWhitespace).joined(separator: " ")
     }
 }
