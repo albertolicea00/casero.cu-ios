@@ -59,14 +59,12 @@ struct GuestDetailView: View {
 
     private var personalCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 14) {
+            HStack(alignment: .center, spacing: 14) {
                 GuestAvatar(guest: guest, photo: photo, size: 58)
                 VStack(alignment: .leading, spacing: 7) {
                     HStack(alignment: .top, spacing: 6) {
-                        Text(guest.fullName)
+                        GuestNameTooltip(name: guest.fullName)
                             .font(.title3.weight(.semibold))
-                            .textSelection(.enabled)
-                            .lineLimit(1)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         if let nationality = guest.nationality,
                             let flag = NationalityFlag.emoji(for: nationality)
@@ -104,6 +102,7 @@ struct GuestDetailView: View {
                             }
                         }
                     }
+                    .zIndex(1)
                     Text("Passport/ID: \(guest.identificador)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -372,6 +371,54 @@ private struct StayTimeline: View {
     }
 }
 
+private struct GuestNameTooltip: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let name: String
+    @State private var isVisible = false
+
+    var body: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isVisible.toggle()
+            }
+        } label: {
+            Text(name)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(name)
+        .overlay(alignment: .topLeading) {
+            if isVisible {
+                Text(name)
+                    .font(.caption.weight(.medium))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.leading)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .frame(maxWidth: 260, alignment: .leading)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(colorScheme == .dark ? Color(white: 0.26) : Color(white: 0.18))
+                    )
+                    .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .offset(y: 28)
+                    .zIndex(1)
+            }
+        }
+        .task(id: isVisible) {
+            guard isVisible else { return }
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isVisible = false
+            }
+        }
+    }
+}
+
 private struct CompanionSummary: View {
     let guest: Guest
     let photo: UIImage?
@@ -382,12 +429,13 @@ private struct CompanionSummary: View {
 
     private var companionCard: some View {
         VStack(alignment: .leading, spacing: 5) {
-            HStack(alignment: .top, spacing: 12) {
+            HStack(alignment: .center, spacing: 12) {
                 GuestAvatar(guest: guest, photo: photo, size: 46)
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(guest.fullName)
+                    GuestNameTooltip(name: guest.fullName)
                         .font(.subheadline.weight(.semibold))
-                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .zIndex(1)
                     Text("Passport/ID: \(guest.identificador)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
