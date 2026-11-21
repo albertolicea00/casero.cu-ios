@@ -487,24 +487,36 @@ private struct GuestAvatar: View {
     let guest: Guest
     let photo: UIImage?
     let size: CGFloat
+    @State private var isPhotoExpanded = false
 
     var body: some View {
-        Group {
+        Button {
+            isPhotoExpanded = true
+        } label: {
+            Group {
+                if let photo {
+                    Image(uiImage: photo)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    Text(initials)
+                        .font(.system(size: size * 0.34, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(uiColor: .tertiarySystemFill))
+                }
+            }
+            .frame(width: size, height: size)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+        .disabled(photo == nil)
+        .accessibilityLabel(guest.fullName)
+        .fullScreenCover(isPresented: $isPhotoExpanded) {
             if let photo {
-                Image(uiImage: photo)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                Text(initials)
-                    .font(.system(size: size * 0.34, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(uiColor: .tertiarySystemFill))
+                ExpandedGuestPhoto(photo: photo, name: guest.fullName)
             }
         }
-        .frame(width: size, height: size)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .accessibilityLabel(guest.fullName)
     }
 
     private var initials: String {
@@ -512,6 +524,33 @@ private struct GuestAvatar: View {
         let first = parts.first?.prefix(1) ?? "?"
         let last = parts.dropFirst().last?.prefix(1) ?? ""
         return (String(first) + String(last)).uppercased()
+    }
+}
+
+private struct ExpandedGuestPhoto: View {
+    @Environment(\.dismiss) private var dismiss
+    let photo: UIImage
+    let name: String
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            Image(uiImage: photo)
+                .resizable()
+                .scaledToFit()
+                .accessibilityLabel(name)
+        }
+        .overlay(alignment: .topTrailing) {
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 32))
+                    .foregroundStyle(.white)
+                    .padding(16)
+            }
+            .accessibilityLabel("Close")
+        }
     }
 }
 
