@@ -11,30 +11,80 @@ struct RegisterGuestView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Look up") {
-                    Picker("Type", selection: $viewModel.lookupKind) {
+                Section {
+                    Picker("Look up by", selection: $viewModel.lookupKind) {
                         ForEach(RegisterGuestViewModel.LookupKind.allCases) { kind in
-                            Text(LocalizedStringKey(kind.rawValue)).tag(kind)
+                            Text(LocalizedStringKey(kind.segmentLabel)).tag(kind)
                         }
                     }
-                    TextField(
-                        LocalizedStringKey(
-                            viewModel.lookupKind == .foreignGuest ? "Passport number" : "Carné de identidad"),
-                        text: $viewModel.identificador,
-                    )
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                }
+
+                Section {
+                    Group {
+                        if viewModel.lookupKind == .foreignGuestByName {
+                            TextField("First name", text: $viewModel.firstName)
+                            TextField("First surname", text: $viewModel.lastName1)
+                            TextField("Second surname", text: $viewModel.lastName2)
+                        } else {
+                            TextField(
+                                LocalizedStringKey(viewModel.lookupKind.fieldLabel),
+                                text: $viewModel.identificador,
+                            )
+                            .keyboardType(viewModel.lookupKind == .cubanCompanion ? .numberPad : .default)
+                        }
+                    }
                     .textInputAutocapitalization(.characters)
                     .autocorrectionDisabled()
+                } footer: {
+                    // Lives in the footer so the Form row clipping doesn't reshape its corners.
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text(LocalizedStringKey(viewModel.lookupKind.help))
 
-                    Button {
-                        Task { await viewModel.lookUp() }
-                    } label: {
-                        if viewModel.isLookingUp {
-                            ProgressView()
-                        } else {
-                            Text("Look up")
+                        VStack(spacing: 8) {
+                            Button {
+                                Task { await viewModel.lookUp() }
+                            } label: {
+                                Group {
+                                    if viewModel.isLookingUp {
+                                        ProgressView().tint(.white)
+                                    } else {
+                                        Text("Look up")
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(PrimaryActionButtonStyle())
+                            .disabled(!viewModel.canLookUp)
+
+                            if !viewModel.canLookUp && !viewModel.isLookingUp {
+                                Label("Fill in the fields above to look up.", systemImage: "lock.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
-                    .disabled(!viewModel.canLookUp)
+                }
+
+                if !viewModel.candidates.isEmpty {
+                    Section("Matches") {
+                        ForEach(Array(viewModel.candidates.enumerated()), id: \.offset) { _, person in
+                            Button { viewModel.select(person) } label: {
+                                VStack(alignment: .leading) {
+                                    Text(person.fullName).font(.headline)
+                                    Text(
+                                        [person.identificador, person.nationality ?? ""].filter { !$0.isEmpty }
+                                            .joined(separator: " · ")
+                                    )
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if let person = viewModel.foundPerson {
@@ -95,9 +145,8 @@ struct RegisterGuestView: View {
                 }
 
                 Section {
-                    Link(destination: CaseroClient.baseURL.appendingPathComponent("Huespedes")) {
-                        Label("Complete in official portal", systemImage: "safari")
-                    }
+                    Link("Complete in official portal", destination: CaseroClient.baseURL.appendingPathComponent("Huespedes"))
+                        .listRowBackground(Color.clear)
                 }
                 if let message = viewModel.errorMessage {
                     Section {
@@ -108,7 +157,7 @@ struct RegisterGuestView: View {
             .navigationTitle("Register guest")
         }
         .onChange(of: viewModel.lookupKind) { _ in viewModel.clearLookup() }
-        .onChange(of: viewModel.identificador) { _ in viewModel.clearLookup() }
+        .onChange(of: viewModel.lookupQuery) { _ in viewModel.clearLookup() }
         .onChange(of: viewModel.isSessionExpired) { expired in
             guard expired else { return }
             Task {

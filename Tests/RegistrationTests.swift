@@ -67,8 +67,8 @@ final class StubPortalClient: PortalServing {
     var results: [Guest] = []
     var submitError: Error?
     var submissions = 0
-    func validatePersonaDiie(identificador: String, tipo: PersonaLookup) async throws -> PersonaValidation { person }
-    func validatePersonaSuin(identificador: String) async throws -> PersonaValidation { person }
+    func validatePersonaDiie(identificador: String, tipo: PersonaLookup) async throws -> [PersonaValidation] { [person] }
+    func validatePersonaSuin(identificador: String) async throws -> [PersonaValidation] { [person] }
     func registerGuests(_ people: [GuestRegistration]) async throws -> [Guest] {
         submissions += 1
         if let submitError { throw submitError }

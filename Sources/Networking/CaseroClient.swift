@@ -1,11 +1,14 @@
 import Foundation
 
-/// Discriminates the two `ValidarPersonaDiie` lookup modes seen in captured
+/// Discriminates the `ValidarPersonaDiie` lookup modes seen in captured
 /// traffic: `tipo=0` with a passport number, `tipo=2` with an underscore-joined
-/// full name.
+/// full name, `tipo=3` with a temporary carné number. `tipo=1` was never seen.
+/// Passport, name and `ValidarPersonaSuin` lookups were captured returning an
+/// array; `tipo=3` was only captured as "not found" and is assumed to match.
 enum PersonaLookup: Int {
     case byPassport = 0
     case byName = 2
+    case byTemporaryCarne = 3
 }
 
 /// Thin client over the CASERO web portal. It behaves like a browser: cookies
@@ -183,9 +186,10 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
 
     /// Looks up a foreign guest in the DIIE registry.
     /// - Parameters:
-    ///   - identificador: passport number (`tipo == .byPassport`) or an
-    ///     underscore-joined full name (`tipo == .byName`), per captured traffic.
-    func validatePersonaDiie(identificador: String, tipo: PersonaLookup) async throws -> PersonaValidation {
+    ///   - identificador: passport number (`tipo == .byPassport`), an
+    ///     underscore-joined full name (`tipo == .byName`) or a temporary carné
+    ///     number (`tipo == .byTemporaryCarne`), per captured traffic.
+    func validatePersonaDiie(identificador: String, tipo: PersonaLookup) async throws -> [PersonaValidation] {
         return try await authenticated {
             return try await validatePersona(
                 path: "Huespedes/ValidarPersonaDiie",
@@ -195,7 +199,7 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
     }
 
     /// Looks up a Cuban companion by carné de identidad in the SUIN registry.
-    func validatePersonaSuin(identificador: String) async throws -> PersonaValidation {
+    func validatePersonaSuin(identificador: String) async throws -> [PersonaValidation] {
         return try await authenticated {
             return try await validatePersona(
                 path: "Huespedes/ValidarPersonaSuin",
@@ -204,10 +208,18 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
         }
     }
 
-    private func validatePersona(path: String, body: (String) -> Data) async throws -> PersonaValidation {
+    /// Captured responses come as an array (several matches are possible for a
+    /// name lookup), as a bare object in older captures, or as
+    /// `{ "success": false, "message": "Persona no encontrada." }` when nothing matches.
+    private func validatePersona(path: String, body: (String) -> Data) async throws -> [PersonaValidation] {
         let token = try AntiForgery.extract(from: try await getHTML("Huespedes"))
         let text = try await postForJSON(path, body: body(token), referer: "Huespedes")
-        return try JSONDecoder().decode(PersonaValidation.self, from: Data(text.utf8))
+        let data = Data(text.utf8)
+        if let failure = try? JSONDecoder().decode(PortalFailure.self, from: data), !failure.success {
+            throw PortalError.rejected(failure.message ?? String(localized: "Person not found."))
+        }
+        if let people = try? JSONDecoder().decode([PersonaValidation].self, from: data) { return people }
+        return [try JSONDecoder().decode(PersonaValidation.self, from: data)]
     }
 
     /// Registers one or more guests/companions in a single call (`|`-joined `personas`).
@@ -358,6 +370,12 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
         }
         return [try JSONDecoder().decode(Guest.self, from: data)]
     }
+}
+
+/// Error envelope returned by `ValidarPersonaDiie` / `ValidarPersonaSuin`.
+private struct PortalFailure: Decodable {
+    let success: Bool
+    let message: String?
 }
 
 /// Envelope for `Huespedes/ListarAcompannantes`. Field names for the request are

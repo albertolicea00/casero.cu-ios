@@ -3,18 +3,59 @@ import Foundation
 @MainActor
 final class RegisterGuestViewModel: ObservableObject {
 
-    enum LookupKind: String, CaseIterable, Identifiable {
-        case foreignGuest = "Foreign guest (passport)"
-        case cubanCompanion = "Cuban companion (carné)"
-        var id: String { rawValue }
+    /// Order matches the segmented selector: passport, CI, names, temporary CI.
+    enum LookupKind: CaseIterable, Identifiable {
+        case foreignGuest
+        case cubanCompanion
+        case foreignGuestByName
+        case temporaryCarne
+        var id: Self { self }
+
+        /// Short segment title.
+        var segmentLabel: String {
+            switch self {
+            case .foreignGuest: "Passport"
+            case .cubanCompanion: "ID card"
+            case .foreignGuestByName: "Name"
+            case .temporaryCarne: "Temp. ID"
+            }
+        }
+
+        var fieldLabel: String {
+            switch self {
+            case .foreignGuest: "Passport number"
+            case .cubanCompanion: "Carné de identidad"
+            case .foreignGuestByName: "First name"
+            case .temporaryCarne: "Temporary carné number"
+            }
+        }
+
+        var help: String {
+            switch self {
+            case .foreignGuest:
+                "This search option is only valid for foreigners and Cubans who are permanent residents abroad."
+            case .cubanCompanion:
+                "This search option is only valid for Cuban nationals."
+            case .foreignGuestByName:
+                "This search option is only valid for foreigners and Cubans who are permanent residents abroad."
+            case .temporaryCarne:
+                "This search option is only valid for foreigners who are permanent or temporary residents in Cuba."
+            }
+        }
     }
 
     @Published var lookupKind: LookupKind = .foreignGuest
     @Published var identificador = ""
+    /// Name lookup fields, mirroring the portal form: first name, first and second surname.
+    @Published var firstName = ""
+    @Published var lastName1 = ""
+    @Published var lastName2 = ""
     @Published var checkIn = Date()
     @Published var checkOut = PortalDates.calendar.date(byAdding: .day, value: 1, to: Date()) ?? Date()
 
     @Published private(set) var foundPerson: PersonaValidation?
+    /// Several matches (possible for a name lookup); the user picks one.
+    @Published private(set) var candidates: [PersonaValidation] = []
     @Published private(set) var queue: [GuestRegistration] = []
     @Published private(set) var isLookingUp = false
     @Published private(set) var isSubmitting = false
@@ -28,8 +69,27 @@ final class RegisterGuestViewModel: ObservableObject {
         self.client = client
     }
 
+    /// What is sent as `identificador`. Name lookups are joined with underscores,
+    /// as captured from the portal: `NOMBRE_APELLIDO1_APELLIDO2`. An empty second
+    /// surname keeps the trailing underscore (`NOMBRE_APELLIDO1_`), which the portal
+    /// also matches.
+    var lookupQuery: String {
+        switch lookupKind {
+        case .foreignGuestByName:
+            [firstName, lastName1, lastName2]
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() }
+                .joined(separator: "_")
+        default:
+            identificador.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+    }
+
     var canLookUp: Bool {
-        !identificador.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isLookingUp && !isSubmitting
+        let hasQuery =
+            lookupKind == .foreignGuestByName
+            ? ![firstName, lastName1].contains { $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            : !lookupQuery.isEmpty
+        return hasQuery && !isLookingUp && !isSubmitting
     }
 
     var validationMessage: String? {
@@ -78,21 +138,29 @@ final class RegisterGuestViewModel: ObservableObject {
         guard canLookUp else { return }
         errorMessage = nil
         foundPerson = nil
+        candidates = []
         isLookingUp = true
         defer { isLookingUp = false }
-        let trimmed = identificador.trimmingCharacters(in: .whitespaces)
+        let query = lookupQuery
         let kind = lookupKind
         do {
-            let person: PersonaValidation
+            let people: [PersonaValidation]
             switch kind {
             case .foreignGuest:
-                let tipo: PersonaLookup = trimmed.contains("_") ? .byName : .byPassport
-                person = try await client.validatePersonaDiie(identificador: trimmed, tipo: tipo)
+                people = try await client.validatePersonaDiie(identificador: query, tipo: .byPassport)
+            case .foreignGuestByName:
+                people = try await client.validatePersonaDiie(identificador: query, tipo: .byName)
+            case .temporaryCarne:
+                people = try await client.validatePersonaDiie(identificador: query, tipo: .byTemporaryCarne)
             case .cubanCompanion:
-                person = try await client.validatePersonaSuin(identificador: trimmed)
+                people = try await client.validatePersonaSuin(identificador: query)
             }
-            guard kind == lookupKind, trimmed == identificador.trimmingCharacters(in: .whitespaces) else { return }
-            foundPerson = person
+            guard kind == lookupKind, query == lookupQuery else { return }
+            switch people.count {
+            case 0: errorMessage = String(localized: "Person not found.")
+            case 1: foundPerson = people[0]
+            default: candidates = people
+            }
         } catch is CancellationError {
             return
         } catch PortalError.sessionExpired {
@@ -153,8 +221,14 @@ final class RegisterGuestViewModel: ObservableObject {
         }
     }
 
+    func select(_ person: PersonaValidation) {
+        candidates = []
+        foundPerson = person
+    }
+
     func clearLookup() {
         foundPerson = nil
+        candidates = []
         errorMessage = nil
     }
 
