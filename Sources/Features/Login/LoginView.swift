@@ -103,14 +103,9 @@ struct LoginView: View {
                     .disabled(!viewModel.canSubmit)
                     .padding(.top, 4)
 
-                    NavigationLink {
-                        PortalPageView(path: "", title: "Official portal")
-                    } label: {
-                        Text("Open official portal")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
-                    .padding(.top, -8)
+                    Link("Open official portal", destination: CaseroClient.baseURL)
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity)
                 }
                 .padding(20)
             }

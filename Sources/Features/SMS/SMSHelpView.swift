@@ -313,9 +313,7 @@ private struct SMSReportInfoSheet: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
 
-                    NavigationLink {
-                        PortalPageView(path: "", title: "Official portal")
-                    } label: {
+                    Link(destination: CaseroClient.baseURL) {
                         HStack {
                             Spacer()
                             Label("Open official portal", systemImage: "safari")

@@ -43,8 +43,8 @@ struct SettingsView: View {
 
     private var communicationChannelsSection: some View {
         Section("Communication channels") {
-            NavigationLink("Manage phones and emails") {
-                PortalPageView(path: "ViasComunicacion", title: "Communication channels")
+            Link(destination: CaseroClient.baseURL.appendingPathComponent("ViasComunicacion")) {
+                Label("Manage phones and emails", systemImage: "safari")
             }
             Text("Changes are saved directly through the official portal form.")
                 .font(.caption)

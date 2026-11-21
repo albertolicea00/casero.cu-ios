@@ -91,8 +91,8 @@ struct RegisterGuestView: View {
                 }
 
                 Section {
-                    NavigationLink("Complete in official portal") {
-                        PortalPageView(path: "Huespedes", title: "Register guest")
+                    Link(destination: CaseroClient.baseURL.appendingPathComponent("Huespedes")) {
+                        Label("Complete in official portal", systemImage: "safari")
                     }
                 }
                 if let message = viewModel.errorMessage {

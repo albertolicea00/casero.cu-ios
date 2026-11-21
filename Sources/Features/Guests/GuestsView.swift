@@ -81,32 +81,6 @@ struct GuestsView: View {
     var body: some View {
         NavigationStack {
             content
-                .safeAreaInset(edge: .top, spacing: 0) {
-                    HStack(spacing: 10) {
-                    Picker("Segment", selection: $viewModel.segment) {
-                        ForEach(GuestsViewModel.Segment.allCases) { segment in
-                            Text(LocalizedStringKey(segment.rawValue)).tag(segment)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-
-                    Button {
-                        pendingFrom = viewModel.from
-                        pendingTo = viewModel.to
-                        isDateFilterPresented = true
-                    } label: {
-                        Image(systemName: "calendar")
-                            .foregroundColor(Color(uiColor: .tertiaryLabel))
-                            .frame(width: 44, height: 36)
-                    }
-                    .buttonStyle(.plain)
-                    .tint(Color(uiColor: .tertiaryLabel))
-                    .accessibilityLabel("Date range")
-                    }
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .background(Color(uiColor: .systemBackground))
-                }
             .background(Color(uiColor: .systemBackground).ignoresSafeArea())
             .navigationTitle("Guests")
             .navigationBarTitleDisplayMode(.large)
@@ -211,6 +185,33 @@ struct GuestsView: View {
         }
     }
 
+    // Lives inside the ScrollView rather than in a top safe-area inset: an inset
+    // above the scroll view throws off the large title's initial offset and it
+    // starts hidden until the user pulls down.
+    private var segmentControls: some View {
+        HStack(spacing: 10) {
+            Picker("Segment", selection: $viewModel.segment) {
+                ForEach(GuestsViewModel.Segment.allCases) { segment in
+                    Text(LocalizedStringKey(segment.rawValue)).tag(segment)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            Button {
+                pendingFrom = viewModel.from
+                pendingTo = viewModel.to
+                isDateFilterPresented = true
+            } label: {
+                Image(systemName: "calendar")
+                    .foregroundColor(Color(uiColor: .tertiaryLabel))
+                    .frame(width: 44, height: 36)
+            }
+            .buttonStyle(.plain)
+            .tint(Color(uiColor: .tertiaryLabel))
+            .accessibilityLabel("Date range")
+        }
+    }
+
     @ViewBuilder
     private var emptyState: some View {
         if viewModel.isLoading {
@@ -247,6 +248,7 @@ struct GuestsView: View {
         return ScrollViewReader { scrollProxy in
                 ScrollView {
                     VStack(spacing: 8) {
+                        segmentControls
                         searchAndFilterControls
                         if let message = viewModel.errorMessage, !guests.isEmpty {
                             Text(message).font(.caption).foregroundStyle(.red)
