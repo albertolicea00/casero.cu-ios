@@ -12,7 +12,6 @@ struct GuestsView: View {
     @State private var companionCounts: [String: Int] = [:]
     @State private var visibleGuestID: String?
     @State private var isScrubbingGuests = false
-    @State private var isHeaderCollapsed = false
 
     init(client: CaseroClient, settings: AppSettings) {
         self.client = client
@@ -82,71 +81,9 @@ struct GuestsView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                if !isHeaderCollapsed && viewModel.isOffline {
-                    Label(offlineCaption, systemImage: "icloud.slash")
-                        .font(.caption)
-                        .foregroundStyle(.orange)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal)
-                        .padding(.top, 4)
-                }
-
-                if !isHeaderCollapsed {
-                HStack(spacing: 10) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.body)
-                            .foregroundStyle(.secondary)
-                            .accessibilityHidden(true)
-
-                        TextField("Name or passport", text: $viewModel.searchText)
-                            .textInputAutocapitalization(.words)
-                            .autocorrectionDisabled()
-                            .textFieldStyle(.plain)
-                            .submitLabel(.search)
-                            .frame(maxWidth: .infinity, minHeight: 44)
-
-                        if !viewModel.searchText.isEmpty {
-                            Button {
-                                viewModel.searchText = ""
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundStyle(.tertiary)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel("Clear search")
-                        }
-                    }
-                    .padding(.horizontal, 12)
-                    .frame(height: 44)
-                    .background(
-                        Color(uiColor: .secondarySystemBackground),
-                        in: RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    )
-
-                    Button {
-                        pendingFrom = viewModel.from
-                        pendingTo = viewModel.to
-                        isDateFilterPresented = true
-                    } label: {
-                        Image(systemName: "calendar")
-                            .foregroundColor(Color(uiColor: .secondaryLabel))
-                            .frame(width: 44, height: 44)
-                    }
-                    .buttonStyle(.plain)
-                    .tint(Color(uiColor: .secondaryLabel))
-                    .accessibilityLabel("Date range")
-                }
-                .padding(.horizontal)
-                .padding(.top, 8)
-
-                if let message = viewModel.errorMessage, !viewModel.guests.isEmpty {
-                    Text(message).font(.caption).foregroundStyle(.red).padding(.horizontal)
-                }
-                }
-
-                HStack(spacing: 10) {
+            content
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    HStack(spacing: 10) {
                     Picker("Segment", selection: $viewModel.segment) {
                         ForEach(GuestsViewModel.Segment.allCases) { segment in
                             Text(LocalizedStringKey(segment.rawValue)).tag(segment)
@@ -154,47 +91,30 @@ struct GuestsView: View {
                     }
                     .pickerStyle(.segmented)
 
-                    if !isHeaderCollapsed {
-                    Menu {
-                        Picker("Sort order", selection: $viewModel.sortOrder) {
-                            ForEach(GuestsViewModel.SortOrder.allCases) { order in
-                                Text(LocalizedStringKey(order.rawValue)).tag(order)
-                            }
-                        }
+                    Button {
+                        pendingFrom = viewModel.from
+                        pendingTo = viewModel.to
+                        isDateFilterPresented = true
                     } label: {
-                        Image(systemName: "arrow.up.arrow.down")
+                        Image(systemName: "calendar")
+                            .foregroundColor(Color(uiColor: .tertiaryLabel))
                             .frame(width: 44, height: 36)
-                            .contentShape(Rectangle())
-                            .foregroundStyle(.secondary)
                     }
-                    .accessibilityLabel("Sort guests")
+                    .buttonStyle(.plain)
+                    .tint(Color(uiColor: .tertiaryLabel))
+                    .accessibilityLabel("Date range")
                     }
-                }
-                .padding(.horizontal)
-                .padding(.top, 12)
-
-                if !isHeaderCollapsed, let lastFetched = viewModel.lastFetched {
-                    Text(String.localizedStringWithFormat(
-                        String(localized: "Last updated: %@"),
-                        Self.lastUpdatedDate.string(from: lastFetched)
-                    ))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
-                    .padding(.top, 8)
+                    .padding(.vertical, 8)
+                    .background(Color(uiColor: .systemBackground))
                 }
-
-                content
-            }
-            .animation(.easeInOut(duration: 0.2), value: isHeaderCollapsed)
             .background(Color(uiColor: .systemBackground).ignoresSafeArea())
             .navigationTitle("Guests")
+            .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    if !isHeaderCollapsed {
                     if !appState.isSignedIn {
                         Button {
                             isLoginPresented = true
@@ -214,7 +134,6 @@ struct GuestsView: View {
                     }
                     .accessibilityLabel("Reload guests")
                     .disabled(viewModel.isLoading || !appState.isSignedIn)
-                    }
                 }
             }
             .sheet(isPresented: $isDateFilterPresented) {
@@ -243,9 +162,6 @@ struct GuestsView: View {
             if appState.isSignedIn { await viewModel.reload() }
         }
         .onChange(of: viewModel.guests.count) { count in appState.hasCachedGuests = count > 0 }
-        .onChange(of: viewModel.filteredGuests.isEmpty) { isEmpty in
-            if isEmpty { isHeaderCollapsed = false }
-        }
         .onChange(of: settings.cacheTTL) { _ in Task { await viewModel.loadFromCache() } }
         .onChange(of: settings.defaultGuestRangeDays) { _ in
             viewModel.applyDefaultRange()
@@ -268,6 +184,46 @@ struct GuestsView: View {
 
     private var offlineCaption: String {
         return String(localized: "Showing cached data.")
+    }
+
+    private var searchAndFilterControls: some View {
+        HStack(spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .font(.body).foregroundStyle(.secondary).accessibilityHidden(true)
+                TextField("Name or passport", text: $viewModel.searchText)
+                    .textInputAutocapitalization(.words)
+                    .autocorrectionDisabled()
+                    .textFieldStyle(.plain)
+                    .submitLabel(.search)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                if !viewModel.searchText.isEmpty {
+                    Button { viewModel.searchText = "" } label: {
+                        Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Clear search")
+                }
+            }
+            .padding(.horizontal, 12)
+            .frame(height: 44)
+            .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
+
+            Menu {
+                Picker("Sort order", selection: $viewModel.sortOrder) {
+                    ForEach(GuestsViewModel.SortOrder.allCases) { order in
+                        Text(LocalizedStringKey(order.rawValue)).tag(order)
+                    }
+                }
+            } label: {
+                Image(systemName: "arrow.up.arrow.down")
+                    .frame(width: 36, height: 44)
+                    .foregroundColor(Color(uiColor: .tertiaryLabel))
+            }
+            .buttonStyle(.plain)
+            .tint(Color(uiColor: .tertiaryLabel))
+            .accessibilityLabel("Sort guests")
+        }
     }
 
     @ViewBuilder
@@ -303,6 +259,29 @@ struct GuestsView: View {
             let knownNationalities = nationalityNamesByCode
             ScrollViewReader { scrollProxy in
                 ScrollView {
+                    VStack(spacing: 8) {
+                        searchAndFilterControls
+                        if let message = viewModel.errorMessage, !viewModel.guests.isEmpty {
+                            Text(message).font(.caption).foregroundStyle(.red)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        if viewModel.isOffline {
+                            Label(offlineCaption, systemImage: "icloud.slash")
+                                .font(.caption).foregroundStyle(.orange)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        if let lastFetched = viewModel.lastFetched {
+                            Text(String.localizedStringWithFormat(
+                                String(localized: "Last updated: %@"),
+                                Self.lastUpdatedDate.string(from: lastFetched)
+                            ))
+                            .font(.caption).foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+
                     LazyVStack(spacing: 10, pinnedViews: [.sectionHeaders]) {
                         ForEach(months) { group in
                         Section {
@@ -349,17 +328,6 @@ struct GuestsView: View {
                 }
                 .coordinateSpace(name: "guestList")
                 .scrollIndicators(.hidden)
-                .simultaneousGesture(
-                    DragGesture(minimumDistance: 10)
-                        .onChanged { value in
-                            guard !isScrubbingGuests else { return }
-                            if value.translation.height < -20, !isHeaderCollapsed {
-                                isHeaderCollapsed = true
-                            } else if value.translation.height > 20, isHeaderCollapsed {
-                                isHeaderCollapsed = false
-                            }
-                        }
-                )
                 .onPreferenceChange(GuestRowPositions.self) { positions in
                     guard !isScrubbingGuests else { return }
                     let current = positions.filter { $0.value <= 30 }.max { $0.value < $1.value }
