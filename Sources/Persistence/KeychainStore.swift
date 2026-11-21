@@ -10,6 +10,10 @@ enum KeychainStore {
 
     private static let service = "com.casero.cu.portal"
 
+    /// Readable only while the device is unlocked, and never restored to another
+    /// device from a backup. See SECURITY.md, "Saved credentials".
+    private static let accessibility = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+
     enum Key: String {
         case username
         case password
@@ -20,8 +24,17 @@ enum KeychainStore {
         var query = baseQuery(for: key)
         SecItemDelete(query as CFDictionary)
         query[kSecValueData as String] = data
-        query[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
+        query[kSecAttrAccessible as String] = accessibility
         SecItemAdd(query as CFDictionary, nil)
+    }
+
+    /// Re-protects items saved by earlier builds with `AfterFirstUnlock`, which
+    /// stayed readable while locked and travelled in device backups.
+    static func migrateAccessibility() {
+        for key in [Key.username, .password] {
+            let update = [kSecAttrAccessible as String: accessibility]
+            SecItemUpdate(baseQuery(for: key) as CFDictionary, update as CFDictionary)
+        }
     }
 
     static func get(_ key: Key) -> String? {

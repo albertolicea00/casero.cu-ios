@@ -1,3 +1,4 @@
+import LocalAuthentication
 import SwiftUI
 
 @main
@@ -31,6 +32,7 @@ final class AppState: ObservableObject {
     private var recoveryTask: Task<Bool, Never>?
 
     init() {
+        KeychainStore.migrateAccessibility()
         client.recoverSession = { [weak self] in
             await self?.recoverSession() ?? false
         }
@@ -43,6 +45,7 @@ final class AppState: ObservableObject {
             let password = KeychainStore.get(.password)
         else { return false }
         let task = Task { () -> Bool in
+            guard await confirmDeviceOwner() else { return false }
             do {
                 try await client.login(user: user, password: password)
                 try Task.checkCancellation()
@@ -53,6 +56,16 @@ final class AppState: ObservableObject {
         let recovered = await task.value
         recoveryTask = nil
         return recovered
+    }
+
+    /// Saved credentials sign in to an official account in the host's name, so
+    /// every use requires the device owner (Face ID, Touch ID or passcode).
+    /// Without a device passcode there is no silent sign-in. See SECURITY.md.
+    private func confirmDeviceOwner() async -> Bool {
+        let context = LAContext()
+        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) else { return false }
+        let reason = String(localized: "Sign in to the app session with your saved credentials.")
+        return (try? await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason)) ?? false
     }
 
     func restoreLocalData() async {
@@ -67,6 +80,13 @@ final class AppState: ObservableObject {
         } else {
             hasCachedGuests = !snapshot.guests.isEmpty
         }
+    }
+
+    /// Silent sign-in at launch with the Keychain credentials, gated by the same
+    /// settings as expiry recovery. On failure the sign-in banner stays.
+    func restoreSession() async {
+        guard !isSignedIn, await recoverSession() else { return }
+        isSignedIn = true
     }
 
     /// Called by any feature view model that catches `PortalError.sessionExpired`.
@@ -99,7 +119,10 @@ struct RootView: View {
     var body: some View {
         MainTabView(client: appState.client)
             .disabled(appState.isSigningOut)
-            .task { await appState.restoreLocalData() }
+            .task {
+                await appState.restoreLocalData()
+                await appState.restoreSession()
+            }
     }
 }
 

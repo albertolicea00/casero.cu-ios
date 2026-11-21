@@ -28,8 +28,9 @@ Native iOS client for Cuban lodging hosts to submit guest reports to the officia
 - Phone/email management through the authenticated official portal form embedded
   in an ephemeral browser. No undocumented write endpoint is guessed.
 - CSV/Excel and PDF exports from the complete cached date range.
-- Optional Keychain credentials, recovery of expired sessions, cache retention,
-  and local data deletion on sign-out.
+- Device-only Keychain credentials (on by default), optional sign-in at launch and
+  recovery of expired sessions behind Face ID/Touch ID/passcode, cache retention,
+  and local data deletion on sign-out. See [SECURITY.md](SECURITY.md#saved-credentials-and-automatic-sign-in).
 - English and Spanish UI, manual, and privacy information.
 
 SMS reporting is available without portal login: guest reports, Cuban companion

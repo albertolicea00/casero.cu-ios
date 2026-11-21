@@ -16,6 +16,9 @@
 "+ %lld companions" = "+ %lld companions";
 "%@ ago" = "%@ ago";
 "In %@" = "In %@";
+"Sign in to the app session with your saved credentials." = "Sign in to the app session with your saved credentials.";
+"Signs in with your saved credentials when the app opens and when a request comes back as expired. iOS asks for Face ID, Touch ID or your passcode each time; without a device passcode it stays off. If it fails, a banner asks you to sign in." = "Signs in with your saved credentials when the app opens and when a request comes back as expired. iOS asks for Face ID, Touch ID or your passcode each time; without a device passcode it stays off. If it fails, a banner asks you to sign in.";
+"Stored only on this device in the iOS Keychain, used to restore the app session." = "Stored only on this device in the iOS Keychain, used to restore the app session. If you turn this on after signing in, sign in again to save them.";
 "Today" = "Today";
 "Stay: %@" = "Stay: %@";
 "ID" = "ID";
@@ -97,7 +100,6 @@
 "365 days" = "365 days";
 "Cancel" = "Cancel";
 "Destination" = "Destination";
-"Detected lazily: only when a real request comes back as expired, never by polling in the background. If off (or no credentials saved), a banner asks you to sign in again." = "Detected lazily: only when a real request comes back as expired, never by polling in the background. If off (or no credentials saved), a banner asks you to sign in again.";
 "Developer info" = "Developer info";
 "Disclaimer" = "Disclaimer";
 "Done" = "Done";
@@ -184,7 +186,7 @@
 "Privacy Policy & Terms" = "Privacy Policy & Terms";
 "Show password" = "Show password"; // pragma: allowlist secret
 "Hide password" = "Hide password"; // pragma: allowlist secret
-"Privacy details" = "Your credentials are sent only to the official portal. Remembering them is optional and stores them in the iOS Keychain. Guest data and optional photos are stored on this device with iOS file protection, subject to the selected retention period. Expired data is removed when accessed. Signing out clears credentials and cached guest data. Clear cache removes local guests and photos. Turning off photo storage removes saved photos. Exports can contain personal data; files you share or save outside this app are managed by their destination. The embedded portal browser uses an ephemeral session. This app includes no analytics or advertising SDK. SMS reports are handed to the system composer and sent through your carrier only after you confirm. The app cannot read service replies; enter received confirmation codes manually.";
+"Privacy details" = "Your credentials are sent only to the official portal. Remembering them is on by default and can be turned off; they are stored only on this device in the iOS Keychain and are used only after Face ID, Touch ID or your passcode. Guest data and optional photos are stored on this device with iOS file protection, subject to the selected retention period. Expired data is removed when accessed. Signing out clears credentials and cached guest data. Clear cache removes local guests and photos. Turning off photo storage removes saved photos. Exports can contain personal data; files you share or save outside this app are managed by their destination. The embedded portal browser uses an ephemeral session. This app includes no analytics or advertising SDK. SMS reports are handed to the system composer and sent through your carrier only after you confirm. The app cannot read service replies; enter received confirmation codes manually.";
 "Ready to register (%lld)" = "Ready to register (%lld)";
 "Register" = "Register";
 "Register guest" = "Register guest";
@@ -227,7 +229,6 @@
 "Some photos could not be loaded. The export includes the remaining data." = "Some photos could not be loaded. The export includes the remaining data.";
 "Some registrations were not confirmed. They remain in the queue. Verify the portal before retrying to avoid duplicate reports." = "Some registrations were not confirmed. They remain in the queue. Verify the portal before retrying to avoid duplicate reports.";
 "Stay days" = "Stay days";
-"Stored in the iOS Keychain, used only for silent session recovery." = "Stored in the iOS Keychain, used only for silent session recovery.";
 "The SMS result is unknown. Check Messages before retrying." = "The SMS result is unknown. Check Messages before retrying.";
 "The end date must be on or after the start date." = "The end date must be on or after the start date.";
 "The main guest's registration is confirmed" = "The main guest's registration is confirmed";

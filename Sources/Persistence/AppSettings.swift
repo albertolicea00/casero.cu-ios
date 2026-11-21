@@ -82,7 +82,7 @@ final class AppSettings: ObservableObject {
         cacheTTL = storedTTL.flatMap(CacheTTL.init(rawValue:)) ?? .oneWeek
         saveImages = defaults.object(forKey: Keys.saveImages) as? Bool ?? true
         autoReauth = defaults.object(forKey: Keys.autoReauth) as? Bool ?? false
-        rememberCredentials = defaults.object(forKey: Keys.rememberCredentials) as? Bool ?? false
+        rememberCredentials = defaults.object(forKey: Keys.rememberCredentials) as? Bool ?? true
         let storedRange = defaults.object(forKey: Keys.defaultGuestRangeDays) as? Int
         defaultGuestRangeDays = [7, 15, 30, 60, 90, 180, 365].contains(storedRange ?? 90) ? (storedRange ?? 90) : 90
     }

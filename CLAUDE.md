@@ -155,8 +155,21 @@ and [the supplied published guide](https://cubatramite.com/reporte-a-inmigracion
 These describe the format; physical carrier acceptance still requires a device
 with the host's registered number.
 
+## Saved credentials
+
+Read [SECURITY.md](SECURITY.md#saved-credentials-and-automatic-sign-in) before
+touching `KeychainStore`, `AppState.recoverSession()` or the session settings.
+Keep these invariants:
+
+- Keychain items use `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`.
+- Every sign-in with saved credentials passes the `LAContext`
+  `.deviceOwnerAuthentication` check first; no passcode means no silent sign-in.
+- "Remember credentials" defaults on; "Auto re-authenticate" defaults off.
+- Sign-out clears the Keychain.
+
 ## What not to do
 
 - Do not hardcode credentials, tokens, cookies, or real guest data anywhere.
 - Do not weaken TLS validation for hosts other than `casero.rem.cu`.
+- Do not sign in with saved credentials without the device owner check.
 - Do not introduce a monorepo layout — Android stays in its own repository.

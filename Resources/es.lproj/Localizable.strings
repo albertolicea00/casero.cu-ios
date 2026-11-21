@@ -16,6 +16,9 @@
 "+ %lld companions" = "+ %lld acompañantes";
 "%@ ago" = "hace %@";
 "In %@" = "en %@";
+"Sign in to the app session with your saved credentials." = "Entrar a la sesión de la app con tus credenciales guardadas.";
+"Signs in with your saved credentials when the app opens and when a request comes back as expired. iOS asks for Face ID, Touch ID or your passcode each time; without a device passcode it stays off. If it fails, a banner asks you to sign in." = "Entra con tus credenciales guardadas al abrir la app y cuando una solicitud indica que la sesión venció. iOS pide Face ID, Touch ID o tu código cada vez; si el dispositivo no tiene código, no funciona. Si falla, un aviso te pide iniciar sesión.";
+"Stored only on this device in the iOS Keychain, used to restore the app session." = "Se guardan solo en este dispositivo, en el llavero de iOS, para recuperar la sesión. Si activas esta opción después de entrar, vuelve a iniciar sesión para guardarlas.";
 "Today" = "hoy";
 "Stay: %@" = "Estancia: %@";
 "ID" = "ID";
@@ -97,7 +100,6 @@
 "365 days" = "365 días";
 "Cancel" = "Cancelar";
 "Destination" = "Destino";
-"Detected lazily: only when a real request comes back as expired, never by polling in the background. If off (or no credentials saved), a banner asks you to sign in again." = "La sesión se recupera cuando una solicitud indica que venció. Si no hay credenciales guardadas, se te pedirá iniciar sesión de nuevo.";
 "Developer info" = "Desarrollador";
 "Disclaimer" = "Aviso";
 "Done" = "Listo";
@@ -184,7 +186,7 @@
 "Privacy Policy & Terms" = "Política de privacidad y términos";
 "Show password" = "Mostrar contraseña"; // pragma: allowlist secret
 "Hide password" = "Ocultar contraseña"; // pragma: allowlist secret
-"Privacy details" = "Las credenciales solo se envían al portal oficial. Recordarlas es opcional y se guardan en el llavero de iOS. Los datos de huéspedes y las fotos opcionales se guardan en este dispositivo con protección de archivos de iOS, durante el plazo seleccionado. Los datos vencidos se eliminan al acceder a ellos. Cerrar sesión borra las credenciales y los datos guardados. Borrar datos guardados elimina huéspedes y fotos locales. Desactivar el almacenamiento de fotos elimina las fotos guardadas. Las exportaciones pueden contener datos personales; los archivos que compartas o guardes fuera de la app quedan bajo el control de su destino. El navegador integrado usa una sesión temporal. La app no incluye SDK de analítica ni publicidad. Los reportes por SMS se entregan al editor del sistema y se envían mediante tu operador solo cuando lo confirmas. La app no puede leer las respuestas del servicio; introduce los códigos recibidos manualmente.";
+"Privacy details" = "Las credenciales solo se envían al portal oficial. Recordarlas está activado por defecto y se puede desactivar; se guardan solo en este dispositivo, en el llavero de iOS, y solo se usan tras Face ID, Touch ID o tu código. Los datos de huéspedes y las fotos opcionales se guardan en este dispositivo con protección de archivos de iOS, durante el plazo seleccionado. Los datos vencidos se eliminan al acceder a ellos. Cerrar sesión borra las credenciales y los datos guardados. Borrar datos guardados elimina huéspedes y fotos locales. Desactivar el almacenamiento de fotos elimina las fotos guardadas. Las exportaciones pueden contener datos personales; los archivos que compartas o guardes fuera de la app quedan bajo el control de su destino. El navegador integrado usa una sesión temporal. La app no incluye SDK de analítica ni publicidad. Los reportes por SMS se entregan al editor del sistema y se envían mediante tu operador solo cuando lo confirmas. La app no puede leer las respuestas del servicio; introduce los códigos recibidos manualmente.";
 "Ready to register (%lld)" = "Listos para reportar (%lld)";
 "Register" = "Registrar";
 "Register guest" = "Registrar huésped";
@@ -227,7 +229,6 @@
 "Some photos could not be loaded. The export includes the remaining data." = "No se pudieron cargar algunas fotos. La exportación incluye los demás datos.";
 "Some registrations were not confirmed. They remain in the queue. Verify the portal before retrying to avoid duplicate reports." = "Algunos registros no fueron confirmados y siguen en la lista. Revisa el portal antes de reintentar para evitar reportes duplicados.";
 "Stay days" = "Días de estancia";
-"Stored in the iOS Keychain, used only for silent session recovery." = "Se guardan en el llavero de iOS para recuperar la sesión. Si activas esta opción después de entrar, vuelve a iniciar sesión para guardarlas.";
 "The SMS result is unknown. Check Messages before retrying." = "Se desconoce el resultado del SMS. Revisa Mensajes antes de reintentar.";
 "The end date must be on or after the start date." = "La fecha final debe ser igual o posterior a la inicial.";
 "The main guest's registration is confirmed" = "El registro del huésped principal está confirmado";

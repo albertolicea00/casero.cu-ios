@@ -55,7 +55,7 @@ struct SettingsView: View {
     private var accountSection: some View {
         Section("Account") {
             Toggle("Remember credentials", isOn: $settings.rememberCredentials)
-            Text("Stored in the iOS Keychain, used only for silent session recovery.")
+            Text("Stored only on this device in the iOS Keychain, used to restore the app session.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             if appState.isSignedIn {
@@ -86,7 +86,7 @@ struct SettingsView: View {
             Toggle("Auto re-authenticate on expiry", isOn: $settings.autoReauth)
                 .disabled(!settings.rememberCredentials)
             Text(
-                "Detected lazily: only when a real request comes back as expired, never by polling in the background. If off (or no credentials saved), a banner asks you to sign in again."
+                "Signs in with your saved credentials when the app opens and when a request comes back as expired. iOS asks for Face ID, Touch ID or your passcode each time; without a device passcode it stays off. If it fails, a banner asks you to sign in."
             )
             .font(.caption)
             .foregroundStyle(.secondary)
