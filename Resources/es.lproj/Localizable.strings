@@ -20,6 +20,8 @@
 "Stay: %@" = "Estancia: %@";
 "ID" = "ID";
 "Stay ID" = "ID de estancia";
+"Unknown date" = "Fecha desconocida";
+"Scroll by date" = "Desplazarse por fecha";
 "Nationality unknown" = "Nacionalidad desconocida";
 "1 hour" = "1 hora";
 "1 week" = "1 semana";

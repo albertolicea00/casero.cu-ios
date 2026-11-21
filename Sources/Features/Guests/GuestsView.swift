@@ -10,6 +10,8 @@ struct GuestsView: View {
     @State private var pendingFrom = Date()
     @State private var pendingTo = Date()
     @State private var companionCounts: [String: Int] = [:]
+    @State private var visibleGuestID: String?
+    @State private var isScrubbingGuests = false
 
     init(client: CaseroClient, settings: AppSettings) {
         self.client = client
@@ -24,6 +26,33 @@ struct GuestsView: View {
         formatter.timeZone = PortalDates.timeZone
         return formatter
     }()
+
+    private static let monthTitle: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = .current
+        formatter.timeZone = PortalDates.timeZone
+        formatter.setLocalizedDateFormatFromTemplate("MMM yyyy")
+        return formatter
+    }()
+
+    private struct GuestMonth: Identifiable {
+        let month: Date?
+        var guests: [Guest]
+        var id: String { month.map { String($0.timeIntervalSince1970) } ?? "unknown" }
+    }
+
+    private func groupedByCheckInMonth(_ guests: [Guest]) -> [GuestMonth] {
+        var groups: [GuestMonth] = []
+        for guest in guests {
+            let month = guest.checkIn.flatMap { PortalDates.calendar.dateInterval(of: .month, for: $0)?.start }
+            if groups.last?.month == month {
+                groups[groups.count - 1].guests.append(guest)
+            } else {
+                groups.append(GuestMonth(month: month, guests: [guest]))
+            }
+        }
+        return groups
+    }
 
     var body: some View {
         NavigationStack {
@@ -224,32 +253,133 @@ struct GuestsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         } else {
-            ScrollView {
-                LazyVStack(spacing: 10) {
-                    ForEach(guests) { guest in
-                        NavigationLink {
-                            GuestDetailView(
-                                guest: guest,
-                                client: client,
-                                settings: settings,
-                                onCompanionsLoaded: { count in companionCounts[guest.id] = count }
-                            )
-                        } label: {
-                            GuestRow(
-                                guest: guest,
-                                dateFormatter: Self.displayDate,
-                                companionCount: companionCounts[guest.id]
-                            )
+            let months = groupedByCheckInMonth(guests)
+            ScrollViewReader { scrollProxy in
+                ScrollView {
+                    LazyVStack(spacing: 10, pinnedViews: [.sectionHeaders]) {
+                        ForEach(months) { group in
+                        Section {
+                            ForEach(group.guests) { guest in
+                                NavigationLink {
+                                    GuestDetailView(
+                                        guest: guest,
+                                        client: client,
+                                        settings: settings,
+                                        onCompanionsLoaded: { count in companionCounts[guest.id] = count }
+                                    )
+                                } label: {
+                                    GuestRow(
+                                        guest: guest,
+                                        dateFormatter: Self.displayDate,
+                                        companionCount: companionCounts[guest.id]
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .background {
+                                    GeometryReader { geometry in
+                                        Color.clear.preference(
+                                            key: GuestRowPositions.self,
+                                            value: [guest.id: geometry.frame(in: .named("guestList")).minY]
+                                        )
+                                    }
+                                }
+                                .id(guest.id)
+                            }
+                        } header: {
+                            Text(group.month.map { Self.monthTitle.string(from: $0) } ?? String(localized: "Unknown date"))
+                                .font(.headline)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 8)
+                                .background(Color(uiColor: .systemBackground))
                         }
-                        .buttonStyle(.plain)
+                    }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 10)
+                    .padding(.bottom, 20)
+                }
+                .coordinateSpace(name: "guestList")
+                .scrollIndicators(.hidden)
+                .onPreferenceChange(GuestRowPositions.self) { positions in
+                    guard !isScrubbingGuests else { return }
+                    let current = positions.filter { $0.value <= 30 }.max { $0.value < $1.value }
+                        ?? positions.min { $0.value < $1.value }
+                    if let current { visibleGuestID = current.key }
+                }
+                .overlay(alignment: .trailing) {
+                    if guests.count > 1 {
+                        guestScrubber(guests: guests) { id in
+                            visibleGuestID = id
+                            scrollProxy.scrollTo(id, anchor: .top)
+                        }
                     }
                 }
-                .padding(.horizontal)
-                .padding(.top, 10)
-                .padding(.bottom, 20)
+                .refreshable { if appState.isSignedIn { await viewModel.reload() } }
             }
-            .refreshable { if appState.isSignedIn { await viewModel.reload() } }
         }
+    }
+
+    private func guestScrubber(guests: [Guest], onSelect: @escaping (String) -> Void) -> some View {
+        GeometryReader { geometry in
+            let index = guests.firstIndex { $0.id == visibleGuestID } ?? 0
+            let travel = max(0, geometry.size.height - 36)
+            let position = travel * CGFloat(index) / CGFloat(guests.count - 1)
+
+            ZStack(alignment: .topTrailing) {
+                Capsule()
+                    .fill(Color(uiColor: .separator))
+                    .frame(width: 3)
+                    .padding(.vertical, 18)
+                    .padding(.trailing, 12)
+                Capsule()
+                    .fill(Color(uiColor: .secondaryLabel))
+                    .frame(width: 7, height: 36)
+                    .padding(.trailing, 10)
+                    .offset(y: position)
+                if isScrubbingGuests {
+                    Text(guests[index].checkIn.map { Self.monthTitle.string(from: $0) } ?? "—")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color(uiColor: .secondarySystemBackground), in: Capsule())
+                        .shadow(color: .black.opacity(0.15), radius: 5, y: 2)
+                        .offset(x: -44, y: min(position, max(0, geometry.size.height - 64)))
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { value in
+                        isScrubbingGuests = true
+                        let fraction = min(max(value.location.y / geometry.size.height, 0), 1)
+                        let selected = min(guests.count - 1, Int((fraction * CGFloat(guests.count - 1)).rounded()))
+                        if guests[selected].id != visibleGuestID { onSelect(guests[selected].id) }
+                    }
+                    .onEnded { _ in isScrubbingGuests = false }
+            )
+        }
+        .frame(width: 44)
+        .padding(.trailing, 8)
+        .accessibilityLabel("Scroll by date")
+        .accessibilityAdjustableAction { direction in
+            let index = guests.firstIndex { $0.id == visibleGuestID } ?? 0
+            switch direction {
+            case .increment: onSelect(guests[min(index + 1, guests.count - 1)].id)
+            case .decrement: onSelect(guests[max(index - 1, 0)].id)
+            @unknown default: break
+            }
+        }
+    }
+}
+
+private struct GuestRowPositions: PreferenceKey {
+    static var defaultValue: [String: CGFloat] = [:]
+
+    static func reduce(value: inout [String: CGFloat], nextValue: () -> [String: CGFloat]) {
+        value.merge(nextValue(), uniquingKeysWith: { _, latest in latest })
     }
 }
 
