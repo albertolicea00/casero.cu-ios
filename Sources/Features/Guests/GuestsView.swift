@@ -12,6 +12,7 @@ struct GuestsView: View {
     @State private var companionCounts: [String: Int] = [:]
     @State private var visibleGuestID: String?
     @State private var isScrubbingGuests = false
+    @State private var isHeaderCollapsed = false
 
     init(client: CaseroClient, settings: AppSettings) {
         self.client = client
@@ -82,7 +83,7 @@ struct GuestsView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if viewModel.isOffline {
+                if !isHeaderCollapsed && viewModel.isOffline {
                     Label(offlineCaption, systemImage: "icloud.slash")
                         .font(.caption)
                         .foregroundStyle(.orange)
@@ -91,6 +92,7 @@ struct GuestsView: View {
                         .padding(.top, 4)
                 }
 
+                if !isHeaderCollapsed {
                 HStack(spacing: 10) {
                     HStack(spacing: 8) {
                         Image(systemName: "magnifyingglass")
@@ -142,6 +144,7 @@ struct GuestsView: View {
                 if let message = viewModel.errorMessage, !viewModel.guests.isEmpty {
                     Text(message).font(.caption).foregroundStyle(.red).padding(.horizontal)
                 }
+                }
 
                 HStack(spacing: 10) {
                     Picker("Segment", selection: $viewModel.segment) {
@@ -151,6 +154,7 @@ struct GuestsView: View {
                     }
                     .pickerStyle(.segmented)
 
+                    if !isHeaderCollapsed {
                     Menu {
                         Picker("Sort order", selection: $viewModel.sortOrder) {
                             ForEach(GuestsViewModel.SortOrder.allCases) { order in
@@ -164,11 +168,12 @@ struct GuestsView: View {
                             .foregroundStyle(.secondary)
                     }
                     .accessibilityLabel("Sort guests")
+                    }
                 }
                 .padding(.horizontal)
                 .padding(.top, 12)
 
-                if let lastFetched = viewModel.lastFetched {
+                if !isHeaderCollapsed, let lastFetched = viewModel.lastFetched {
                     Text(String.localizedStringWithFormat(
                         String(localized: "Last updated: %@"),
                         Self.lastUpdatedDate.string(from: lastFetched)
@@ -182,12 +187,14 @@ struct GuestsView: View {
 
                 content
             }
+            .animation(.easeInOut(duration: 0.2), value: isHeaderCollapsed)
             .background(Color(uiColor: .systemBackground).ignoresSafeArea())
             .navigationTitle("Guests")
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
+                    if !isHeaderCollapsed {
                     if !appState.isSignedIn {
                         Button {
                             isLoginPresented = true
@@ -207,6 +214,7 @@ struct GuestsView: View {
                     }
                     .accessibilityLabel("Reload guests")
                     .disabled(viewModel.isLoading || !appState.isSignedIn)
+                    }
                 }
             }
             .sheet(isPresented: $isDateFilterPresented) {
@@ -235,6 +243,9 @@ struct GuestsView: View {
             if appState.isSignedIn { await viewModel.reload() }
         }
         .onChange(of: viewModel.guests.count) { count in appState.hasCachedGuests = count > 0 }
+        .onChange(of: viewModel.filteredGuests.isEmpty) { isEmpty in
+            if isEmpty { isHeaderCollapsed = false }
+        }
         .onChange(of: settings.cacheTTL) { _ in Task { await viewModel.loadFromCache() } }
         .onChange(of: settings.defaultGuestRangeDays) { _ in
             viewModel.applyDefaultRange()
@@ -338,6 +349,17 @@ struct GuestsView: View {
                 }
                 .coordinateSpace(name: "guestList")
                 .scrollIndicators(.hidden)
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 10)
+                        .onChanged { value in
+                            guard !isScrubbingGuests else { return }
+                            if value.translation.height < -20, !isHeaderCollapsed {
+                                isHeaderCollapsed = true
+                            } else if value.translation.height > 20, isHeaderCollapsed {
+                                isHeaderCollapsed = false
+                            }
+                        }
+                )
                 .onPreferenceChange(GuestRowPositions.self) { positions in
                     guard !isScrubbingGuests else { return }
                     let current = positions.filter { $0.value <= 30 }.max { $0.value < $1.value }
