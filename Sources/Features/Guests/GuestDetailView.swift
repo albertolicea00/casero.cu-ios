@@ -68,16 +68,6 @@ struct GuestDetailView: View {
                             .textSelection(.enabled)
                             .lineLimit(1)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                        if !isCompanion {
-                            VStack(alignment: .trailing, spacing: 1) {
-                                Text("Stay ID")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                Text(guest.stayId)
-                                    .font(.caption.weight(.bold))
-                                    .textSelection(.enabled)
-                            }
-                        }
                         if let nationality = guest.nationality,
                             let flag = NationalityFlag.emoji(for: nationality)
                         {
@@ -122,34 +112,36 @@ struct GuestDetailView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            if isCompanion {
-                Divider()
-                registrationIdentifiers
-            }
+            Divider()
+            registrationIdentifiers
         }
         .guestCard()
     }
 
     private var registrationIdentifiers: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 3) {
                 Text("Stay ID")
-                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Text(":")
                     .foregroundStyle(.secondary)
                 Text(guest.stayId)
-                    .font(.caption.weight(.bold))
+                    .fontWeight(.bold)
                     .textSelection(.enabled)
             }
+            .font(.caption)
             if isCompanion {
                 Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
+                HStack(spacing: 3) {
                     Text("ID")
-                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text(":")
                         .foregroundStyle(.secondary)
                     Text(guest.companionId ?? "--")
-                        .font(.caption.weight(.bold))
+                        .fontWeight(.bold)
                         .textSelection(.enabled)
                 }
+                .font(.caption)
             }
         }
     }
@@ -404,23 +396,27 @@ private struct CompanionSummary: View {
             }
             Divider().padding(.vertical, 3)
             HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 3) {
                     Text("Stay ID")
-                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text(":")
                         .foregroundStyle(.secondary)
                     Text(guest.stayId)
-                        .font(.caption.weight(.bold))
+                        .fontWeight(.bold)
                         .textSelection(.enabled)
                 }
+                .font(.caption)
                 Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
+                HStack(spacing: 3) {
                     Text("ID")
-                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text(":")
                         .foregroundStyle(.secondary)
                     Text(guest.companionId ?? "--")
-                        .font(.caption.weight(.bold))
+                        .fontWeight(.bold)
                         .textSelection(.enabled)
                 }
+                .font(.caption)
             }
             if guest.checkIn != nil || guest.checkOut != nil {
                 Divider().padding(.vertical, 3)
