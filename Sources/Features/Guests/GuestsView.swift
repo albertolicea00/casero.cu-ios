@@ -6,7 +6,6 @@ struct GuestsView: View {
     @ObservedObject private var settings: AppSettings
     @StateObject private var viewModel: GuestsViewModel
     @State private var isDateFilterPresented = false
-    @State private var isLoginPresented = false
     @State private var pendingFrom = Date()
     @State private var pendingTo = Date()
     @State private var companionCounts: [String: Int] = [:]
@@ -115,14 +114,6 @@ struct GuestsView: View {
             .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    if !appState.isSignedIn {
-                        Button {
-                            isLoginPresented = true
-                        } label: {
-                            Label("Sign in to the app session", systemImage: "person.crop.circle.badge.plus")
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
                     Button {
                         Task { await viewModel.reload() }
                     } label: {
@@ -151,11 +142,6 @@ struct GuestsView: View {
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
             }
-            .sheet(isPresented: $isLoginPresented) {
-                LoginView(client: client, settings: settings)
-                    .presentationDetents([.large])
-                    .presentationDragIndicator(.visible)
-            }
         }
         .task {
             await viewModel.loadFromCache()
@@ -169,7 +155,6 @@ struct GuestsView: View {
         }
         .onChange(of: appState.isSignedIn) { signedIn in
             if signedIn {
-                isLoginPresented = false
                 Task { await viewModel.reload() }
             }
         }
@@ -227,41 +212,43 @@ struct GuestsView: View {
     }
 
     @ViewBuilder
+    private var emptyState: some View {
+        if viewModel.isLoading {
+            ProgressView()
+        } else if let message = viewModel.errorMessage {
+            VStack(spacing: 12) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.system(size: 34))
+                    .foregroundStyle(.orange)
+                Text(message).foregroundStyle(.red).multilineTextAlignment(.center)
+                Button("Retry") { Task { await viewModel.reload() } }
+                    .buttonStyle(.bordered)
+            }
+            .padding()
+        } else {
+            VStack(spacing: 10) {
+                Image(systemName: "person.2")
+                    .font(.system(size: 38, weight: .regular))
+                    .foregroundStyle(.tertiary)
+                Text("No guests in this range.")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    // A single ScrollView is kept in every state: swapping it for a plain view
+    // (e.g. switching to an empty segment) makes the navigation bar lose track
+    // of it and the large title stops showing.
     private var content: some View {
         let guests = viewModel.filteredGuests
-        if guests.isEmpty {
-            if viewModel.isLoading {
-                ProgressView().frame(maxHeight: .infinity)
-            } else if let message = viewModel.errorMessage {
-                VStack(spacing: 12) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.system(size: 34))
-                        .foregroundStyle(.orange)
-                    Text(message).foregroundStyle(.red).multilineTextAlignment(.center)
-                    Button("Retry") { Task { await viewModel.reload() } }
-                        .buttonStyle(.bordered)
-                }
-                .padding()
-                .frame(maxHeight: .infinity)
-            } else {
-                VStack(spacing: 10) {
-                    Image(systemName: "person.2")
-                        .font(.system(size: 38, weight: .regular))
-                        .foregroundStyle(.tertiary)
-                    Text("No guests in this range.")
-                        .font(.headline)
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-        } else {
-            let months = groupedByCheckInMonth(guests)
-            let knownNationalities = nationalityNamesByCode
-            ScrollViewReader { scrollProxy in
+        let months = groupedByCheckInMonth(guests)
+        let knownNationalities = nationalityNamesByCode
+        return ScrollViewReader { scrollProxy in
                 ScrollView {
                     VStack(spacing: 8) {
                         searchAndFilterControls
-                        if let message = viewModel.errorMessage, !viewModel.guests.isEmpty {
+                        if let message = viewModel.errorMessage, !guests.isEmpty {
                             Text(message).font(.caption).foregroundStyle(.red)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -282,6 +269,10 @@ struct GuestsView: View {
                     .padding(.horizontal)
                     .padding(.top, 8)
 
+                    if guests.isEmpty {
+                        emptyState
+                            .frame(maxWidth: .infinity, minHeight: 320)
+                    } else {
                     LazyVStack(spacing: 10, pinnedViews: [.sectionHeaders]) {
                         ForEach(months) { group in
                         Section {
@@ -325,6 +316,7 @@ struct GuestsView: View {
                     .padding(.horizontal)
                     .padding(.top, 10)
                     .padding(.bottom, 20)
+                    }
                 }
                 .coordinateSpace(name: "guestList")
                 .scrollIndicators(.hidden)
@@ -344,7 +336,6 @@ struct GuestsView: View {
                 }
                 .refreshable { if appState.isSignedIn { await viewModel.reload() } }
             }
-        }
     }
 
     private func guestScrubber(guests: [Guest], onSelect: @escaping (String) -> Void) -> some View {

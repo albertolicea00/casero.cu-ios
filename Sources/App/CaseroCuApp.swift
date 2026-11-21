@@ -72,6 +72,7 @@ final class AppState: ObservableObject {
     /// Called by any feature view model that catches `PortalError.sessionExpired`.
     /// Lazy by design: no background polling, this only reacts to a real failed call.
     func reportSessionExpired() async {
+        isSignedIn = false
         sessionExpiredBanner = true
     }
 
@@ -119,9 +120,14 @@ struct MainTabView: View {
         VStack(spacing: 0) {
             if appState.isSigningOut { ProgressView("Signing out of the app session…").padding() }
             if appState.sessionExpiredBanner {
-                SessionExpiredBanner()
+                SessionExpiredBanner(onSignIn: { isRegisterLoginPresented = true })
             }
             ConnectivityBanner(connectivity: appState.connectivity)
+            if !appState.isSignedIn && !appState.sessionExpiredBanner
+                && [.register, .guests, .settings].contains(selection)
+            {
+                SignInBanner(onSignIn: { isRegisterLoginPresented = true })
+            }
 
             TabView(selection: $selection) {
                 SMSHelpView {
@@ -203,12 +209,10 @@ private struct AuthGate<Content: View>: View {
 }
 
 private struct SessionExpiredBanner: View {
-    @EnvironmentObject private var appState: AppState
+    let onSignIn: () -> Void
 
     var body: some View {
-        Button {
-            appState.isSignedIn = false
-        } label: {
+        Button(action: onSignIn) {
             Label("App session expired. Tap to sign in again.", systemImage: "exclamationmark.triangle.fill")
                 .font(.footnote.weight(.semibold))
                 .frame(maxWidth: .infinity)
@@ -216,6 +220,22 @@ private struct SessionExpiredBanner: View {
         }
         .frame(minHeight: 44)
         .background(Color.orange.opacity(0.2))
+        .foregroundStyle(.primary)
+    }
+}
+
+private struct SignInBanner: View {
+    let onSignIn: () -> Void
+
+    var body: some View {
+        Button(action: onSignIn) {
+            Label("Sign in to the app session", systemImage: "person.crop.circle.badge.plus")
+                .font(.footnote.weight(.semibold))
+                .frame(maxWidth: .infinity)
+                .padding(8)
+        }
+        .frame(minHeight: 44)
+        .background(Color.blue.opacity(0.15))
         .foregroundStyle(.primary)
     }
 }
