@@ -235,7 +235,7 @@ private struct SignInBanner: View {
                 .padding(8)
         }
         .frame(minHeight: 44)
-        .background(Color.blue.opacity(0.15))
+        .background(Color.yellow.opacity(0.25))
         .foregroundStyle(.primary)
     }
 }
