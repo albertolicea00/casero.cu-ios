@@ -177,6 +177,7 @@
 "Photo" = "Photo";
 "Pinned certificate not bundled. Add casero_rem_cu.cer to the app resources — see CLAUDE.md." = "Pinned certificate not bundled. Add casero_rem_cu.cer to the app resources — see CLAUDE.md.";
 "Portal returned HTTP %lld." = "Portal returned HTTP %lld.";
+"Tap Preview SMS to open the prepared message in Messages. Review it and tap Send to confirm sending." = "Tap Preview SMS to open the prepared message in Messages. Review it and tap Send to confirm sending.";
 "You’ll review the prepared message in Messages before sending." = "You’ll review the prepared message in Messages before sending.";
 "Previously loaded guests remain available in Guests until the selected retention period expires. SMS/USSD requires cellular service even when no internet is needed." = "Previously loaded guests remain available in Guests until the selected retention period expires. SMS/USSD requires cellular service even when no internet is needed.";
 "Privacy Policy & Terms" = "Privacy Policy & Terms";
@@ -199,6 +200,7 @@
 "SMS procedure reference" = "SMS procedure reference";
 "SMS reports" = "SMS reports";
 "SMS report information" = "SMS report information";
+"Preview SMS" = "Preview SMS";
 "Send SMS" = "Send SMS";
 "Guest" = "Guest";
 "Companion" = "Companion";

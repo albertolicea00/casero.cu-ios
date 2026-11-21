@@ -16,7 +16,7 @@ struct SMSHelpView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Preview the prepared message in Messages. It will not be sent until you tap Send.")
+                    Text("Tap Preview SMS to open the prepared message in Messages. Review it and tap Send to confirm sending.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .padding(.horizontal, 4)
