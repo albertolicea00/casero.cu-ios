@@ -49,7 +49,7 @@ final class SMSFlowTests: XCTestCase {
         let model = SMSReportViewModel()
         model.passport = "TEST0001"
         model.days = "5"
-        model.prepare()
+        model.prepare(kind: .guest)
         let message = try XCTUnwrap(model.preparedMessage)
         XCTAssertEqual(message.body, "HCTEST0001 5")
         model.finished(.sent, kind: message.kind)
@@ -64,7 +64,7 @@ final class SMSFlowTests: XCTestCase {
     func testCancellingDoesNotAdvanceToConfirmationOrLoseInputs() {
         let model = SMSReportViewModel()
         model.passport = "TEST0001"
-        model.prepare()
+        model.prepare(kind: .guest)
         model.finished(.cancelled, kind: .guest)
         XCTAssertEqual(model.kind, .guest)
         XCTAssertEqual(model.passport, "TEST0001")
@@ -74,7 +74,7 @@ final class SMSFlowTests: XCTestCase {
     func testPreparedMessageIsAnImmutableSnapshot() throws {
         let model = SMSReportViewModel()
         model.passport = "TEST0001"
-        model.prepare()
+        model.prepare(kind: .guest)
         let message = try XCTUnwrap(model.preparedMessage)
         model.passport = "TEST0002"
         model.days = "7"

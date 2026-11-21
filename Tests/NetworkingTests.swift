@@ -71,7 +71,7 @@ final class NetworkingTests: XCTestCase {
         do {
             _ = try await client.registerGuests([registration])
             XCTFail("A timeout must remain an uncertain failure")
-        } catch PortalError.unreachable {} catch { XCTFail("Unexpected error: \(error)") }
+        } catch PortalError.registrationUncertain {} catch { XCTFail("Unexpected error: \(error)") }
         XCTAssertEqual(state.gets, 1)
         XCTAssertFalse(state.recovered)
     }

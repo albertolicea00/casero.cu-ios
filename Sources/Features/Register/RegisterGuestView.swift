@@ -8,6 +8,7 @@ struct RegisterGuestView: View {
     /// Queue entry waiting for the remove confirmation.
     @State private var pendingRemoval: GuestRegistration?
     @State private var isConfirmingSubmit = false
+    @State private var pdfFile: SavedPDF?
     private let client: CaseroClient
 
     init(client: CaseroClient) {
@@ -53,6 +54,9 @@ struct RegisterGuestView: View {
                             .font(.subheadline)
                             .foregroundStyle(.red)
                             .padding(.horizontal, 4)
+                        if !viewModel.queue.isEmpty {
+                            failureHelp(reason: message)
+                        }
                     }
                 }
                 .padding()
@@ -60,6 +64,9 @@ struct RegisterGuestView: View {
             .background(Color(uiColor: .systemBackground).ignoresSafeArea())
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Register guest")
+            .sheet(item: $pdfFile) { file in
+                ShareSheet(items: [file.url])
+            }
             .sheet(isPresented: isShowingResult) {
                 LookupResultSheet(
                     viewModel: viewModel,
@@ -245,7 +252,40 @@ struct RegisterGuestView: View {
                     photo: queuePhotos[guest.identificador]
                 )
             }
+            saveRecordButton {
+                ExportService.registrationPDF(.submitted(results), photos: queuePhotos)
+            }
         }
+    }
+
+    /// Shown when sending fails while people remain queued: what to do next and a
+    /// PDF of the pending people with the error, to finish the report elsewhere.
+    private func failureHelp(reason: String) -> some View {
+        let uncertain = !viewModel.uncertainIDs.isEmpty
+        return VStack(alignment: .leading, spacing: 10) {
+            Label(
+                "If it keeps failing, report these people by SMS from the SMS tab, or save this PDF and take it to the nearest immigration office.",
+                systemImage: "building.columns"
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 4)
+            saveRecordButton {
+                ExportService.registrationPDF(
+                    .failed(viewModel.queue, reason: reason, uncertain: uncertain), photos: queuePhotos)
+            }
+        }
+    }
+
+    private func saveRecordButton(_ makePDF: @escaping () -> Data) -> some View {
+        Button {
+            pdfFile = ExportService.writeRegistrationPDF(makePDF()).map(SavedPDF.init(url:))
+        } label: {
+            Label("Save PDF", systemImage: "arrow.down.doc")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.large)
     }
 
     /// Headline + content block, matching the SMS confirmation section.
@@ -454,12 +494,18 @@ private enum RegisterText {
     }
 }
 
+private struct SavedPDF: Identifiable {
+    let url: URL
+    var id: URL { url }
+}
+
 /// Last check before reporting: every person with document, origin and stay,
 /// so the host reviews exactly what is about to reach the portal.
 private struct SubmitSummarySheet: View {
     let entries: [GuestRegistration]
     let photos: [String: UIImage]
     var uncertainIDs: Set<String> = []
+    @State private var pdfFile: SavedPDF?
     let onCancel: () -> Void
     let onConfirm: () -> Void
 
@@ -487,12 +533,23 @@ private struct SubmitSummarySheet: View {
                 .padding()
             }
             .safeAreaInset(edge: .bottom) {
-                Button(action: onConfirm) {
-                    Text(registerTitle).frame(maxWidth: .infinity)
+                VStack(spacing: 10) {
+                    Button(action: onConfirm) {
+                        Text(registerTitle).frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(PrimaryActionButtonStyle())
+                    Button(action: savePDF) {
+                        Label("Save PDF", systemImage: "arrow.down.doc")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
                 }
-                .buttonStyle(PrimaryActionButtonStyle())
                 .padding()
                 .background(.bar)
+            }
+            .sheet(item: $pdfFile) { file in
+                ShareSheet(items: [file.url])
             }
             .navigationTitle("Review registration")
             .navigationBarTitleDisplayMode(.inline)
@@ -502,6 +559,13 @@ private struct SubmitSummarySheet: View {
                 }
             }
         }
+    }
+
+    /// Writes the review as a PDF (file protection on, temp folder) and opens the
+    /// share sheet so the host can keep it in Files, mail it, print it, etc.
+    private func savePDF() {
+        let data = ExportService.registrationPDF(.prepared(entries), photos: photos)
+        pdfFile = ExportService.writeRegistrationPDF(data).map(SavedPDF.init(url:))
     }
 
     private func isUncertain(_ entry: GuestRegistration) -> Bool {
