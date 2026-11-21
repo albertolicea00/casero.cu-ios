@@ -27,6 +27,15 @@ struct GuestsView: View {
         return formatter
     }()
 
+    private static let lastUpdatedDate: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = .current
+        formatter.timeZone = PortalDates.timeZone
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter
+    }()
+
     private static let monthTitle: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = .current
@@ -120,10 +129,11 @@ struct GuestsView: View {
                         isDateFilterPresented = true
                     } label: {
                         Image(systemName: "calendar")
-                            .foregroundStyle(.secondary)
+                            .foregroundColor(Color(uiColor: .secondaryLabel))
                             .frame(width: 44, height: 44)
                     }
                     .buttonStyle(.plain)
+                    .tint(Color(uiColor: .secondaryLabel))
                     .accessibilityLabel("Date range")
                 }
                 .padding(.horizontal)
@@ -157,6 +167,18 @@ struct GuestsView: View {
                 }
                 .padding(.horizontal)
                 .padding(.top, 12)
+
+                if let lastFetched = viewModel.lastFetched {
+                    Text(String.localizedStringWithFormat(
+                        String(localized: "Last updated: %@"),
+                        Self.lastUpdatedDate.string(from: lastFetched)
+                    ))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                }
 
                 content
             }
@@ -234,9 +256,6 @@ struct GuestsView: View {
     }
 
     private var offlineCaption: String {
-        if let lastFetched = viewModel.lastFetched {
-            return String(localized: "Showing cached data from \(Self.displayDate.string(from: lastFetched)).")
-        }
         return String(localized: "Showing cached data.")
     }
 

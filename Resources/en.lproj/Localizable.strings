@@ -214,6 +214,7 @@
 "Settings" = "Settings";
 "Showing cached data from %@." = "Showing cached data from %@.";
 "Showing cached data." = "Showing cached data.";
+"Last updated: %@" = "Last updated: %@";
 "Sign in" = "Sign in";
 "Sign in to the app" = "Sign in to the app";
 "Sign out of the app" = "Sign out of the app";
