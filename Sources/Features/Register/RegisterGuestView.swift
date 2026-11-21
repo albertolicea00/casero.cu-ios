@@ -62,6 +62,10 @@ struct RegisterGuestView: View {
                         }
                         .onDelete { viewModel.removeFromQueue($0) }
 
+                        if let message = viewModel.submitBlockedMessage {
+                            Text(message).foregroundStyle(.red)
+                        }
+
                         Button {
                             Task { await viewModel.submit() }
                         } label: {
@@ -80,7 +84,7 @@ struct RegisterGuestView: View {
                         ForEach(results) { guest in
                             VStack(alignment: .leading) {
                                 Label(
-                                    guest.fullName,
+                                    Self.displayName(guest.fullName),
                                     systemImage: guest.response == "OK" ? "checkmark.circle.fill" : "xmark.circle.fill"
                                 )
                                 .foregroundStyle(guest.response == "OK" ? .green : .red)
@@ -112,5 +116,10 @@ struct RegisterGuestView: View {
                 viewModel.acknowledgeSessionExpired()
             }
         }
+    }
+
+    /// `RegistrarHuesped` echoes the wire name (`NOMBRE**APELLIDO1*APELLIDO2`) as `Biografico`.
+    private static func displayName(_ wireName: String) -> String {
+        wireName.split(whereSeparator: { $0 == "*" || $0 == " " }).joined(separator: " ")
     }
 }

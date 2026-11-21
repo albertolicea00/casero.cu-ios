@@ -57,8 +57,21 @@ final class RegisterGuestViewModel: ObservableObject {
 
     var canAdd: Bool { foundPerson != nil && validationMessage == nil && !isSubmitting }
 
+    /// Nationality code the portal returns for Cuban companions (`ValidarPersonaSuin`).
+    private static let cubanNationalityCode = "247"
+
+    /// Captured traffic only shows companions registered in the same call as a
+    /// foreign guest (the companion's `EstanciaId` is `<guest stay>.1`), so a
+    /// queue of companions alone is never sent.
+    var submitBlockedMessage: String? {
+        guard !queue.isEmpty,
+            queue.allSatisfy({ $0.nationalityCode == Self.cubanNationalityCode })
+        else { return nil }
+        return String(localized: "Add the foreign guest to the queue before registering companions.")
+    }
+
     var canSubmit: Bool {
-        !queue.isEmpty && !isSubmitting
+        !queue.isEmpty && !isSubmitting && submitBlockedMessage == nil
     }
 
     func lookUp() async {
