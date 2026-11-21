@@ -338,11 +338,6 @@ private struct GuestRow: View {
                 }
                 .font(.headline)
                 .foregroundStyle(.primary)
-                if let companionLine {
-                    Text(companionLine)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
             }
 
             if guest.checkIn != nil || guest.checkOut != nil {
@@ -355,19 +350,22 @@ private struct GuestRow: View {
                     stayDate(title: "Check-out", date: guest.checkOut)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                if let checkIn = guest.checkIn {
-                    Text(GuestStayText.age(of: checkIn))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                if let duration = GuestStayText.duration(for: guest) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "moon.stars")
-                        Text(String.localizedStringWithFormat(String(localized: "Stay: %@"), duration))
+            }
+            if GuestStayText.duration(for: guest) != nil || companionLine != nil {
+                HStack(spacing: 8) {
+                    if let duration = GuestStayText.duration(for: guest) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "moon.stars")
+                            Text(String.localizedStringWithFormat(String(localized: "Stay: %@"), duration))
+                        }
                     }
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.secondary)
+                    Spacer(minLength: 8)
+                    if let companionLine {
+                        Text(companionLine)
+                    }
                 }
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
             }
         }
         .padding(14)

@@ -22,11 +22,8 @@ struct GuestDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
-                sectionHeading("Personal data")
-                personalCard
                 photoAction
-
-                sectionHeading("Stay timeline")
+                personalCard
                 stayCard
 
                 if !isCompanion {
@@ -176,13 +173,23 @@ struct GuestDetailView: View {
     private var stayCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             StayTimeline(guest: guest)
-            if let duration = GuestStayText.duration(for: guest) {
+            if guest.checkIn != nil || GuestStayText.duration(for: guest) != nil {
                 Divider()
-                Label(
-                    String.localizedStringWithFormat(String(localized: "Stay: %@"), duration), systemImage: "moon.stars"
-                )
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 5) {
+                    if let checkIn = guest.checkIn {
+                        Text(GuestStayText.age(of: checkIn))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    if let duration = GuestStayText.duration(for: guest) {
+                        Label(
+                            String.localizedStringWithFormat(String(localized: "Stay: %@"), duration),
+                            systemImage: "moon.stars"
+                        )
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    }
+                }
             }
         }
         .guestCard()
@@ -205,9 +212,6 @@ struct GuestDetailView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
-            ForEach(companions) { companion in
-                CompanionSummary(guest: companion, photo: companionPhotos[companion.id])
-            }
             if !companions.isEmpty {
                 HStack {
                     Spacer()
@@ -219,7 +223,7 @@ struct GuestDetailView: View {
                                 .frame(minHeight: 36)
                         } else {
                             Label(
-                                hasAllCompanionPhotos ? "Reload companion photos" : "Load companion photos",
+                                hasAllCompanionPhotos ? "Reload photos" : "Load companion photos",
                                 systemImage: "arrow.clockwise"
                             )
                             .font(.caption)
@@ -229,6 +233,9 @@ struct GuestDetailView: View {
                     .foregroundStyle(.secondary)
                     .disabled(isLoadingCompanionPhotos)
                 }
+            }
+            ForEach(companions) { companion in
+                CompanionSummary(guest: companion, photo: companionPhotos[companion.id])
             }
             if let companionPhotoError {
                 Text(companionPhotoError)
@@ -355,17 +362,12 @@ private struct StayTimeline: View {
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.secondary)
             Spacer(minLength: 8)
-            VStack(alignment: .trailing, spacing: 3) {
-                if let date {
-                    Text(PortalDates.display(date))
-                        .font(.subheadline.monospacedDigit().weight(.medium))
-                        .foregroundStyle(.primary)
-                    Text(GuestStayText.age(of: date))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                } else {
-                    Text("—").font(.subheadline).foregroundStyle(.secondary)
-                }
+            if let date {
+                Text(PortalDates.display(date))
+                    .font(.subheadline.monospacedDigit().weight(.medium))
+                    .foregroundStyle(.primary)
+            } else {
+                Text("—").font(.subheadline).foregroundStyle(.secondary)
             }
         }
     }
@@ -469,14 +471,6 @@ private struct CompanionSummary: View {
             if guest.checkIn != nil || guest.checkOut != nil {
                 Divider().padding(.vertical, 3)
                 StayTimeline(guest: guest)
-                if let duration = GuestStayText.duration(for: guest) {
-                    Label(
-                        String.localizedStringWithFormat(String(localized: "Stay: %@"), duration),
-                        systemImage: "moon.stars"
-                    )
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.secondary)
-                }
             }
         }
     }
