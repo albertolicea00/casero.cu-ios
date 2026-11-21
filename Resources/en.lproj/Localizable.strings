@@ -216,8 +216,8 @@
 "Showing cached data." = "Showing cached data.";
 "Last updated: %@" = "Last updated: %@";
 "Sign in" = "Sign in";
-"Sign in to the app" = "Sign in to the app";
-"Sign out of the app" = "Sign out of the app";
+"Sign in to the app session" = "Sign in to the app session";
+"Sign out of the app session" = "Sign out of the app session";
 "Sign in to look up and report guests." = "Sign in to look up and report guests.";
 "Back to guest or companion" = "Back to guest or companion";
 "Sign in in app" = "Sign in in app";

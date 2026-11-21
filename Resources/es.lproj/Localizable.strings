@@ -216,8 +216,8 @@
 "Showing cached data." = "Mostrando datos guardados.";
 "Last updated: %@" = "Última actualización: %@";
 "Sign in" = "Iniciar sesión";
-"Sign in to the app" = "Iniciar sesión en la app";
-"Sign out of the app" = "Cerrar sesión de la app";
+"Sign in to the app session" = "Iniciar sesión en la app";
+"Sign out of the app session" = "Cerrar la sesión de la app";
 "Sign in to look up and report guests." = "Inicia sesión para consultar y reportar huéspedes.";
 "Back to guest or companion" = "Volver al huésped o acompañante";
 "Sign in in app" = "Iniciar sesión en la app";

@@ -59,14 +59,14 @@ struct SettingsView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             if appState.isSignedIn {
-                Button("Sign out of the app", role: .destructive) {
+                Button("Sign out of the app session", role: .destructive) {
                     Task { await appState.signOutCompletely() }
                 }
             } else {
                 Button {
                     isLoginPresented = true
                 } label: {
-                    Label("Sign in to the app", systemImage: "person.crop.circle.badge.plus")
+                    Label("Sign in to the app session", systemImage: "person.crop.circle.badge.plus")
                 }
             }
         }
@@ -107,7 +107,12 @@ struct SettingsView: View {
                     appState.hasCachedGuests = false
                 }
             } label: {
-                Label("Clear cache", systemImage: "trash")
+                Label {
+                    Text("Clear cache")
+                } icon: {
+                    Image(systemName: "trash")
+                        .foregroundStyle(.red)
+                }
             }
             Text(viewModel.cacheSummary)
                 .font(.caption)
