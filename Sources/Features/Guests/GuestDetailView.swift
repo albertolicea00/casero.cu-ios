@@ -400,7 +400,7 @@ private struct NationalityTooltip: View {
     }
 }
 
-private struct GuestNameTooltip: View {
+struct GuestNameTooltip: View {
     @Environment(\.colorScheme) private var colorScheme
     let name: String
     @State private var isVisible = false

@@ -1,5 +1,8 @@
 "%lld guests cached, last updated %@." = "%lld huéspedes guardados; última actualización: %@.";
+"%lld people match this search." = "%lld personas coinciden con la búsqueda.";
+"%lld people will be reported to the official portal." = "Se reportarán %lld personas al portal oficial.";
 "1 day" = "1 día";
+"1 person will be reported to the official portal." = "Se reportará 1 persona al portal oficial.";
 "7 days" = "7 días";
 "15 days" = "15 días";
 "1 night" = "1 noche";
@@ -15,8 +18,20 @@
 "+ 1 companion" = "+ 1 acompañante";
 "+ %lld companions" = "+ %lld acompañantes";
 "%@ ago" = "hace %@";
+"Born" = "Nacimiento";
+"Check names, documents and dates. This app cannot undo a registration once the portal accepts it." = "Revisa nombres, documentos y fechas. Esta app no puede deshacer un registro una vez que el portal lo acepta.";
+"Choose person" = "Elegir persona";
+"Confirm person" = "Confirmar persona";
+"From (country)" = "De";
 "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal." = "Busca a cada persona, indica las fechas de estancia y agrégala al registro. Toca Reportar personas para enviarlas al portal oficial.";
+"Passport/ID: %@" = "Pasaporte/carné: %@";
+"Register %lld people" = "Registrar %lld personas";
+"Register 1 person" = "Registrar 1 persona";
 "Remove" = "Quitar";
+"Remove from registration?" = "¿Quitar del registro?";
+"Review registration" = "Revisar registro";
+"Select a person above to add them." = "Selecciona una persona arriba para agregarla.";
+"Stay details" = "Datos de la estancia";
 "This search option is only valid for Cuban nationals." = "Esta opción de búsqueda solo es válida para nacionales.";
 "Fill in the fields above to look up." = "Completa los campos de arriba para buscar.";
 "First name" = "Nombre";
@@ -25,7 +40,6 @@
 "ID card" = "CI";
 "In %@" = "en %@";
 "Look up by" = "Buscar por";
-"Matches" = "Coincidencias";
 "This search option is only valid for foreigners who are permanent or temporary residents in Cuba." = "Esta opción de búsqueda solo es válida para extranjeros residentes permanentes o temporales en Cuba.";
 "Passport" = "Pasaporte";
 "Person not found." = "Persona no encontrada.";
@@ -131,7 +145,6 @@
 "Export guest data" = "Exportar datos de huéspedes";
 "Foreign guest" = "Huésped extranjero";
 "Format" = "Formato";
-"Found" = "Persona encontrada";
 "From" = "Desde";
 "Guest details" = "Detalles del huésped";
 "Guest passport" = "Pasaporte del huésped";

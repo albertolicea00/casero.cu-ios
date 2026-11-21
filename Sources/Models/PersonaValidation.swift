@@ -71,6 +71,8 @@ struct GuestRegistration {
     /// `nationalityCode`; kept separate in case the portal expects a distinct
     /// "coming from" code for connecting itineraries — unverified.
     let procedenciaCode: String
+    /// Display only (queue card); never sent to the portal.
+    var nationalityName: String? = nil
 
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()

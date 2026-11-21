@@ -3,7 +3,11 @@ import SwiftUI
 struct RegisterGuestView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var viewModel: RegisterGuestViewModel
-    @State private var foundPhoto: UIImage?
+    /// Photos seen in the result sheet, reused on the queue cards.
+    @State private var queuePhotos: [String: UIImage] = [:]
+    /// Queue entry waiting for the remove confirmation.
+    @State private var pendingRemoval: GuestRegistration?
+    @State private var isConfirmingSubmit = false
     private let client: CaseroClient
 
     init(client: CaseroClient) {
@@ -36,14 +40,6 @@ struct RegisterGuestView: View {
                     lookupInputCard
                     lookUpButton
 
-                    if !viewModel.candidates.isEmpty {
-                        matchesSection
-                    }
-
-                    if let person = viewModel.foundPerson {
-                        foundSection(person)
-                    }
-
                     if !viewModel.queue.isEmpty {
                         queueSection
                     }
@@ -64,6 +60,15 @@ struct RegisterGuestView: View {
             .background(Color(uiColor: .systemBackground).ignoresSafeArea())
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Register guest")
+            .sheet(isPresented: isShowingResult) {
+                LookupResultSheet(
+                    viewModel: viewModel,
+                    loadPhoto: { await photo(for: $0) },
+                    onAdded: { id, photo in queuePhotos[id] = photo }
+                )
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+            }
         }
         .onChange(of: viewModel.lookupKind) { _ in viewModel.clearLookup() }
         .onChange(of: viewModel.lookupQuery) { _ in viewModel.clearLookup() }
@@ -125,7 +130,11 @@ struct RegisterGuestView: View {
             .buttonStyle(PrimaryActionButtonStyle())
             .disabled(!viewModel.canLookUp)
 
-            if !viewModel.canLookUp && !viewModel.isLookingUp {
+            if let message = viewModel.lookupErrorMessage {
+                Label(message, systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            } else if !viewModel.canLookUp && !viewModel.isLookingUp {
                 Label("Fill in the fields above to look up.", systemImage: "lock.fill")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -133,98 +142,17 @@ struct RegisterGuestView: View {
         }
     }
 
-    private var matchesSection: some View {
-        section("Matches") {
-            InputCard {
-                ForEach(Array(viewModel.candidates.enumerated()), id: \.offset) { index, person in
-                    if index > 0 { Divider() }
-                    Button { viewModel.select(person) } label: {
-                        VStack(alignment: .leading) {
-                            Text(person.fullName).font(.headline)
-                            Text(
-                                [person.identificador, person.nationality ?? ""].filter { !$0.isEmpty }
-                                    .joined(separator: " · ")
-                            )
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.vertical, 12)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-    }
-
-    private func foundSection(_ person: PersonaValidation) -> some View {
-        section("Found") {
-            InputCard {
-                HStack(spacing: 14) {
-                    GuestAvatar(name: person.fullName, photo: foundPhoto, size: 58)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(person.fullName).font(.headline)
-                        if let nationality = person.nationality {
-                            HStack(spacing: 6) {
-                                if let flag = NationalityFlag.emoji(for: nationality) { Text(flag) }
-                                Text(nationality)
-                            }
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-                .padding(.vertical, 12)
-                Divider()
-                stayDatePicker("Check-in", selection: $viewModel.checkIn)
-                Divider()
-                stayDatePicker("Check-out", selection: $viewModel.checkOut)
-                Divider()
-                Label(
-                    String.localizedStringWithFormat(
-                        String(localized: "Stay: %@"),
-                        GuestStayText.nights(from: viewModel.checkIn, to: viewModel.checkOut)),
-                    systemImage: "moon.stars"
-                )
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.secondary)
-                .padding(.vertical, 12)
-            }
-            .task(id: person.identificador) { await loadPhoto(for: person) }
-            if let message = viewModel.validationMessage {
-                Text(message)
-                    .font(.caption)
-                    .foregroundStyle(.red)
-                    .padding(.horizontal, 4)
-            }
-            Button {
-                viewModel.addToQueue()
-            } label: {
-                Text("Add to registration").frame(maxWidth: .infinity)
-            }
-            .buttonStyle(PrimaryActionButtonStyle())
-            .disabled(!viewModel.canAdd)
-        }
-    }
-
-    /// Label and compact picker on one row. `fixedSize` keeps the picker at its ideal
-    /// width so it never falls back to the short numeric format ("11/22/26").
-    private func stayDatePicker(_ title: LocalizedStringKey, selection: Binding<Date>) -> some View {
-        HStack {
-            Text(title)
-            Spacer(minLength: 8)
-            DatePicker(title, selection: selection, displayedComponents: .date)
-                .labelsHidden()
-                .fixedSize()
-        }
-        .padding(.vertical, 8)
+    /// Lookup results open in a sheet; swiping it down cancels.
+    private var isShowingResult: Binding<Bool> {
+        Binding(
+            get: { viewModel.isShowingResult },
+            set: { if !$0 { viewModel.dismissResult() } }
+        )
     }
 
     /// Same photo endpoints as Guests: Cuban nationals (CI lookup) by carné, everyone
     /// else through the foreign registry. A missing photo just keeps the initials.
-    private func loadPhoto(for person: PersonaValidation) async {
-        foundPhoto = nil
+    private func photo(for person: PersonaValidation) async -> UIImage? {
         let data: Data?
         if viewModel.lookupKind == .cubanCompanion {
             data = try? await client.fetchCompanionPhoto(carne: person.identificador)
@@ -233,32 +161,13 @@ struct RegisterGuestView: View {
                 passport: person.identificador, name: person.fullName,
                 nationalityCode: person.nationalityCode ?? "", sex: person.sex ?? "")
         }
-        guard !Task.isCancelled, let data else { return }
-        foundPhoto = UIImage(data: data)
+        return data.flatMap(UIImage.init(data:))
     }
 
     private var queueSection: some View {
         section("Ready to register (\(viewModel.queue.count))") {
-            InputCard {
-                ForEach(Array(viewModel.queue.enumerated()), id: \.offset) { index, entry in
-                    if index > 0 { Divider() }
-                    HStack {
-                        Text(
-                            "\(entry.firstName) \(entry.lastName1) \(entry.lastName2)".trimmingCharacters(
-                                in: .whitespaces))
-                        Spacer()
-                        Button {
-                            viewModel.removeFromQueue(IndexSet(integer: index))
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(.secondary)
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(viewModel.isSubmitting)
-                        .accessibilityLabel("Remove")
-                    }
-                    .padding(.vertical, 12)
-                }
+            ForEach(Array(viewModel.queue.enumerated()), id: \.offset) { _, entry in
+                queueCard(entry)
             }
             if let message = viewModel.submitBlockedMessage {
                 Text(message)
@@ -267,7 +176,7 @@ struct RegisterGuestView: View {
                     .padding(.horizontal, 4)
             }
             Button {
-                Task { await viewModel.submit() }
+                isConfirmingSubmit = true
             } label: {
                 Group {
                     if viewModel.isSubmitting {
@@ -281,6 +190,46 @@ struct RegisterGuestView: View {
             .buttonStyle(PrimaryActionButtonStyle())
             .disabled(!viewModel.canSubmit)
         }
+        .sheet(isPresented: $isConfirmingSubmit) {
+            SubmitSummarySheet(
+                entries: viewModel.queue,
+                photos: queuePhotos,
+                onCancel: { isConfirmingSubmit = false },
+                onConfirm: {
+                    isConfirmingSubmit = false
+                    Task { await viewModel.submit() }
+                }
+            )
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+        }
+        .alert(
+            "Remove from registration?",
+            isPresented: Binding(get: { pendingRemoval != nil }, set: { if !$0 { pendingRemoval = nil } }),
+            presenting: pendingRemoval
+        ) { entry in
+            Button("Cancel", role: .cancel) {}
+            Button("Remove", role: .destructive) { remove(entry) }
+        } message: { entry in
+            Text(
+                [RegisterText.fullName(entry), NationalityFlag.emoji(for: entry.nationalityName)]
+                    .compactMap { $0 }.joined(separator: " "))
+        }
+    }
+
+    /// Same card as the result sheet plus the stay range; the trash asks first.
+    private func queueCard(_ entry: GuestRegistration) -> some View {
+        RegistrationCard(
+            entry: entry,
+            photo: queuePhotos[entry.identificador],
+            onRemove: viewModel.isSubmitting ? nil : { pendingRemoval = entry }
+        )
+    }
+
+    private func remove(_ entry: GuestRegistration) {
+        guard let index = viewModel.queue.firstIndex(where: { $0.identificador == entry.identificador }) else { return }
+        queuePhotos[entry.identificador] = nil
+        viewModel.removeFromQueue(IndexSet(integer: index))
     }
 
     private func lastResultSection(_ results: [Guest]) -> some View {
@@ -315,5 +264,316 @@ struct RegisterGuestView: View {
     /// `RegistrarHuesped` echoes the wire name (`NOMBRE**APELLIDO1*APELLIDO2`) as `Biografico`.
     private static func displayName(_ wireName: String) -> String {
         wireName.split(whereSeparator: { $0 == "*" || $0 == " " }).joined(separator: " ")
+    }
+}
+
+/// Guest-details style person block: photo, one-line name (tap it for the full
+/// name when cut), document, then origin and birth date. Callers wrap it in an
+/// `InputCard`; used in the result sheet and on the queue cards.
+private struct PersonDetails: View {
+    let name: String
+    let identificador: String
+    let nationality: String?
+    let birthDate: Date?
+    let photo: UIImage?
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(alignment: .center, spacing: 14) {
+                GuestAvatar(name: name, photo: photo, size: 58)
+                VStack(alignment: .leading, spacing: 7) {
+                    GuestNameTooltip(name: name)
+                        .font(.title3.weight(.semibold))
+                        .zIndex(1)
+                    Text("Passport/ID: \(identificador)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.vertical, 12)
+            .zIndex(1)
+            Divider()
+            HStack {
+                if let nationality {
+                    fact("From (country)", value: [NationalityFlag.emoji(for: nationality), nationality]
+                        .compactMap { $0 }.joined(separator: " "))
+                }
+                Spacer(minLength: 8)
+                if let birthDate {
+                    fact("Born", value: RegisterText.date(birthDate))
+                }
+            }
+            .font(.caption)
+            .padding(.vertical, 10)
+        }
+    }
+
+    private func fact(_ title: LocalizedStringKey, value: String) -> some View {
+        HStack(spacing: 3) {
+            Text(title).foregroundStyle(.secondary)
+            Text(":").foregroundStyle(.secondary)
+            Text(value)
+                .fontWeight(.bold)
+                .lineLimit(1)
+                .textSelection(.enabled)
+        }
+    }
+}
+
+/// A queued person: the same card as the result sheet plus the stay range. Shown
+/// in Ready to register (with the trash) and in the review sheet (without it).
+private struct RegistrationCard: View {
+    let entry: GuestRegistration
+    let photo: UIImage?
+    let onRemove: (() -> Void)?
+
+    var body: some View {
+        InputCard {
+            PersonDetails(
+                name: RegisterText.fullName(entry),
+                identificador: entry.identificador,
+                nationality: entry.nationalityName,
+                birthDate: entry.birthDate,
+                photo: photo
+            )
+            .zIndex(1)
+            Divider()
+            HStack(spacing: 8) {
+                Label(RegisterText.stay(from: entry.checkIn, to: entry.checkOut), systemImage: "moon.stars")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 8)
+                if let onRemove {
+                    Button(action: onRemove) {
+                        Image(systemName: "trash")
+                            .foregroundStyle(.red)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Remove")
+                }
+            }
+            .padding(.vertical, 10)
+        }
+    }
+}
+
+/// Display formatting shared by the Register cards and the submit summary.
+private enum RegisterText {
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        formatter.timeZone = PortalDates.timeZone
+        return formatter
+    }()
+
+    static func date(_ date: Date) -> String { dateFormatter.string(from: date) }
+
+    /// "Nov 21, 2026 → Nov 22, 2026 · 1 night"
+    static func stay(from checkIn: Date, to checkOut: Date) -> String {
+        "\(date(checkIn)) → \(date(checkOut)) · \(GuestStayText.nights(from: checkIn, to: checkOut))"
+    }
+
+    static func fullName(_ entry: GuestRegistration) -> String {
+        "\(entry.firstName) \(entry.lastName1) \(entry.lastName2)"
+            .split(whereSeparator: \.isWhitespace).joined(separator: " ")
+    }
+}
+
+/// Last check before reporting: every person with document, origin and stay,
+/// so the host reviews exactly what is about to reach the portal.
+private struct SubmitSummarySheet: View {
+    let entries: [GuestRegistration]
+    let photos: [String: UIImage]
+    let onCancel: () -> Void
+    let onConfirm: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
+                    Text(header)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 4)
+                    ForEach(Array(entries.enumerated()), id: \.offset) { _, entry in
+                        RegistrationCard(entry: entry, photo: photos[entry.identificador], onRemove: nil)
+                    }
+                    Label(
+                        "Check names, documents and dates. This app cannot undo a registration once the portal accepts it.",
+                        systemImage: "exclamationmark.triangle"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 4)
+                }
+                .padding()
+            }
+            .safeAreaInset(edge: .bottom) {
+                Button(action: onConfirm) {
+                    Text(registerTitle).frame(maxWidth: .infinity)
+                }
+                .buttonStyle(PrimaryActionButtonStyle())
+                .padding()
+                .background(.bar)
+            }
+            .navigationTitle("Review registration")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel", action: onCancel)
+                }
+            }
+        }
+    }
+
+    private var header: String {
+        entries.count == 1
+            ? String(localized: "1 person will be reported to the official portal.")
+            : String(localized: "\(entries.count) people will be reported to the official portal.")
+    }
+
+    private var registerTitle: String {
+        entries.count == 1
+            ? String(localized: "Register 1 person")
+            : String(localized: "Register \(entries.count) people")
+    }
+}
+
+/// Lookup results: the people on top (a single match is already active, several
+/// are tapped to pick one) and, apart below, the stay dates and Add to registration.
+private struct LookupResultSheet: View {
+    @ObservedObject var viewModel: RegisterGuestViewModel
+    let loadPhoto: (PersonaValidation) async -> UIImage?
+    let onAdded: (String, UIImage?) -> Void
+    @State private var photos: [String: UIImage] = [:]
+
+    private var hasSeveral: Bool { viewModel.candidates.count > 1 }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    if hasSeveral {
+                        Text(String(localized: "\(viewModel.candidates.count) people match this search."))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 4)
+                    }
+                    ForEach(Array(viewModel.candidates.enumerated()), id: \.offset) { _, person in
+                        personCard(person)
+                    }
+                    staySection
+                }
+                .padding()
+            }
+            .navigationTitle(hasSeveral ? "Choose person" : "Confirm person")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { viewModel.dismissResult() }
+                }
+            }
+        }
+    }
+
+    private func isActive(_ person: PersonaValidation) -> Bool {
+        guard let found = viewModel.foundPerson else { return false }
+        return found.identificador == person.identificador && found.fullName == person.fullName
+    }
+
+    /// Tap anywhere on the card to make it the active person. The photo and the
+    /// name keep their own taps (enlarge, full-name tooltip).
+    private func personCard(_ person: PersonaValidation) -> some View {
+        let active = isActive(person)
+        return InputCard {
+            PersonDetails(
+                name: person.fullName,
+                identificador: person.identificador,
+                nationality: person.nationality,
+                birthDate: person.birthDate,
+                photo: photos[person.identificador]
+            )
+        }
+        .task(id: person.identificador) {
+            guard photos[person.identificador] == nil else { return }
+            photos[person.identificador] = await loadPhoto(person)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.accentColor, lineWidth: active && hasSeveral ? 2 : 0)
+        }
+        .overlay(alignment: .topTrailing) {
+            if hasSeveral {
+                Image(systemName: active ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundStyle(active ? Color.accentColor : Color.secondary)
+                    .padding(10)
+            }
+        }
+        .contentShape(RoundedRectangle(cornerRadius: 16))
+        .onTapGesture { viewModel.select(person) }
+        .accessibilityAddTraits(active ? [.isButton, .isSelected] : .isButton)
+    }
+
+    private var staySection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Stay details")
+                .font(.headline)
+                .padding(.top, 8)
+            InputCard {
+                stayDatePicker("Check-in", selection: $viewModel.checkIn)
+                Divider()
+                stayDatePicker("Check-out", selection: $viewModel.checkOut)
+                Divider()
+                Label(
+                    String.localizedStringWithFormat(
+                        String(localized: "Stay: %@"),
+                        GuestStayText.nights(from: viewModel.checkIn, to: viewModel.checkOut)),
+                    systemImage: "moon.stars"
+                )
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+                .padding(.vertical, 12)
+            }
+            if let message = viewModel.validationMessage {
+                Text(message)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 4)
+            }
+            VStack(spacing: 8) {
+                Button {
+                    guard let person = viewModel.foundPerson else { return }
+                    let photo = photos[person.identificador]
+                    viewModel.addToQueue()
+                    onAdded(person.identificador, photo)
+                } label: {
+                    Text("Add to registration").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(PrimaryActionButtonStyle())
+                .disabled(!viewModel.canAdd)
+                if viewModel.foundPerson == nil {
+                    Label("Select a person above to add them.", systemImage: "hand.tap")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    /// Label and compact picker on one row. `fixedSize` keeps the picker at its ideal
+    /// width so it never falls back to the short numeric format ("11/22/26").
+    private func stayDatePicker(_ title: LocalizedStringKey, selection: Binding<Date>) -> some View {
+        HStack {
+            Text(title)
+            Spacer(minLength: 8)
+            DatePicker(title, selection: selection, displayedComponents: .date)
+                .labelsHidden()
+                .fixedSize()
+        }
+        .padding(.vertical, 8)
     }
 }

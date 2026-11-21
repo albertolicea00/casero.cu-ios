@@ -53,12 +53,19 @@ final class RegisterGuestViewModel: ObservableObject {
     @Published var checkIn = Date()
     @Published var checkOut = PortalDates.calendar.date(byAdding: .day, value: 1, to: Date()) ?? Date()
 
+    /// The person being reviewed in the result sheet (dates + Add to registration).
     @Published private(set) var foundPerson: PersonaValidation?
-    /// Several matches (possible for a name lookup); the user picks one.
+    /// Every lookup result. Several are listed in the sheet to pick from first.
     @Published private(set) var candidates: [PersonaValidation] = []
+
+    /// The result sheet is open while there is something to pick or review.
+    var isShowingResult: Bool { foundPerson != nil || !candidates.isEmpty }
     @Published private(set) var queue: [GuestRegistration] = []
     @Published private(set) var isLookingUp = false
     @Published private(set) var isSubmitting = false
+    /// Shown under the Look up button.
+    @Published private(set) var lookupErrorMessage: String?
+    /// Registration errors, shown with the queue.
     @Published private(set) var errorMessage: String?
     @Published private(set) var lastSubmission: [Guest]?
     @Published private(set) var isSessionExpired = false
@@ -136,7 +143,7 @@ final class RegisterGuestViewModel: ObservableObject {
 
     func lookUp() async {
         guard canLookUp else { return }
-        errorMessage = nil
+        lookupErrorMessage = nil
         foundPerson = nil
         candidates = []
         isLookingUp = true
@@ -156,17 +163,20 @@ final class RegisterGuestViewModel: ObservableObject {
                 people = try await client.validatePersonaSuin(identificador: query)
             }
             guard kind == lookupKind, query == lookupQuery else { return }
-            switch people.count {
-            case 0: errorMessage = String(localized: "Person not found.")
-            case 1: foundPerson = people[0]
-            default: candidates = people
+            // Results open in a sheet. A single match goes straight to its card;
+            // several are listed first so the host picks the right person.
+            if people.isEmpty {
+                lookupErrorMessage = String(localized: "Person not found.")
+            } else {
+                candidates = people
+                if people.count == 1 { foundPerson = people[0] }
             }
         } catch is CancellationError {
             return
         } catch PortalError.sessionExpired {
             isSessionExpired = true
         } catch {
-            errorMessage = (error as? PortalError)?.errorDescription ?? error.localizedDescription
+            lookupErrorMessage = (error as? PortalError)?.errorDescription ?? error.localizedDescription
         }
     }
 
@@ -184,10 +194,15 @@ final class RegisterGuestViewModel: ObservableObject {
             checkIn: checkIn,
             checkOut: checkOut,
             procedenciaCode: person.nationalityCode ?? "",
+            nationalityName: person.nationality,
         )
         queue.append(registration)
         foundPerson = nil
+        candidates = []
         identificador = ""
+        firstName = ""
+        lastName1 = ""
+        lastName2 = ""
     }
 
     func removeFromQueue(_ offsets: IndexSet) {
@@ -221,15 +236,21 @@ final class RegisterGuestViewModel: ObservableObject {
         }
     }
 
-    func select(_ person: PersonaValidation) {
+    /// Closes the result sheet without adding anyone.
+    func dismissResult() {
+        foundPerson = nil
         candidates = []
+    }
+
+    func select(_ person: PersonaValidation) {
         foundPerson = person
     }
+
 
     func clearLookup() {
         foundPerson = nil
         candidates = []
-        errorMessage = nil
+        lookupErrorMessage = nil
     }
 
     func acknowledgeSessionExpired() {

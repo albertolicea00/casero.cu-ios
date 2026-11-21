@@ -1,5 +1,8 @@
 "%lld guests cached, last updated %@." = "%lld guests cached, last updated %@.";
+"%lld people match this search." = "%lld people match this search.";
+"%lld people will be reported to the official portal." = "%lld people will be reported to the official portal.";
 "1 day" = "1 day";
+"1 person will be reported to the official portal." = "1 person will be reported to the official portal.";
 "7 days" = "7 days";
 "15 days" = "15 days";
 "1 night" = "1 night";
@@ -15,8 +18,20 @@
 "+ 1 companion" = "+ 1 companion";
 "+ %lld companions" = "+ %lld companions";
 "%@ ago" = "%@ ago";
+"Born" = "Born";
+"Check names, documents and dates. This app cannot undo a registration once the portal accepts it." = "Check names, documents and dates. This app cannot undo a registration once the portal accepts it.";
+"Choose person" = "Choose person";
+"Confirm person" = "Confirm person";
+"From (country)" = "From";
 "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal." = "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal.";
+"Passport/ID: %@" = "Passport/ID: %@";
+"Register %lld people" = "Register %lld people";
+"Register 1 person" = "Register 1 person";
 "Remove" = "Remove";
+"Remove from registration?" = "Remove from registration?";
+"Review registration" = "Review registration";
+"Select a person above to add them." = "Select a person above to add them.";
+"Stay details" = "Stay details";
 "This search option is only valid for Cuban nationals." = "This search option is only valid for Cuban nationals.";
 "Fill in the fields above to look up." = "Fill in the fields above to look up.";
 "First name" = "First name";
@@ -25,7 +40,6 @@
 "ID card" = "ID card";
 "In %@" = "In %@";
 "Look up by" = "Look up by";
-"Matches" = "Matches";
 "This search option is only valid for foreigners who are permanent or temporary residents in Cuba." = "This search option is only valid for foreigners who are permanent or temporary residents in Cuba.";
 "Passport" = "Passport";
 "Person not found." = "Person not found.";
@@ -131,7 +145,6 @@
 "Export guest data" = "Export guest data";
 "Foreign guest" = "Foreign guest";
 "Format" = "Format";
-"Found" = "Found";
 "From" = "From";
 "Guest details" = "Guest details";
 "Guest passport" = "Guest passport";
