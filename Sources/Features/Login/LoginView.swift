@@ -20,7 +20,7 @@ struct LoginView: View {
                             .font(.system(size: 42))
                             .foregroundStyle(.tint)
                             .accessibilityHidden(true)
-                        Text("Sign in to the guest portal")
+                        Text("Sign in to the app session")
                             .font(.title2.weight(.semibold))
                             .multilineTextAlignment(.center)
                         Text("Use your account to register guests and manage your data.")
@@ -94,7 +94,7 @@ struct LoginView: View {
                                 ProgressView()
                                     .frame(maxWidth: .infinity)
                             } else {
-                                Text("Sign in in app")
+                                Text("Sign in to the app session")
                                     .frame(maxWidth: .infinity)
                             }
                         }
@@ -115,7 +115,7 @@ struct LoginView: View {
                 .padding(20)
             }
             .background(Color(uiColor: .systemBackground).ignoresSafeArea())
-            .navigationTitle("Sign in in app")
+            .navigationTitle("Sign in to the app session")
             .navigationBarTitleDisplayMode(.inline)
         }
     }

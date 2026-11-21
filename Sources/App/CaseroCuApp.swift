@@ -117,7 +117,7 @@ struct MainTabView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if appState.isSigningOut { ProgressView("Signing out…").padding() }
+            if appState.isSigningOut { ProgressView("Signing out of the app session…").padding() }
             if appState.sessionExpiredBanner {
                 SessionExpiredBanner()
             }
@@ -179,15 +179,15 @@ private struct AuthGate<Content: View>: View {
                     Image(systemName: "person.badge.key")
                         .font(.system(size: 38))
                         .foregroundStyle(.tertiary)
-                    Text("Sign in to the guest portal")
+                    Text("Sign in to the app session")
                         .font(.headline)
                         .multilineTextAlignment(.center)
-                    Text("Sign in to look up and report guests.")
+                    Text("Use your portal account to look up and report guests.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                     Button(action: onSignIn) {
-                        Label("Sign in", systemImage: "person.crop.circle.badge.plus")
+                        Label("Sign in to the app session", systemImage: "person.crop.circle.badge.plus")
                     }
                     .buttonStyle(.borderedProminent)
                 }
@@ -209,7 +209,7 @@ private struct SessionExpiredBanner: View {
         Button {
             appState.isSignedIn = false
         } label: {
-            Label("Session lost. Tap to sign in.", systemImage: "exclamationmark.triangle.fill")
+            Label("App session expired. Tap to sign in again.", systemImage: "exclamationmark.triangle.fill")
                 .font(.footnote.weight(.semibold))
                 .frame(maxWidth: .infinity)
                 .padding(8)

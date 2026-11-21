@@ -27,7 +27,7 @@ enum PortalError: LocalizedError {
             return String(
                 localized: "The portal returned an unexpected response. Please try again or use the official portal.")
         case .sessionExpired:
-            return String(localized: "Session expired. Please sign in again.")
+            return String(localized: "App session expired. Please sign in again.")
         case .invalidCredentials:
             return String(localized: "Invalid username or password.")
         case .antiForgeryMissing:

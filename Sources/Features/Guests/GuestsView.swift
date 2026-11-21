@@ -199,7 +199,7 @@ struct GuestsView: View {
                         Button {
                             isLoginPresented = true
                         } label: {
-                            Label("Sign in", systemImage: "person.crop.circle.badge.plus")
+                            Label("Sign in to the app session", systemImage: "person.crop.circle.badge.plus")
                         }
                         .buttonStyle(.borderedProminent)
                     }
