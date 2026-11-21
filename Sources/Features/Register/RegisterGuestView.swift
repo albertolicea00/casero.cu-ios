@@ -3,8 +3,11 @@ import SwiftUI
 struct RegisterGuestView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var viewModel: RegisterGuestViewModel
+    @State private var foundPhoto: UIImage?
+    private let client: CaseroClient
 
     init(client: CaseroClient) {
+        self.client = client
         _viewModel = StateObject(wrappedValue: RegisterGuestViewModel(client: client))
     }
 
@@ -158,20 +161,37 @@ struct RegisterGuestView: View {
     private func foundSection(_ person: PersonaValidation) -> some View {
         section("Found") {
             InputCard {
-                VStack(alignment: .leading) {
-                    Text(person.fullName).font(.headline)
-                    if let nationality = person.nationality {
-                        Text(nationality).font(.subheadline).foregroundStyle(.secondary)
+                HStack(spacing: 14) {
+                    GuestAvatar(name: person.fullName, photo: foundPhoto, size: 58)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(person.fullName).font(.headline)
+                        if let nationality = person.nationality {
+                            HStack(spacing: 6) {
+                                if let flag = NationalityFlag.emoji(for: nationality) { Text(flag) }
+                                Text(nationality)
+                            }
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        }
                     }
                 }
                 .padding(.vertical, 12)
                 Divider()
-                DatePicker("Check-in", selection: $viewModel.checkIn, displayedComponents: .date)
-                    .padding(.vertical, 8)
+                stayDatePicker("Check-in", selection: $viewModel.checkIn)
                 Divider()
-                DatePicker("Check-out", selection: $viewModel.checkOut, displayedComponents: .date)
-                    .padding(.vertical, 8)
+                stayDatePicker("Check-out", selection: $viewModel.checkOut)
+                Divider()
+                Label(
+                    String.localizedStringWithFormat(
+                        String(localized: "Stay: %@"),
+                        GuestStayText.nights(from: viewModel.checkIn, to: viewModel.checkOut)),
+                    systemImage: "moon.stars"
+                )
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+                .padding(.vertical, 12)
             }
+            .task(id: person.identificador) { await loadPhoto(for: person) }
             if let message = viewModel.validationMessage {
                 Text(message)
                     .font(.caption)
@@ -186,6 +206,35 @@ struct RegisterGuestView: View {
             .buttonStyle(PrimaryActionButtonStyle())
             .disabled(!viewModel.canAdd)
         }
+    }
+
+    /// Label and compact picker on one row. `fixedSize` keeps the picker at its ideal
+    /// width so it never falls back to the short numeric format ("11/22/26").
+    private func stayDatePicker(_ title: LocalizedStringKey, selection: Binding<Date>) -> some View {
+        HStack {
+            Text(title)
+            Spacer(minLength: 8)
+            DatePicker(title, selection: selection, displayedComponents: .date)
+                .labelsHidden()
+                .fixedSize()
+        }
+        .padding(.vertical, 8)
+    }
+
+    /// Same photo endpoints as Guests: Cuban nationals (CI lookup) by carné, everyone
+    /// else through the foreign registry. A missing photo just keeps the initials.
+    private func loadPhoto(for person: PersonaValidation) async {
+        foundPhoto = nil
+        let data: Data?
+        if viewModel.lookupKind == .cubanCompanion {
+            data = try? await client.fetchCompanionPhoto(carne: person.identificador)
+        } else {
+            data = try? await client.fetchForeignGuestPhoto(
+                passport: person.identificador, name: person.fullName,
+                nationalityCode: person.nationalityCode ?? "", sex: person.sex ?? "")
+        }
+        guard !Task.isCancelled, let data else { return }
+        foundPhoto = UIImage(data: data)
     }
 
     private var queueSection: some View {

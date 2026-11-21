@@ -57,7 +57,7 @@ struct GuestDetailView: View {
     private var personalCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .center, spacing: 14) {
-                GuestAvatar(guest: guest, photo: photo, size: 58)
+                GuestAvatar(name: guest.fullName, photo: photo, size: 58)
                 VStack(alignment: .leading, spacing: 7) {
                     HStack(alignment: .top, spacing: 6) {
                         GuestNameTooltip(name: guest.fullName)
@@ -459,7 +459,7 @@ private struct CompanionSummary: View {
     private var companionCard: some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack(alignment: .center, spacing: 12) {
-                GuestAvatar(guest: guest, photo: photo, size: 46)
+                GuestAvatar(name: guest.fullName, photo: photo, size: 46)
                 VStack(alignment: .leading, spacing: 5) {
                     HStack(alignment: .top, spacing: 6) {
                         GuestNameTooltip(name: guest.fullName)
@@ -509,8 +509,8 @@ private struct CompanionSummary: View {
 
 }
 
-private struct GuestAvatar: View {
-    let guest: Guest
+struct GuestAvatar: View {
+    let name: String
     let photo: UIImage?
     let size: CGFloat
     @State private var isPhotoExpanded = false
@@ -537,16 +537,16 @@ private struct GuestAvatar: View {
         }
         .buttonStyle(.plain)
         .disabled(photo == nil)
-        .accessibilityLabel(guest.fullName)
+        .accessibilityLabel(name)
         .fullScreenCover(isPresented: $isPhotoExpanded) {
             if let photo {
-                ExpandedGuestPhoto(photo: photo, name: guest.fullName)
+                ExpandedGuestPhoto(photo: photo, name: name)
             }
         }
     }
 
     private var initials: String {
-        let parts = guest.fullName.split(whereSeparator: \.isWhitespace)
+        let parts = name.split(whereSeparator: \.isWhitespace)
         let first = parts.first?.prefix(1) ?? "?"
         let last = parts.dropFirst().last?.prefix(1) ?? ""
         return (String(first) + String(last)).uppercased()
@@ -591,6 +591,10 @@ extension View {
 enum GuestStayText {
     static func duration(for guest: Guest) -> String? {
         guard let checkIn = guest.checkIn, let checkOut = guest.checkOut else { return nil }
+        return nights(from: checkIn, to: checkOut)
+    }
+
+    static func nights(from checkIn: Date, to checkOut: Date) -> String {
         let count = max(
             0,
             PortalDates.calendar.dateComponents(
