@@ -6,6 +6,7 @@ struct GuestDetailView: View {
     let client: CaseroClient
     let settings: AppSettings
     var isCompanion = false
+    var nationalityNamesByCode: [String: String] = [:]
     var onCompanionsLoaded: ((Int) -> Void)? = nil
     @State private var photo: UIImage?
     @State private var photoError: String?
@@ -17,7 +18,6 @@ struct GuestDetailView: View {
     @State private var didLoadCompanions = false
     @State private var companionPhotos: [String: UIImage] = [:]
     @State private var companionPhotoError: String?
-    @State private var isNationalityTooltipVisible = false
 
     var body: some View {
         ScrollView {
@@ -63,40 +63,10 @@ struct GuestDetailView: View {
                         GuestNameTooltip(name: guest.fullName)
                             .font(.title3.weight(.semibold))
                             .frame(maxWidth: .infinity, alignment: .leading)
-                        if let nationality = guest.nationality,
-                            let flag = NationalityFlag.emoji(for: nationality)
+                        if let nationality = guest.displayNationality(
+                            isCompanion: isCompanion, knownNamesByCode: nationalityNamesByCode)
                         {
-                            Button {
-                                withAnimation(.easeInOut(duration: 0.15)) {
-                                    isNationalityTooltipVisible.toggle()
-                                }
-                            } label: {
-                                Text(flag)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel("Nationality: \(nationality)")
-                            .overlay(alignment: .bottomTrailing) {
-                                if isNationalityTooltipVisible {
-                                    Text(nationality)
-                                        .font(.caption.weight(.medium))
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 6)
-                                        .background(.regularMaterial, in: Capsule())
-                                        .overlay(Capsule().strokeBorder(.quaternary, lineWidth: 1))
-                                        .shadow(color: .black.opacity(0.12), radius: 6, y: 3)
-                                        .fixedSize()
-                                        .offset(y: 30)
-                                        .zIndex(1)
-                                }
-                            }
-                            .task(id: isNationalityTooltipVisible) {
-                                guard isNationalityTooltipVisible else { return }
-                                try? await Task.sleep(nanoseconds: 1_800_000_000)
-                                guard !Task.isCancelled else { return }
-                                withAnimation(.easeInOut(duration: 0.15)) {
-                                    isNationalityTooltipVisible = false
-                                }
-                            }
+                            NationalityTooltip(nationality: nationality)
                         }
                     }
                     .zIndex(1)
@@ -373,6 +343,63 @@ private struct StayTimeline: View {
     }
 }
 
+extension Guest {
+    func displayNationality(isCompanion: Bool, knownNamesByCode: [String: String] = [:]) -> String? {
+        if let nationality = nationality?.trimmingCharacters(in: .whitespacesAndNewlines),
+            !nationality.isEmpty
+        {
+            return nationality
+        }
+        if isCompanion {
+            guard identificador.count == 11,
+                identificador.allSatisfy({ $0.isASCII && $0.isNumber })
+            else { return nil }
+            return String(localized: "Cuba")
+        }
+        guard let code = nationalityCode?.trimmingCharacters(in: .whitespacesAndNewlines) else { return nil }
+        return knownNamesByCode[code]
+    }
+}
+
+private struct NationalityTooltip: View {
+    let nationality: String
+    @State private var isVisible = false
+
+    var body: some View {
+        Group {
+            if let flag = NationalityFlag.emoji(for: nationality) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.15)) { isVisible.toggle() }
+                } label: {
+                    Text(flag)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Nationality: \(nationality)")
+                .overlay(alignment: .bottomTrailing) {
+                    if isVisible {
+                        Text(nationality)
+                            .font(.caption.weight(.medium))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(.regularMaterial, in: Capsule())
+                            .overlay(Capsule().strokeBorder(.quaternary, lineWidth: 1))
+                            .shadow(color: .black.opacity(0.12), radius: 6, y: 3)
+                            .fixedSize()
+                            .offset(y: 30)
+                            .zIndex(1)
+                    }
+                }
+                .task(id: isVisible) {
+                    guard isVisible else { return }
+                    try? await Task.sleep(nanoseconds: 1_800_000_000)
+                    guard !Task.isCancelled else { return }
+                    withAnimation(.easeInOut(duration: 0.15)) { isVisible = false }
+                }
+            }
+        }
+    }
+}
+
 private struct GuestNameTooltip: View {
     @Environment(\.colorScheme) private var colorScheme
     let name: String
@@ -434,10 +461,15 @@ private struct CompanionSummary: View {
             HStack(alignment: .center, spacing: 12) {
                 GuestAvatar(guest: guest, photo: photo, size: 46)
                 VStack(alignment: .leading, spacing: 5) {
-                    GuestNameTooltip(name: guest.fullName)
-                        .font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .zIndex(1)
+                    HStack(alignment: .top, spacing: 6) {
+                        GuestNameTooltip(name: guest.fullName)
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        if let nationality = guest.displayNationality(isCompanion: true) {
+                            NationalityTooltip(nationality: nationality)
+                        }
+                    }
+                    .zIndex(1)
                     Text("Passport/ID: \(guest.identificador)")
                         .font(.caption)
                         .foregroundStyle(.secondary)

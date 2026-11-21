@@ -57,12 +57,13 @@ final class GuestsViewModel: ObservableObject {
             }
         }
         let bySearch: [Guest]
-        if searchText.trimmingCharacters(in: .whitespaces).isEmpty {
+        let needle = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if needle.isEmpty {
             bySearch = bySegment
         } else {
-            let needle = searchText.lowercased()
             bySearch = bySegment.filter {
-                $0.fullName.lowercased().contains(needle) || $0.identificador.lowercased().contains(needle)
+                $0.fullName.range(of: needle, options: [.caseInsensitive, .diacriticInsensitive]) != nil
+                    || $0.identificador.range(of: needle, options: [.caseInsensitive, .diacriticInsensitive]) != nil
             }
         }
         return bySearch.sorted {

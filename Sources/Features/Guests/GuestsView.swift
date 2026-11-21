@@ -54,6 +54,22 @@ struct GuestsView: View {
         return groups
     }
 
+    private var nationalityNamesByCode: [String: String] {
+        let names = Dictionary(grouping: viewModel.guests.compactMap { guest -> (String, String)? in
+            guard let code = guest.nationalityCode?.trimmingCharacters(in: .whitespacesAndNewlines),
+                !code.isEmpty,
+                let nationality = guest.nationality?.trimmingCharacters(in: .whitespacesAndNewlines),
+                !nationality.isEmpty,
+                NationalityFlag.emoji(for: nationality) != nil
+            else { return nil }
+            return (code, nationality)
+        }, by: { $0.0 })
+        return names.compactMapValues { entries in
+            let countries = Set(entries.compactMap { NationalityFlag.emoji(for: $0.1) })
+            return countries.count == 1 ? entries.first?.1 : nil
+        }
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -254,6 +270,7 @@ struct GuestsView: View {
             }
         } else {
             let months = groupedByCheckInMonth(guests)
+            let knownNationalities = nationalityNamesByCode
             ScrollViewReader { scrollProxy in
                 ScrollView {
                     LazyVStack(spacing: 10, pinnedViews: [.sectionHeaders]) {
@@ -265,13 +282,15 @@ struct GuestsView: View {
                                         guest: guest,
                                         client: client,
                                         settings: settings,
+                                        nationalityNamesByCode: knownNationalities,
                                         onCompanionsLoaded: { count in companionCounts[guest.id] = count }
                                     )
                                 } label: {
                                     GuestRow(
                                         guest: guest,
                                         dateFormatter: Self.displayDate,
-                                        companionCount: companionCounts[guest.id]
+                                        companionCount: companionCounts[guest.id],
+                                        nationalityNamesByCode: knownNationalities
                                     )
                                 }
                                 .buttonStyle(.plain)
@@ -450,6 +469,7 @@ private struct GuestRow: View {
     let guest: Guest
     let dateFormatter: DateFormatter
     let companionCount: Int?
+    let nationalityNamesByCode: [String: String]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -459,7 +479,8 @@ private struct GuestRow: View {
                         .lineLimit(1)
                         .truncationMode(.tail)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    if let nationality = guest.nationality,
+                    if let nationality = guest.displayNationality(
+                        isCompanion: false, knownNamesByCode: nationalityNamesByCode),
                         let flag = NationalityFlag.emoji(for: nationality)
                     {
                         Text(flag)
