@@ -10,8 +10,18 @@ struct RegisterGuestView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 4)
+
+                    Link(destination: CaseroClient.baseURL.appendingPathComponent("Huespedes")) {
+                        Label("Complete in official portal", systemImage: "safari")
+                    }
+                    .padding(.horizontal, 4)
+
                     Picker("Look up by", selection: $viewModel.lookupKind) {
                         ForEach(RegisterGuestViewModel.LookupKind.allCases) { kind in
                             Text(LocalizedStringKey(kind.segmentLabel)).tag(kind)
@@ -19,141 +29,37 @@ struct RegisterGuestView: View {
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets())
-                }
 
-                Section {
-                    Group {
-                        if viewModel.lookupKind == .foreignGuestByName {
-                            TextField("First name", text: $viewModel.firstName)
-                            TextField("First surname", text: $viewModel.lastName1)
-                            TextField("Second surname", text: $viewModel.lastName2)
-                        } else {
-                            TextField(
-                                LocalizedStringKey(viewModel.lookupKind.fieldLabel),
-                                text: $viewModel.identificador,
-                            )
-                            .keyboardType(viewModel.lookupKind == .cubanCompanion ? .numberPad : .default)
-                        }
+                    lookupInputCard
+                    lookUpButton
+
+                    if !viewModel.candidates.isEmpty {
+                        matchesSection
                     }
-                    .textInputAutocapitalization(.characters)
-                    .autocorrectionDisabled()
-                } footer: {
-                    // Lives in the footer so the Form row clipping doesn't reshape its corners.
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text(LocalizedStringKey(viewModel.lookupKind.help))
 
-                        VStack(spacing: 8) {
-                            Button {
-                                Task { await viewModel.lookUp() }
-                            } label: {
-                                Group {
-                                    if viewModel.isLookingUp {
-                                        ProgressView().tint(.white)
-                                    } else {
-                                        Text("Look up")
-                                    }
-                                }
-                                .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(PrimaryActionButtonStyle())
-                            .disabled(!viewModel.canLookUp)
+                    if let person = viewModel.foundPerson {
+                        foundSection(person)
+                    }
 
-                            if !viewModel.canLookUp && !viewModel.isLookingUp {
-                                Label("Fill in the fields above to look up.", systemImage: "lock.fill")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
+                    if !viewModel.queue.isEmpty {
+                        queueSection
+                    }
+
+                    if let results = viewModel.lastSubmission {
+                        lastResultSection(results)
+                    }
+
+                    if let message = viewModel.errorMessage {
+                        Text(message)
+                            .font(.subheadline)
+                            .foregroundStyle(.red)
+                            .padding(.horizontal, 4)
                     }
                 }
-
-                if !viewModel.candidates.isEmpty {
-                    Section("Matches") {
-                        ForEach(Array(viewModel.candidates.enumerated()), id: \.offset) { _, person in
-                            Button { viewModel.select(person) } label: {
-                                VStack(alignment: .leading) {
-                                    Text(person.fullName).font(.headline)
-                                    Text(
-                                        [person.identificador, person.nationality ?? ""].filter { !$0.isEmpty }
-                                            .joined(separator: " · ")
-                                    )
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if let person = viewModel.foundPerson {
-                    Section("Found") {
-                        Text(person.fullName).font(.headline)
-                        if let nationality = person.nationality {
-                            Text(nationality).font(.subheadline).foregroundStyle(.secondary)
-                        }
-                        DatePicker("Check-in", selection: $viewModel.checkIn, displayedComponents: .date)
-                        DatePicker("Check-out", selection: $viewModel.checkOut, displayedComponents: .date)
-                        if let message = viewModel.validationMessage {
-                            Text(message).foregroundStyle(.red)
-                        }
-                        Button("Add to registration") { viewModel.addToQueue() }
-                            .disabled(!viewModel.canAdd)
-                    }
-                }
-
-                if !viewModel.queue.isEmpty {
-                    Section("Ready to register (\(viewModel.queue.count))") {
-                        ForEach(Array(viewModel.queue.enumerated()), id: \.offset) { _, entry in
-                            Text(
-                                "\(entry.firstName) \(entry.lastName1) \(entry.lastName2)".trimmingCharacters(
-                                    in: .whitespaces))
-                        }
-                        .onDelete { viewModel.removeFromQueue($0) }
-
-                        if let message = viewModel.submitBlockedMessage {
-                            Text(message).foregroundStyle(.red)
-                        }
-
-                        Button {
-                            Task { await viewModel.submit() }
-                        } label: {
-                            if viewModel.isSubmitting {
-                                ProgressView()
-                            } else {
-                                Text("Register people")
-                            }
-                        }
-                        .disabled(!viewModel.canSubmit)
-                    }
-                }
-
-                if let results = viewModel.lastSubmission {
-                    Section("Last result") {
-                        ForEach(results) { guest in
-                            VStack(alignment: .leading) {
-                                Label(
-                                    Self.displayName(guest.fullName),
-                                    systemImage: guest.response == "OK" ? "checkmark.circle.fill" : "xmark.circle.fill"
-                                )
-                                .foregroundStyle(guest.response == "OK" ? .green : .red)
-                                Text(guest.response ?? String(localized: "Unconfirmed")).font(.caption)
-                            }
-                        }
-                    }
-                }
-
-                Section {
-                    Link("Complete in official portal", destination: CaseroClient.baseURL.appendingPathComponent("Huespedes"))
-                        .listRowBackground(Color.clear)
-                }
-                if let message = viewModel.errorMessage {
-                    Section {
-                        Text(message).foregroundStyle(.red)
-                    }
-                }
+                .padding()
             }
+            .background(Color(uiColor: .systemBackground).ignoresSafeArea())
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Register guest")
         }
         .onChange(of: viewModel.lookupKind) { _ in viewModel.clearLookup() }
@@ -164,6 +70,196 @@ struct RegisterGuestView: View {
                 await appState.reportSessionExpired()
                 viewModel.acknowledgeSessionExpired()
             }
+        }
+    }
+
+    private var lookupInputCard: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            InputCard {
+                Group {
+                    if viewModel.lookupKind == .foreignGuestByName {
+                        TextField("First name", text: $viewModel.firstName)
+                            .padding(.vertical, 12)
+                        Divider()
+                        TextField("First surname", text: $viewModel.lastName1)
+                            .padding(.vertical, 12)
+                        Divider()
+                        TextField("Second surname", text: $viewModel.lastName2)
+                            .padding(.vertical, 12)
+                    } else {
+                        TextField(
+                            LocalizedStringKey(viewModel.lookupKind.fieldLabel),
+                            text: $viewModel.identificador,
+                        )
+                        .keyboardType(viewModel.lookupKind == .cubanCompanion ? .numberPad : .default)
+                        .padding(.vertical, 12)
+                    }
+                }
+                .textInputAutocapitalization(.characters)
+                .autocorrectionDisabled()
+            }
+            Label(LocalizedStringKey(viewModel.lookupKind.help), systemImage: "info.circle")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 4)
+        }
+    }
+
+    private var lookUpButton: some View {
+        VStack(spacing: 8) {
+            Button {
+                Task { await viewModel.lookUp() }
+            } label: {
+                Group {
+                    if viewModel.isLookingUp {
+                        ProgressView().tint(.white)
+                    } else {
+                        Text("Look up")
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(PrimaryActionButtonStyle())
+            .disabled(!viewModel.canLookUp)
+
+            if !viewModel.canLookUp && !viewModel.isLookingUp {
+                Label("Fill in the fields above to look up.", systemImage: "lock.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var matchesSection: some View {
+        section("Matches") {
+            InputCard {
+                ForEach(Array(viewModel.candidates.enumerated()), id: \.offset) { index, person in
+                    if index > 0 { Divider() }
+                    Button { viewModel.select(person) } label: {
+                        VStack(alignment: .leading) {
+                            Text(person.fullName).font(.headline)
+                            Text(
+                                [person.identificador, person.nationality ?? ""].filter { !$0.isEmpty }
+                                    .joined(separator: " · ")
+                            )
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 12)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private func foundSection(_ person: PersonaValidation) -> some View {
+        section("Found") {
+            InputCard {
+                VStack(alignment: .leading) {
+                    Text(person.fullName).font(.headline)
+                    if let nationality = person.nationality {
+                        Text(nationality).font(.subheadline).foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.vertical, 12)
+                Divider()
+                DatePicker("Check-in", selection: $viewModel.checkIn, displayedComponents: .date)
+                    .padding(.vertical, 8)
+                Divider()
+                DatePicker("Check-out", selection: $viewModel.checkOut, displayedComponents: .date)
+                    .padding(.vertical, 8)
+            }
+            if let message = viewModel.validationMessage {
+                Text(message)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 4)
+            }
+            Button {
+                viewModel.addToQueue()
+            } label: {
+                Text("Add to registration").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(PrimaryActionButtonStyle())
+            .disabled(!viewModel.canAdd)
+        }
+    }
+
+    private var queueSection: some View {
+        section("Ready to register (\(viewModel.queue.count))") {
+            InputCard {
+                ForEach(Array(viewModel.queue.enumerated()), id: \.offset) { index, entry in
+                    if index > 0 { Divider() }
+                    HStack {
+                        Text(
+                            "\(entry.firstName) \(entry.lastName1) \(entry.lastName2)".trimmingCharacters(
+                                in: .whitespaces))
+                        Spacer()
+                        Button {
+                            viewModel.removeFromQueue(IndexSet(integer: index))
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(viewModel.isSubmitting)
+                        .accessibilityLabel("Remove")
+                    }
+                    .padding(.vertical, 12)
+                }
+            }
+            if let message = viewModel.submitBlockedMessage {
+                Text(message)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 4)
+            }
+            Button {
+                Task { await viewModel.submit() }
+            } label: {
+                Group {
+                    if viewModel.isSubmitting {
+                        ProgressView().tint(.white)
+                    } else {
+                        Text("Register people")
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(PrimaryActionButtonStyle())
+            .disabled(!viewModel.canSubmit)
+        }
+    }
+
+    private func lastResultSection(_ results: [Guest]) -> some View {
+        section("Last result") {
+            InputCard {
+                ForEach(Array(results.enumerated()), id: \.element.id) { index, guest in
+                    if index > 0 { Divider() }
+                    VStack(alignment: .leading) {
+                        Label(
+                            Self.displayName(guest.fullName),
+                            systemImage: guest.response == "OK" ? "checkmark.circle.fill" : "xmark.circle.fill"
+                        )
+                        .foregroundStyle(guest.response == "OK" ? .green : .red)
+                        Text(guest.response ?? String(localized: "Unconfirmed")).font(.caption)
+                    }
+                    .padding(.vertical, 12)
+                }
+            }
+        }
+    }
+
+    /// Headline + content block, matching the SMS confirmation section.
+    private func section<Content: View>(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(.primary)
+            content()
         }
     }
 

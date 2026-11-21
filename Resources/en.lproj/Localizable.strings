@@ -15,6 +15,8 @@
 "+ 1 companion" = "+ 1 companion";
 "+ %lld companions" = "+ %lld companions";
 "%@ ago" = "%@ ago";
+"Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal." = "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal.";
+"Remove" = "Remove";
 "This search option is only valid for Cuban nationals." = "This search option is only valid for Cuban nationals.";
 "Fill in the fields above to look up." = "Fill in the fields above to look up.";
 "First name" = "First name";
@@ -121,7 +123,7 @@
 "by @albertolicea00" = "by @albertolicea00";
 "Each guest and companion requires a separate report. The first reply supplies a confirmation code. Send HC followed by that code to 7344, then wait for the registration code that confirms the report." = "Each guest and companion requires a separate report. The first reply supplies a confirmation code. Send HC followed by that code to 7344, then wait for the registration code that confirms the report.";
 "Enable Remember credentials at sign-in to recover expired sessions automatically." = "Enable Remember credentials at sign-in to recover expired sessions automatically.";
-"Enter a passport using only letters and digits." = "Enter a passport using only letters and digits.";
+"Enter a passport/ID using only letters and digits." = "Enter a passport/ID using only letters and digits.";
 "Enter a positive whole number of stay days." = "Enter a positive whole number of stay days.";
 "Enter only the received confirmation code, without HC or spaces." = "Enter only the received confirmation code, without HC or spaces.";
 "Enter the companion's 11-digit identity number." = "Enter the companion's 11-digit identity number.";

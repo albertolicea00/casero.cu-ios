@@ -15,6 +15,8 @@
 "+ 1 companion" = "+ 1 acompañante";
 "+ %lld companions" = "+ %lld acompañantes";
 "%@ ago" = "hace %@";
+"Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal." = "Busca a cada persona, indica las fechas de estancia y agrégala al registro. Toca Reportar personas para enviarlas al portal oficial.";
+"Remove" = "Quitar";
 "This search option is only valid for Cuban nationals." = "Esta opción de búsqueda solo es válida para nacionales.";
 "Fill in the fields above to look up." = "Completa los campos de arriba para buscar.";
 "First name" = "Nombre";
@@ -121,7 +123,7 @@
 "by @albertolicea00" = "por @albertolicea00";
 "Each guest and companion requires a separate report. The first reply supplies a confirmation code. Send HC followed by that code to 7344, then wait for the registration code that confirms the report." = "Cada huésped y acompañante requiere un reporte independiente. La primera respuesta incluye un código de confirmación. Envía HC seguido de ese código al 7344 y espera el código de registro que acredita el reporte.";
 "Enable Remember credentials at sign-in to recover expired sessions automatically." = "Activa Recordar credenciales al iniciar sesión para recuperar automáticamente las sesiones vencidas.";
-"Enter a passport using only letters and digits." = "Introduce un pasaporte que contenga solo letras y números.";
+"Enter a passport/ID using only letters and digits." = "Introduce un pasaporte/ID que contenga solo letras y números.";
 "Enter a positive whole number of stay days." = "Introduce un número entero positivo de días de estancia.";
 "Enter only the received confirmation code, without HC or spaces." = "Introduce solo el código de confirmación recibido, sin HC ni espacios.";
 "Enter the companion's 11-digit identity number." = "Introduce los 11 dígitos del carné del acompañante.";

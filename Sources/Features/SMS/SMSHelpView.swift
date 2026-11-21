@@ -92,7 +92,7 @@ struct SMSHelpView: View {
 
     private var reportInputCard: some View {
         VStack(alignment: .leading, spacing: 6) {
-            VStack(spacing: 0) {
+            InputCard {
                 TextField("Guest passport", text: $model.passport)
                     .textInputAutocapitalization(.characters)
                     .autocorrectionDisabled()
@@ -111,9 +111,6 @@ struct SMSHelpView: View {
                     .keyboardType(.numberPad)
                     .padding(.vertical, 12)
             }
-            .padding(.horizontal, 16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
             if let validation = model.validationMessage(for: selectedReportKind) {
                 Label(validation, systemImage: "info.circle")
                     .font(.caption)
@@ -125,16 +122,13 @@ struct SMSHelpView: View {
 
     private var confirmationInputCard: some View {
         VStack(alignment: .leading, spacing: 6) {
-            VStack(spacing: 0) {
+            InputCard {
                 TextField("Confirmation code without HC", text: $model.confirmationCode)
                     .textContentType(.oneTimeCode)
                     .textInputAutocapitalization(.characters)
                     .autocorrectionDisabled()
                     .padding(.vertical, 12)
             }
-            .padding(.horizontal, 16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
             if let validation = model.validationMessage(for: .confirmation) {
                 Label(validation, systemImage: "info.circle")
                     .font(.caption)

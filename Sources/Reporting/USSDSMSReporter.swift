@@ -17,7 +17,7 @@ enum USSDSMSReporter {
         var errorDescription: String? {
             switch self {
             case .passport:
-                return String(localized: "Enter a passport using only letters and digits.")
+                return String(localized: "Enter a passport/ID using only letters and digits.")
             case .companionIdentity:
                 return String(localized: "Enter the companion's 11-digit identity number.")
             case .days:
