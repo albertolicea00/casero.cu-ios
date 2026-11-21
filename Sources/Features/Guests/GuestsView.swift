@@ -83,9 +83,6 @@ struct GuestsView: View {
             content
             .background(Color(uiColor: .systemBackground).ignoresSafeArea())
             .navigationTitle("Guests")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
