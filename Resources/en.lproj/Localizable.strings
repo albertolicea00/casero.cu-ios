@@ -22,6 +22,7 @@
 "Born" = "Born";
 "Born: %@" = "Born: %@";
 "Check names, documents and dates. This app cannot undo a registration once the portal accepts it." = "Check names, documents and dates. This app cannot undo a registration once the portal accepts it.";
+"Check-in can be at most 7 days ago." = "Check-in can be at most 7 days ago.";
 "Check-in: %@  Check-out: %@  (%lld nights)" = "Check-in: %@  Check-out: %@  (%lld nights)";
 "Choose person" = "Choose person";
 "Confirm person" = "Confirm person";

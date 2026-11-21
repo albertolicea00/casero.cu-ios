@@ -677,9 +677,11 @@ private struct LookupResultSheet: View {
                 .font(.headline)
                 .padding(.top, 8)
             InputCard {
-                stayDatePicker("Check-in", selection: $viewModel.checkIn)
+                stayDatePicker(
+                    "Check-in", selection: $viewModel.checkIn,
+                    in: RegisterGuestViewModel.earliestCheckIn()...)
                 Divider()
-                stayDatePicker("Check-out", selection: $viewModel.checkOut)
+                stayDatePicker("Check-out", selection: $viewModel.checkOut, in: viewModel.checkIn...)
                 Divider()
                 Label(
                     String.localizedStringWithFormat(
@@ -719,11 +721,13 @@ private struct LookupResultSheet: View {
 
     /// Label and compact picker on one row. `fixedSize` keeps the picker at its ideal
     /// width so it never falls back to the short numeric format ("11/22/26").
-    private func stayDatePicker(_ title: LocalizedStringKey, selection: Binding<Date>) -> some View {
+    private func stayDatePicker(
+        _ title: LocalizedStringKey, selection: Binding<Date>, in range: PartialRangeFrom<Date>
+    ) -> some View {
         HStack {
             Text(title)
             Spacer(minLength: 8)
-            DatePicker(title, selection: selection, displayedComponents: .date)
+            DatePicker(title, selection: selection, in: range, displayedComponents: .date)
                 .labelsHidden()
                 .fixedSize()
         }

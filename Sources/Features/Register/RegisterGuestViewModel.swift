@@ -101,6 +101,16 @@ final class RegisterGuestViewModel: ObservableObject {
         return hasQuery && !isLookingUp && !isSubmitting
     }
 
+    /// The portal accepts check-ins up to 7 days back (today the 21st → the 14th),
+    /// counted in Cuba time.
+    nonisolated static let maxCheckInDaysBack = 7
+
+    nonisolated static func earliestCheckIn(now: Date = .now) -> Date {
+        let calendar = PortalDates.calendar
+        let today = calendar.startOfDay(for: now)
+        return calendar.date(byAdding: .day, value: -maxCheckInDaysBack, to: today) ?? today
+    }
+
     var validationMessage: String? {
         guard let person = foundPerson else { return nil }
         if let response = person.response, !response.isEmpty, response != "OK" { return response }
@@ -118,6 +128,9 @@ final class RegisterGuestViewModel: ObservableObject {
             return String(localized: "Personal data contains unsupported characters. Use the official portal.")
         }
         if checkOut < checkIn { return String(localized: "Check-out must be on or after check-in.") }
+        if PortalDates.calendar.startOfDay(for: checkIn) < Self.earliestCheckIn() {
+            return String(localized: "Check-in can be at most 7 days ago.")
+        }
         if queue.contains(where: { $0.identificador.caseInsensitiveCompare(person.identificador) == .orderedSame }) {
             return String(localized: "This person is already in the registration queue.")
         }

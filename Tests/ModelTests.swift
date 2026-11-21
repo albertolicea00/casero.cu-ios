@@ -23,6 +23,15 @@ final class ModelTests: XCTestCase {
                 + "TESTB*MEDIO*TRES*CUATRO,00000000001,247,F,06/04/85,18/11/26,21/11/26,247")
     }
 
+    func testCheckInGoesBackAtMostSevenDays() {
+        var components = DateComponents()
+        components.year = 2026; components.month = 11; components.day = 21; components.hour = 15
+        let now = PortalDates.calendar.date(from: components)!
+        let earliest = RegisterGuestViewModel.earliestCheckIn(now: now)
+        XCTAssertEqual(PortalDates.calendar.component(.day, from: earliest), 14)
+        XCTAssertEqual(earliest, PortalDates.calendar.startOfDay(for: earliest))
+    }
+
     func testPortalDatesKeepBirthDatesBefore1970() {
         XCTAssertNotNil(DotNetDate.parse("/Date(-315619200000)/"))
         XCTAssertEqual(DotNetDate.parse("/Date(0)/"), Date(timeIntervalSince1970: 0))
