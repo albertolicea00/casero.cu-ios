@@ -33,6 +33,29 @@ final class RegistrationTests: XCTestCase {
         XCTAssertEqual(model.queue.count, 1)
     }
 
+    /// A Cuban living abroad is found by passport and is a main guest; only people
+    /// found by CI count as companions.
+    func testCompanionRuleFollowsLookupNotNationality() async throws {
+        let client = StubPortalClient()
+        let json = #"{"Nombre":"Test","Apellido1":"Guest","Biografico":"Test Guest","Identificador":"X1","Nacionalidad":"247","Sexo":"F","FechaNac":"/Date(0)/"}"#
+        client.person = try JSONDecoder().decode(PersonaValidation.self, from: Data(json.utf8))
+        let model = RegisterGuestViewModel(client: client)
+        model.lookupKind = .foreignGuest
+        model.identificador = "X1"
+        await model.lookUp()
+        model.addToQueue()
+        XCTAssertNil(model.companionWarning)
+        XCTAssertTrue(model.canSubmit)
+
+        let companions = RegisterGuestViewModel(client: client)
+        companions.lookupKind = .cubanCompanion
+        companions.identificador = "00000000001"
+        await companions.lookUp()
+        companions.addToQueue()
+        XCTAssertNotNil(companions.companionWarning)
+        XCTAssertTrue(companions.canSubmit, "Warning only: the portal decides")
+    }
+
     func testPartialSuccessRetainsRejectedPeople() async throws {
         let client = StubPortalClient()
         let model = RegisterGuestViewModel(client: client)

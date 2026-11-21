@@ -51,6 +51,30 @@ final class NetworkingTests: XCTestCase {
         XCTAssertEqual(state.gets, 2)
     }
 
+    /// Captured from the portal when it refuses a registration: the app must show
+    /// the portal's own message, not "unexpected response".
+    func testRegistrationRejectionShowsPortalMessage() async throws {
+        let client = client()
+        PortalURLProtocol.handler = { request in
+            if request.httpMethod == "GET" { return (200, "text/html", tokenHTML) }
+            return (
+                200, "application/json",
+                #"{"success":false,"message":"No se ha registrado ningún huésped.","errors":{"nombre":"Error"}}"#
+            )
+        }
+        let date = Date()
+        let registration = GuestRegistration(
+            firstName: "Test", lastName1: "Guest", lastName2: "",
+            identificador: "TEST", nationalityCode: "428", sex: "F", birthDate: date,
+            checkIn: date, checkOut: date, procedenciaCode: "428")
+        do {
+            _ = try await client.registerGuests([registration])
+            XCTFail("A portal rejection must throw")
+        } catch PortalError.rejected(let message) {
+            XCTAssertEqual(message, "No se ha registrado ningún huésped.")
+        } catch { XCTFail("Unexpected error: \(error)") }
+    }
+
     func testUncertainRegistrationFailureIsNeverAutomaticallyRetried() async throws {
         let client = client()
         let state = RequestState()

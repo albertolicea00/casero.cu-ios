@@ -94,7 +94,7 @@
 "About" = "About";
 "Account" = "Account";
 "Active" = "Active";
-"Add the foreign guest to the queue before registering companions." = "Add the foreign guest to the queue before registering companions.";
+"Add the main guest to the queue before registering companions." = "Add the main guest (found by passport, name or temporary ID) to the queue before registering companions.";
 "Add to registration" = "Add to registration";
 "After sending" = "After sending";
 "All" = "All";

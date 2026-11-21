@@ -94,7 +94,7 @@
 "About" = "Acerca de";
 "Account" = "Cuenta";
 "Active" = "Activos";
-"Add the foreign guest to the queue before registering companions." = "Agrega al huésped extranjero a la lista antes de reportar acompañantes.";
+"Add the main guest to the queue before registering companions." = "Agrega al huésped principal (buscado por pasaporte, nombre o CI temporal) antes de reportar acompañantes.";
 "Add to registration" = "Añadir al reporte";
 "After sending" = "Después del envío";
 "All" = "Todos";

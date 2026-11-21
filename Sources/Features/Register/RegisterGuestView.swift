@@ -186,11 +186,17 @@ struct RegisterGuestView: View {
             ForEach(Array(viewModel.queue.enumerated()), id: \.offset) { _, entry in
                 queueCard(entry)
             }
-            if let message = viewModel.submitBlockedMessage {
-                Text(message)
-                    .font(.caption)
-                    .foregroundStyle(.red)
-                    .padding(.horizontal, 4)
+            if let message = viewModel.companionWarning {
+                // Warning only, sending stays enabled: same yellow as the sign-in banner.
+                Label {
+                    Text(message).foregroundStyle(.primary)
+                } icon: {
+                    Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+                }
+                .font(.caption.weight(.medium))
+                .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.yellow.opacity(0.25), in: RoundedRectangle(cornerRadius: 10))
             }
             Button {
                 isConfirmingSubmit = true

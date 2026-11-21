@@ -57,6 +57,8 @@ final class RegisterGuestViewModel: ObservableObject {
     @Published private(set) var foundPerson: PersonaValidation?
     /// Every lookup result. Several are listed in the sheet to pick from first.
     @Published private(set) var candidates: [PersonaValidation] = []
+    /// How the current results were found (the selector can change afterwards).
+    private var resultKind: LookupKind?
 
     /// The result sheet is open while there is something to pick or review.
     var isShowingResult: Bool { foundPerson != nil || !candidates.isEmpty }
@@ -139,21 +141,17 @@ final class RegisterGuestViewModel: ObservableObject {
 
     var canAdd: Bool { foundPerson != nil && validationMessage == nil && !isSubmitting }
 
-    /// Nationality code the portal returns for Cuban companions (`ValidarPersonaSuin`).
-    private static let cubanNationalityCode = "247"
-
     /// Captured traffic only shows companions registered in the same call as a
-    /// foreign guest (the companion's `EstanciaId` is `<guest stay>.1`), so a
-    /// queue of companions alone is never sent.
-    var submitBlockedMessage: String? {
-        guard !queue.isEmpty,
-            queue.allSatisfy({ $0.nationalityCode == Self.cubanNationalityCode })
-        else { return nil }
-        return String(localized: "Add the foreign guest to the queue before registering companions.")
+    /// main guest (the companion's `EstanciaId` is `<guest stay>.1`). A queue of
+    /// companions alone gets a warning but is still sent: the portal decides and
+    /// its answer is shown. Companions are people found by CI, not by nationality.
+    var companionWarning: String? {
+        guard !queue.isEmpty, queue.allSatisfy(\.isCompanion) else { return nil }
+        return String(localized: "Add the main guest to the queue before registering companions.")
     }
 
     var canSubmit: Bool {
-        !queue.isEmpty && !isSubmitting && submitBlockedMessage == nil
+        !queue.isEmpty && !isSubmitting
     }
 
     func lookUp() async {
@@ -186,6 +184,7 @@ final class RegisterGuestViewModel: ObservableObject {
                     ? String(localized: "Not found. If the person has a second given name, try without it.")
                     : String(localized: "Person not found.")
             } else {
+                resultKind = kind
                 candidates = people
                 if people.count == 1 { foundPerson = people[0] }
             }
@@ -217,6 +216,7 @@ final class RegisterGuestViewModel: ObservableObject {
             checkOut: checkOut,
             procedenciaCode: person.nationalityCode ?? "",
             nationalityName: person.nationality,
+            isCompanion: resultKind == .cubanCompanion,
         )
         queue.append(registration)
         foundPerson = nil

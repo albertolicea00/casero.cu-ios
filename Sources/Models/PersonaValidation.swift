@@ -77,6 +77,10 @@ struct GuestRegistration {
     let procedenciaCode: String
     /// Display only (queue card); never sent to the portal.
     var nationalityName: String? = nil
+    /// Found through the CI lookup (`ValidarPersonaSuin`), i.e. a Cuban companion.
+    /// Not derived from nationality: Cubans living abroad are found by passport
+    /// and register as main guests. Never sent to the portal.
+    var isCompanion = false
 
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
