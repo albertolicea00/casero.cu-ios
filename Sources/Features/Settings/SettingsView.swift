@@ -156,7 +156,11 @@ struct SettingsView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.vertical, 4)
-            NavigationLink("User Manual") { ManualView() }
+            NavigationLink("App User Manual") { ManualView() }
+            NavigationLink("Official Portal Help") { PortalHelpView() }
+            Link(destination: USSDSMSReporter.instructionsURL) {
+                Label("Cubatramite source", systemImage: "book")
+            }
             NavigationLink("Privacy Policy & Terms") { PrivacyView() }
             Link(destination: URL(string: "https://github.com/albertolicea00/casero.cu-ios")!) {
                 Label("Open source project", systemImage: "chevron.left.forwardslash.chevron.right")
@@ -255,7 +259,7 @@ private struct ManualView: View {
             Text("Manual instructions")
                 .padding()
         }
-        .navigationTitle("User Manual")
+        .navigationTitle("App User Manual")
     }
 }
 

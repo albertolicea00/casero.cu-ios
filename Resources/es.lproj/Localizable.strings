@@ -22,6 +22,7 @@
 "Add" = "Agregar";
 "Add companion" = "Agregar acompañante";
 "Add companion?" = "¿Agregar acompañante?";
+"App User Manual" = "Manual de usuario de la app";
 "Attempted from CASEROcu on %@ (Cuba time). Error: %@" = "Intentado desde CASEROcu el %1$@ (hora de Cuba). Error: %2$@";
 "Born" = "Nacimiento";
 "Born: %@" = "Nacimiento: %@";
@@ -36,6 +37,7 @@
 "Copied" = "Copiado";
 "Copy" = "Copiar";
 "Copy stay ID" = "Copiar ID de estancia";
+"Cubatramite source" = "Fuente: Cubatramite";
 "Current check-out" = "Salida actual";
 "First name (only the first one)" = "Nombre (solo el primero)";
 "From (country)" = "De";
@@ -56,6 +58,7 @@
 "Not found. If the person has a second given name, try without it." = "No encontrada. Si la persona tiene segundo nombre, prueba sin él.";
 "Not registered" = "No registrado";
 "Not registered: %@" = "No registrado: %@";
+"Official Portal Help" = "Ayuda del portal oficial";
 "Passport/ID: %@" = "Pasaporte/carné: %@";
 "People marked Not registered were not accepted by the portal." = "Las personas marcadas como No registrado no fueron aceptadas por el portal.";
 "Prepared in CASEROcu on %@ (Cuba time), before sending. This is not proof of registration: only the stay IDs returned by the official portal confirm it." = "Preparado en CASEROcu el %@ (hora de Cuba), antes de enviar. No es una prueba de registro: solo los ID de estancia que devuelve el portal oficial lo confirman.";
@@ -221,7 +224,6 @@
 "Look up" = "Buscar";
 "Manage phones and emails" = "Gestionar teléfonos y correos";
 "Manage phone in Settings" = "Gestionar teléfono en Ajustes";
-"User Manual" = "Manual del usuario";
 "Manual instructions" = "SMS: usa el teléfono asociado a tu registro de arrendador para reportar huéspedes o acompañantes al 7344. Revisa y envía el mensaje preparado, espera la respuesta, verifica los datos y envía HC seguido del código de confirmación recibido. El registro se completa cuando el servicio devuelve un código de registro. Asocia primero tu teléfono mediante el 18808.\n\nRegistrar: inicia sesión, busca al huésped, revisa sus datos y fechas, añádelo a la lista y envía el reporte. Las personas no confirmadas siguen en la lista; revisa el portal antes de reintentar.\n\nHuéspedes: selecciona un intervalo, carga todas las páginas, busca, filtra y abre detalles y fotos. Los datos conservados están disponibles sin internet.\n\nAjustes: configura la recuperación de sesión, la conservación de datos, las fotos, las exportaciones y las vías de comunicación.";
 "Message cancelled. No report was confirmed." = "Mensaje cancelado. No se confirmó ningún reporte.";
 "Message could not be sent. Check cellular service and try again." = "No se pudo enviar el mensaje. Revisa la cobertura celular e inténtalo de nuevo.";

@@ -22,6 +22,7 @@
 "Add" = "Add";
 "Add companion" = "Add companion";
 "Add companion?" = "Add companion?";
+"App User Manual" = "App User Manual";
 "Attempted from CASEROcu on %@ (Cuba time). Error: %@" = "Attempted from CASEROcu on %@ (Cuba time). Error: %@";
 "Born" = "Born";
 "Born: %@" = "Born: %@";
@@ -36,6 +37,7 @@
 "Copied" = "Copied";
 "Copy" = "Copy";
 "Copy stay ID" = "Copy stay ID";
+"Cubatramite source" = "Cubatramite source";
 "Current check-out" = "Current check-out";
 "First name (only the first one)" = "First name (only the first one)";
 "From (country)" = "From";
@@ -56,6 +58,7 @@
 "Not found. If the person has a second given name, try without it." = "Not found. If the person has a second given name, try without it.";
 "Not registered" = "Not registered";
 "Not registered: %@" = "Not registered: %@";
+"Official Portal Help" = "Official Portal Help";
 "Passport/ID: %@" = "Passport/ID: %@";
 "People marked Not registered were not accepted by the portal." = "People marked Not registered were not accepted by the portal.";
 "Prepared in CASEROcu on %@ (Cuba time), before sending. This is not proof of registration: only the stay IDs returned by the official portal confirm it." = "Prepared in CASEROcu on %@ (Cuba time), before sending. This is not proof of registration: only the stay IDs returned by the official portal confirm it.";
@@ -221,7 +224,6 @@
 "Look up" = "Look up";
 "Manage phones and emails" = "Manage phones and emails";
 "Manage phone in Settings" = "Manage phone in Settings";
-"User Manual" = "User Manual";
 "Manual instructions" = "SMS: use your associated host phone to send a guest or companion report to 7344. Review and send the prepared message, wait for the service reply, check the guest data, and send HC followed by the received confirmation code. Registration is complete only after the service returns a registration code. Associate your phone through 18808 first.\n\nRegister: sign in, look up a guest, review their data and dates, add them to the queue, then submit. Unconfirmed people remain in the queue; check the portal before retrying.\n\nGuests: select a date range, load all pages, search, filter, and open details and photos. Retained data is available offline.\n\nSettings: configure session recovery, data retention, photos, exports, and communication channels.";
 "Message cancelled. No report was confirmed." = "Message cancelled. No report was confirmed.";
 "Message could not be sent. Check cellular service and try again." = "Message could not be sent. Check cellular service and try again.";
