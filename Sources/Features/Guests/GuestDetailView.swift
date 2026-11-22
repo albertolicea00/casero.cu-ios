@@ -574,11 +574,24 @@ private struct CompanionSummary: View {
             if guest.checkIn != nil || guest.checkOut != nil {
                 Divider().padding(.vertical, 3)
                 StayTimeline(guest: guest)
-                if guest.isActive() {
-                    Text(GuestStayText.departure(checkOut: guest.checkOut))
-                        .font(.caption)
+            }
+            if guest.isActive() || GuestStayText.duration(for: guest) != nil {
+                // Like the main stay card, without "days ago": only active companions say when they leave.
+                Divider().padding(.vertical, 3)
+                VStack(alignment: .leading, spacing: 5) {
+                    if guest.isActive() {
+                        Text(GuestStayText.departure(checkOut: guest.checkOut))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    if let duration = GuestStayText.duration(for: guest) {
+                        Label(
+                            String.localizedStringWithFormat(String(localized: "Stay: %@"), duration),
+                            systemImage: "moon.stars"
+                        )
+                        .font(.subheadline.weight(.medium))
                         .foregroundStyle(.secondary)
-                        .padding(.top, 4)
+                    }
                 }
             }
             if let onUpdateCheckOut {
