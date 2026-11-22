@@ -90,7 +90,7 @@
 "Save PDF" = "Guardar PDF";
 "Select a person above to add them." = "Selecciona una persona arriba para agregarla.";
 "Sent from CASEROcu to the official portal on %@ (Cuba time). People marked Registered were accepted with the stay ID shown." = "Enviado desde CASEROcu al portal oficial el %@ (hora de Cuba). Las personas marcadas como Registrado fueron aceptadas con el ID de estancia indicado.";
-"Sent without confirmation. Check Guests before retrying." = "Enviado sin confirmación. Revisa Guests antes de reintentar.";
+"Sent without confirmation. Check Guests before retrying." = "Enviado sin confirmación. Revisa Huéspedes antes de reintentar.";
 "Sign in to see your portal profile." = "Inicia sesión para ver tu perfil del portal.";
 "Sign in to see your registered channels." = "Inicia sesión para ver tus vías registradas.";
 "Stay details" = "Datos de la estancia";
@@ -245,7 +245,6 @@
 "Loading" = "Cargando";
 "Look up" = "Buscar";
 "Manage phone in Settings" = "Gestionar teléfono en Ajustes";
-"Manual instructions" = "SMS: usa el teléfono asociado a tu registro de arrendador para reportar huéspedes o acompañantes al 7344. Revisa y envía el mensaje preparado, espera la respuesta, verifica los datos y envía HC seguido del código de confirmación recibido. El registro se completa cuando el servicio devuelve un código de registro. Asocia primero tu teléfono mediante el 18808.\n\nRegistrar: inicia sesión, busca al huésped, revisa sus datos y fechas, añádelo a la lista y envía el reporte. Las personas no confirmadas siguen en la lista; revisa el portal antes de reintentar.\n\nHuéspedes: selecciona un intervalo, carga todas las páginas, busca, filtra y abre detalles y fotos. Los datos conservados están disponibles sin internet.\n\nAjustes: configura la recuperación de sesión, la conservación de datos, las fotos, las exportaciones y las vías de comunicación.";
 "Message cancelled. No report was confirmed." = "Mensaje cancelado. No se confirmó ningún reporte.";
 "Message could not be sent. Check cellular service and try again." = "No se pudo enviar el mensaje. Revisa la cobertura celular e inténtalo de nuevo.";
 "Message preview" = "Vista previa del mensaje";
@@ -284,7 +283,6 @@
 "Privacy Policy & Terms" = "Política de privacidad y términos";
 "Show password" = "Mostrar contraseña"; // pragma: allowlist secret
 "Hide password" = "Ocultar contraseña"; // pragma: allowlist secret
-"Privacy details" = "Las credenciales solo se envían al portal oficial. Recordarlas está activado por defecto y se puede desactivar; se guardan solo en este dispositivo, en el llavero de iOS, y solo se usan tras Face ID, Touch ID o tu código. Los datos de huéspedes y las fotos opcionales se guardan en este dispositivo con protección de archivos de iOS, durante el plazo seleccionado. Los datos vencidos se eliminan al acceder a ellos. Cerrar sesión borra las credenciales y los datos guardados. Borrar datos guardados elimina huéspedes y fotos locales. Desactivar el almacenamiento de fotos elimina las fotos guardadas. Las exportaciones pueden contener datos personales; los archivos que compartas o guardes fuera de la app quedan bajo el control de su destino. El navegador integrado usa una sesión temporal. La app no incluye SDK de analítica ni publicidad. Los reportes por SMS se entregan al editor del sistema y se envían mediante tu operador solo cuando lo confirmas. La app no puede leer las respuestas del servicio; introduce los códigos recibidos manualmente.";
 "Ready to register (%lld)" = "Listos para reportar (%lld)";
 "Register" = "Registrar";
 "Register guest" = "Registrar huésped";

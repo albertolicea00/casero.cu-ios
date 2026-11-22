@@ -27,10 +27,10 @@ Contents:
 | `Sources/Features/Register/` | Lookup, result sheet, queue, review sheet, results, PDFs |
 | `Sources/Features/Guests/` | Guest list, detail, companions, photos, `GuestAvatar`, `GuestNameTooltip`, `NationalityFlag`, `GuestStayText` |
 | `Sources/Features/SMS/` | SMS report composer (7344) |
-| `Sources/Features/Settings/`, `Login/` | Settings, exports, sign-in, `PortalProfileSheet`, `CommunicationChannelsSheet`, `PortalHelpView`, `CubatramiteGuideView` |
+| `Sources/Features/Settings/`, `Login/` | Settings, exports, sign-in, `PortalProfileSheet`, `CommunicationChannelsSheet`, `AppUserManualView`, `PortalHelpView`, `CubatramiteGuideView` |
 | `Sources/Persistence/` | `AppSettings`, `KeychainStore`, `GuestCache`, `PhotoCache` |
-| `Sources/Support/` | `ExportService` (CSV/PDF), `GuestPhotoService`, `InputCard`, `PrimaryActionButtonStyle`, `HelpBlocksView`, `SectionInfoSheet`, `ShareSheet`, `ConnectivityMonitor` |
-| `Resources/{en,es}.lproj/` | `Localizable.strings` (UI), `PortalHelp.strings` and `CubatramiteGuide.strings` (long help texts, see [Help screens](#help-screens)) |
+| `Sources/Support/` | `ExportService` (CSV/PDF), `GuestPhotoService`, `InputCard`, `PrimaryActionButtonStyle`, `HelpBlocksView` (+ `HelpSection`, `HelpDocumentView`), `SectionInfoSheet`, `ShareSheet`, `ConnectivityMonitor` |
+| `Resources/{en,es}.lproj/` | `Localizable.strings` (UI), `PortalHelp.strings`, `CubatramiteGuide.strings` and `UserManual.strings` (long help texts, see [Help screens](#help-screens)) |
 | `Resources/Assets.xcassets/Portal*` | Tiles copied from the portal's home page, shown in Official Portal Help only as a visual reference |
 | `Tests/` | Unit tests with fabricated fixtures and `URLProtocol` stubs |
 | `.ignore/` | Local, git-ignored browser captures. Contain live cookies and real data. Never commit, never quote in issues |
@@ -145,8 +145,10 @@ Rules:
     pull to refresh, session expiry reported to `AppState`. "Manage phones and
     emails" opens `ViasComunicacion` in Safari; the app never writes channels.
   - Remember credentials, sign in / sign out.
-- **About**: App User Manual, Official Portal Help, Cubatramite source, Privacy
-  Policy & Terms, and external links.
+- **About**: App User Manual (`AppUserManualView`), Official Portal Help,
+  Cubatramite source, Privacy Policy & Terms (opens
+  `https://casero-cu.vercel.app/privacy.html`; the policy, terms and EULA live in
+  the `casero-cu-web` repo, not in the app), and external links.
 - `SettingsView` owns a `NavigationStack(path:)` of `SettingsView.Destination`.
   `MainTabView` keeps that path (`settingsPath`) so other tabs can open a
   Settings screen: the SMS information sheet's "SMS procedure reference"
@@ -168,10 +170,14 @@ Rules:
   link to the full article. The article is not copied verbatim because this repo
   is public. It does not update itself: re-read the guide and update the summary
   when it changes.
-- Both are built from `HelpBlock` values (`paragraph`, `heading`, `terms`,
+- **App User Manual** (`AppUserManualView`): everything the app does, tab by tab
+  (getting started, SMS, Register, Guests, Settings, help, troubleshooting).
+  Button names must match the UI labels in each language: when a label changes
+  in `Localizable.strings`, update `UserManual.strings` too.
+- All three are built from `HelpBlock` values (`paragraph`, `heading`, `terms`,
   `steps`, `bullets`, `notes`, `example`) rendered by `HelpBlocksView`. Every
   string is an English key looked up in the screen's own strings table
-  (`PortalHelp`, `CubatramiteGuide`); `example` text (SMS formats) is not
+  (`PortalHelp`, `CubatramiteGuide`, `UserManual`); `example` text (SMS formats) is not
   translated. Adding a block means adding its key to **both** `en` and `es`
   tables, including `"Notes"`. A missing key falls back to English silently.
 

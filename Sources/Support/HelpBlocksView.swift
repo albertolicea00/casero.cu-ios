@@ -107,3 +107,49 @@ struct HelpBlocksView: View {
         }
     }
 }
+
+/// A titled group of help blocks, used by the long-form help screens.
+struct HelpSection: Identifiable {
+    let id: String
+    let title: String
+    let symbol: String
+    let blocks: [HelpBlock]
+}
+
+/// Scrollable help document: an intro, then one headed card per section.
+/// `title` and section texts are keys in `table`.
+struct HelpDocumentView<Footer: View>: View {
+    let navigationTitle: LocalizedStringKey
+    let intro: String
+    let sections: [HelpSection]
+    let table: String
+    @ViewBuilder var footer: Footer
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(Bundle.main.localizedString(forKey: intro, value: nil, table: table))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 4)
+
+                ForEach(sections) { section in
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label(
+                            Bundle.main.localizedString(forKey: section.title, value: nil, table: table),
+                            systemImage: section.symbol
+                        )
+                        .font(.headline)
+                        HelpBlocksView(blocks: section.blocks, table: table)
+                    }
+                }
+
+                footer
+            }
+            .padding()
+        }
+        .background(Color(uiColor: .systemBackground).ignoresSafeArea())
+        .navigationTitle(navigationTitle)
+    }
+}

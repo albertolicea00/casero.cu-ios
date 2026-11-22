@@ -422,9 +422,9 @@ now closed):
   whether companion dates must fall inside the guest's stay.
 - Meaning of `Estado` in lookups.
 - `ListarViasComunicacion`: the `Tipo` value for e-mails, and the add/remove
-  channels request.
+  channels request ([#4](https://github.com/albertolicea00/casero.cu-ios/issues/4)).
 - `Gestionar/CambiarCredencialesAjax`: request body and answer (only the URL and
-  form field ids are known).
+  form field ids are known) ([#3](https://github.com/albertolicea00/casero.cu-ios/issues/3)).
 
 Known issues:
 

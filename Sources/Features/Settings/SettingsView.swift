@@ -174,10 +174,12 @@ struct SettingsView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.vertical, 4)
-            NavigationLink("App User Manual") { ManualView() }
+            NavigationLink("App User Manual") { AppUserManualView() }
             NavigationLink("Official Portal Help") { PortalHelpView() }
             NavigationLink("Cubatramite source", value: Destination.cubatramiteGuide)
-            NavigationLink("Privacy Policy & Terms") { PrivacyView() }
+            Link(destination: URL(string: "https://casero-cu.vercel.app/privacy.html")!) {
+                Label("Privacy Policy & Terms", systemImage: "hand.raised")
+            }
             Link(destination: URL(string: "https://github.com/albertolicea00/casero.cu-ios")!) {
                 Label("Open source project", systemImage: "chevron.left.forwardslash.chevron.right")
             }
@@ -266,22 +268,5 @@ private struct ExportFormSheet: View {
         .sheet(item: $viewModel.exportedFile, onDismiss: viewModel.removeExport) { file in
             ShareSheet(items: [file.url])
         }
-    }
-}
-
-private struct ManualView: View {
-    var body: some View {
-        ScrollView {
-            Text("Manual instructions")
-                .padding()
-        }
-        .navigationTitle("App User Manual")
-    }
-}
-
-private struct PrivacyView: View {
-    var body: some View {
-        ScrollView { Text("Privacy details").padding() }
-            .navigationTitle("Privacy Policy & Terms")
     }
 }

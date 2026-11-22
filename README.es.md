@@ -19,7 +19,9 @@ Cliente nativo iOS para que los arrendadores de casas particulares en Cuba repor
 
 La app incluye inicio de sesión en el portal (con Face ID / código para usar las
 credenciales guardadas), listas de huéspedes paginadas, datos sin conexión,
-fotos, exportaciones CSV/PDF e interfaz en español e inglés.
+fotos, exportaciones CSV/PDF, interfaz y manual de usuario en español e inglés.
+La política de privacidad, los términos y el EULA están en el
+[sitio web](https://casero-cu.vercel.app/privacy.html).
 
 Registro de huéspedes: búsqueda por pasaporte, nombre, carné de identidad (CI) y
 CI temporal; confirmación de la persona, fechas (entrada hasta 7 días atrás),

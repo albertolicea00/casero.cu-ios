@@ -38,7 +38,8 @@ Native iOS client for Cuban lodging hosts to submit guest reports to the officia
 - Device-only Keychain credentials (on by default), optional sign-in at launch and
   recovery of expired sessions behind Face ID/Touch ID/passcode, cache retention,
   and local data deletion on sign-out. See [SECURITY.md](SECURITY.md#saved-credentials-and-automatic-sign-in).
-- English and Spanish UI, manual, and privacy information.
+- English and Spanish UI and in-app user manual. The privacy policy, terms and
+  EULA are on the [website](https://casero-cu.vercel.app/privacy.html).
 
 SMS reporting is available without portal login: guest reports, Cuban companion
 reports, and the separate confirmation SMS are prepared for **7344** with the
