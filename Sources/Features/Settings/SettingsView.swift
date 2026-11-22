@@ -14,6 +14,7 @@ struct SettingsView: View {
     @State private var isExportFormPresented = false
     @State private var isLoginPresented = false
     @State private var isChannelsPresented = false
+    @State private var isProfilePresented = false
 
     init(client: CaseroClient, settings: AppSettings, path: Binding<[Destination]> = .constant([])) {
         self.client = client
@@ -45,6 +46,9 @@ struct SettingsView: View {
             .onChange(of: appState.isSignedIn) { signedIn in
                 if signedIn { isLoginPresented = false }
             }
+            .sheet(isPresented: $isProfilePresented) {
+                PortalProfileSheet(client: client)
+            }
             .sheet(isPresented: $isChannelsPresented) {
                 CommunicationChannelsSheet(client: client)
             }
@@ -58,7 +62,16 @@ struct SettingsView: View {
 
     private var accountSection: some View {
         Section("Account") {
-            Button("View registered phones and emails") { isChannelsPresented = true }
+            Button {
+                isProfilePresented = true
+            } label: {
+                Label("Portal Profile", systemImage: "person.crop.circle")
+            }
+            Button {
+                isChannelsPresented = true
+            } label: {
+                Label("Communication channels", systemImage: "envelope")
+            }
             Toggle("Remember credentials", isOn: $settings.rememberCredentials)
             Text("Stored only on this device in the iOS Keychain, used to restore the app session.")
                 .font(.caption)

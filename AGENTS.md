@@ -116,7 +116,21 @@ data.
    - Success: `302` to `/Plataforma/` and the session cookies are set.
    - Bad credentials: `200` with the login page again → `invalidCredentials`.
 3. `GET /Cuenta/CerrarSesion` — logout.
-4. `GET /Cuenta/Perfil` — profile page (not used by the app).
+4. `GET /Cuenta/Perfil` — profile page. A normal page navigation (not AJAX);
+   there is no JSON endpoint. The data is an HTML table inside
+   `<div class="row well perfil">`: pairs of `<td class="titulo">label</td>`
+   `<td class="texto">value</td>` with the labels `Primer Nombre`,
+   `Segundo Nombre`, `Primer Apellido`, `Segundo Apellido`, `CI`, `Provincia`,
+   `Usuario`, `Municipio` and `Direcci&oacute;n` (address in one `colspan="3"`
+   cell). Labels may contain HTML entities. The page also has an "Acerca de"
+   modal with the same `titulo`/`texto` classes **before** the profile block,
+   and the change-password `<form>` after it. `PortalProfile.parse` reads only
+   the profile block (covered by `testPortalProfileParsesProfileTable`).
+5. Password change: the profile form calls
+   `cambiarCredenciales('/Plataforma/Gestionar/CambiarCredencialesAjax')` from
+   `Scripts/Casero/Perfil.js`, with fields `txt-claveanterior`, `txt-nuevaclave`
+   and `txt-renuevaclave`. The request body and answer were not captured; the
+   app does not call it and opens `Cuenta/Perfil` in Safari instead.
 
 Password rule enforced by the portal (mirror it for early validation): 8–100
 characters, regex `^(?=.*[A-Z])(?=.*\W)(?=.*[0-9])(?=.*[a-z]).*$`.
@@ -292,7 +306,8 @@ From the active-guests page; token and referer `Huespedes/HuespedesActivos`.
   `__RequestVerificationToken=<token from /ViasComunicacion>` only.
   Answer: `[{ "Tipo": "sms", "Valor": "+535XXXXXXX" }, …]`. Phones come back as
   `Tipo: "sms"`; the e-mail `Tipo` has not been captured yet, so the app treats
-  any other `Tipo` as an e-mail. Settings shows this list read-only.
+  any other `Tipo` as an e-mail. Settings → Account shows this list read-only
+  (`CaseroClient.listCommunicationChannels`).
 - Modify: never captured, so the app does **not** call it. Adding or removing
   channels opens the official page in Safari.
 
@@ -347,6 +362,15 @@ name).
 
 Newest first. Each entry: what was learned and how.
 
+- **2026-11-22** — Profile: `GET /Cuenta/Perfil` renders the account as a
+  `td.titulo`/`td.texto` table inside `div.perfil`; password changes go to
+  `Gestionar/CambiarCredencialesAjax` (web capture of the page). Profile is read
+  and shown in Settings; password change stays on the web.
+- **2026-11-22** — Communication channels list:
+  `POST /ViasComunicacion/ListarViasComunicacion` with only the token answers
+  `[{ Tipo, Valor }]`, phones as `Tipo: "sms"` (web capture). Implemented,
+  read-only.
+
 - **2026-11-22** — Check-out updates: `ActualizarFechaSalidaHuesped` and
   `ActualizarFechaSalidaAcompannante` (`acompananteId`), answer
   `{ success: true, message }`; earliest date is the person's check-in day (web
@@ -397,6 +421,10 @@ now closed):
 - `RegistrarAcompannantes`: several companions in one call, refusal shape, and
   whether companion dates must fall inside the guest's stay.
 - Meaning of `Estado` in lookups.
+- `ListarViasComunicacion`: the `Tipo` value for e-mails, and the add/remove
+  channels request.
+- `Gestionar/CambiarCredencialesAjax`: request body and answer (only the URL and
+  form field ids are known).
 
 Known issues:
 

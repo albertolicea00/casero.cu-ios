@@ -24,12 +24,15 @@
 "Add companion" = "Add companion";
 "Add companion?" = "Add companion?";
 "Adding or removing channels is done in the official portal." = "Adding or removing channels is done in the official portal.";
+"Address" = "Address";
 "App User Manual" = "App User Manual";
 "Attempted from CASEROcu on %@ (Cuba time). Error: %@" = "Attempted from CASEROcu on %@ (Cuba time). Error: %@";
 "Beta" = "Beta";
 "Born" = "Born";
 "Born: %@" = "Born: %@";
 "Browse your active guests and your registration history from the official portal. Open a guest to see their details, add companions or change the check-out date." = "Browse your active guests and your registration history from the official portal. Open a guest to see their details, add companions or change the check-out date.";
+"Change password in the portal" = "Change password in the portal";
+"Check it on the official website" = "Check it on the official website";
 "Check names, documents and dates. This app cannot undo a registration once the portal accepts it." = "Check names, documents and dates. This app cannot undo a registration once the portal accepts it.";
 "Check-in can be at most 7 days ago." = "Check-in can be at most 7 days ago.";
 "Check-in: %@  Check-out: %@  (%lld nights)" = "Check-in: %@  Check-out: %@  (%lld nights)";
@@ -49,6 +52,7 @@
 "Guest registration — prepared" = "Guest registration — prepared";
 "Guest registration — registered" = "Guest registration — registered";
 "Guests information" = "Guests information";
+"Identity card (CI)" = "Identity card (CI)";
 "If it keeps failing, report these people by SMS from the SMS tab, or save this PDF and take it to the nearest immigration office." = "If it keeps failing, report these people by SMS from the SMS tab, or save this PDF and take it to the nearest immigration office.";
 "If the person has a second given name, try without it." = "If the person has a second given name, try without it.";
 "If the registration cannot be completed, report these people by SMS from the SMS tab, or take this document to the nearest immigration office and report them there." = "If the registration cannot be completed, report these people by SMS from the SMS tab, or take this document to the nearest immigration office and report them there.";
@@ -58,6 +62,7 @@
 "Leaves tomorrow" = "Leaves tomorrow";
 "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal." = "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal.";
 "Look up guests and companions in the official registry, set their stay dates and submit them to the portal in one go." = "Look up guests and companions in the official registry, set their stay dates and submit them to the portal in one go.";
+"Municipality" = "Municipality";
 "New check-out" = "New check-out";
 "No communication channels registered." = "No communication channels registered.";
 "No departure date" = "No departure date";
@@ -69,7 +74,9 @@
 "Passport/ID: %@" = "Passport/ID: %@";
 "People marked Not registered were not accepted by the portal." = "People marked Not registered were not accepted by the portal.";
 "Phones and emails registered in the official portal for alternative communication." = "Phones and emails registered in the official portal for alternative communication.";
+"Portal Profile" = "Portal Profile";
 "Prepared in CASEROcu on %@ (Cuba time), before sending. This is not proof of registration: only the stay IDs returned by the official portal confirm it." = "Prepared in CASEROcu on %@ (Cuba time), before sending. This is not proof of registration: only the stay IDs returned by the official portal confirm it.";
+"Province" = "Province";
 "Register %lld people" = "Register %lld people";
 "Register 1 person" = "Register 1 person";
 "Manage phones and emails" = "Manage phones and emails";
@@ -84,6 +91,7 @@
 "Select a person above to add them." = "Select a person above to add them.";
 "Sent from CASEROcu to the official portal on %@ (Cuba time). People marked Registered were accepted with the stay ID shown." = "Sent from CASEROcu to the official portal on %@ (Cuba time). People marked Registered were accepted with the stay ID shown.";
 "Sent without confirmation. Check Guests before retrying." = "Sent without confirmation. Check Guests before retrying.";
+"Sign in to see your portal profile." = "Sign in to see your portal profile.";
 "Sign in to see your registered channels." = "Sign in to see your registered channels.";
 "Stay details" = "Stay details";
 "Stay ID: %@" = "Stay ID: %@";
@@ -154,7 +162,6 @@
 "Prepare the first message" = "Prepare the first message";
 "For a guest, enter the passport and stay days. For a companion, enter the main guest's passport and the companion's identity number; the main guest must already be registered. The app prepares the HC message for 7344. Review it in Messages and send it." = "For a guest, enter the passport and stay days. For a companion, enter the main guest's passport and the companion's identity number; the main guest must already be registered. The app prepares the HC message for 7344. Review it in Messages and send it.";
 "Check the reply and confirm" = "Check the reply and confirm";
-"View registered phones and emails" = "View registered phones and emails";
 "Wait for the service reply. Verify the guest's name and nationality, then select Confirm, enter the received confirmation code without HC, and send the prepared confirmation message to 7344." = "Wait for the service reply. Verify the guest's name and nationality, then select Confirm, enter the received confirmation code without HC, and send the prepared confirmation message to 7344.";
 "Wait for the registration code" = "Wait for the registration code";
 "The report is complete only after the service returns a final registration code. Each person needs a separate exchange. Confirmation requests expire after six hours; start a new report if one expires." = "The report is complete only after the service returns a final registration code. Each person needs a separate exchange. Confirmation requests expire after six hours; start a new report if one expires.";
@@ -271,6 +278,7 @@
 "Photo" = "Photo";
 "Portal returned HTTP %lld." = "Portal returned HTTP %lld.";
 "Tap Preview SMS to open the prepared message in Messages. Review it and tap Send to confirm sending." = "Tap Preview SMS to open the prepared message in Messages. Review it and tap Send to confirm sending.";
+"Your account in the official portal." = "Your account in the official portal.";
 "You’ll review the prepared message in Messages before sending." = "You’ll review the prepared message in Messages before sending.";
 "Previously loaded guests remain available in Guests until the selected retention period expires. SMS/USSD requires cellular service even when no internet is needed." = "Previously loaded guests remain available in Guests until the selected retention period expires. SMS/USSD requires cellular service even when no internet is needed.";
 "Privacy Policy & Terms" = "Privacy Policy & Terms";

@@ -27,8 +27,13 @@ Native iOS client for Cuban lodging hosts to submit guest reports to the officia
   offline access to retained data after reopening the app.
 - Guest details, optional photo caching, and companion lookup with an official
   portal fallback.
-- Phone/email management by opening the official portal page in Safari. No
-  undocumented write endpoint is guessed.
+- Read-only list of the host's registered phones and emails; adding or removing
+  them opens the official portal page in Safari. No undocumented write endpoint
+  is guessed. The portal profile (name, CI, username, address) is shown
+  read-only; password changes go through the portal's profile page.
+- In-app help: the official portal's help (with links to each portal page) and an
+  offline summary of the Cubatramite reporting guide. Register and Guests explain
+  what they do and flag that they are in beta.
 - CSV/Excel and PDF exports from the complete cached date range.
 - Device-only Keychain credentials (on by default), optional sign-in at launch and
   recovery of expired sessions behind Face ID/Touch ID/passcode, cache retention,

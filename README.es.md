@@ -24,12 +24,19 @@ fotos, exportaciones CSV/PDF e interfaz en español e inglés.
 Registro de huéspedes: búsqueda por pasaporte, nombre, carné de identidad (CI) y
 CI temporal; confirmación de la persona, fechas (entrada hasta 7 días atrás),
 revisión antes de enviar, ID de estancia en el resultado y PDF antes, después y
-si falla. El formato de envío está confirmado con capturas del portal; falta un
-registro completo enviado desde la app (issue #2). Vea el
+si falla. El formato de envío está confirmado con capturas del portal y ya se
+envió un registro real desde la app (issue #2, cerrado). Vea el
 [contrato de registro](AGENTS.md#registration--confirmed).
 
-Los teléfonos y correos se gestionan abriendo la página oficial del portal en
-Safari.
+La app muestra, solo para consulta, los teléfonos y correos registrados del
+arrendador; para añadirlos o eliminarlos abre la página oficial del portal en
+Safari. También muestra, solo para consulta, el perfil del portal (nombre, CI,
+usuario, dirección); el cambio de contraseña se hace en la página de perfil del
+portal.
+
+Ayuda dentro de la app: la ayuda oficial del portal (con enlaces a cada página
+del portal) y un resumen sin conexión de la guía de Cubatrámite sobre el
+reporte. Registrar y Huéspedes explican qué hacen y avisan que están en beta.
 
 El reporte por SMS a **7344** usa el prefijo **HC**, los días de estancia, los
 reportes de acompañantes y el intercambio de confirmación por separado. La

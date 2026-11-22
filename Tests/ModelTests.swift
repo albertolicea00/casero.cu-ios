@@ -85,6 +85,50 @@ final class ModelTests: XCTestCase {
         XCTAssertNil(USSDSMSReporter.dialURL(for: "*123#"))
     }
 
+    /// Mirrors the shape of `GET /Cuenta/Perfil` (synthetic data): `td.titulo` /
+    /// `td.texto` pairs inside `div.perfil`, entities in labels, an empty second name,
+    /// and the password form after the block.
+    func testPortalProfileParsesProfileTable() throws {
+        let html = """
+            <table class="tabla"><tr><td class="titulo">Registrado:</td><td class="texto">Ignored</td></tr></table>
+            <h2>Mi Perfil</h2>
+            <div class="row well perfil">
+                <table class="tabla" >
+                    <tr>
+                        <td class="titulo">Primer Nombre</td><td class="texto">TESTA</td>
+                        <td class="titulo">Segundo Nombre</td><td class="texto"></td>
+                    </tr>
+                    <tr>
+                        <td class="titulo">Primer Apellido</td><td class="texto">UNO</td>
+                        <td class="titulo">Segundo Apellido</td><td class="texto">DOS</td>
+                    </tr>
+                    <tr>
+                        <td class="titulo">CI</td><td class="texto">00000000001</td>
+                        <td class="titulo">Provincia</td><td class="texto">LA HABANA</td>
+                    </tr>
+                    <tr>
+                        <td class="titulo">Usuario</td><td class="texto">X000Y</td>
+                        <td class="titulo">Municipio</td><td class="texto">PLAYA</td>
+                    </tr>
+                    <tr>
+                        <td class="titulo">Direcci&oacute;n</td>
+                        <td class="texto" colspan="3">CALLE A, Nro. 1, Entre: B y C, Municipio: PLAYA</td>
+                    </tr>
+                </table>
+            </div>
+            <form class="well"><td class="titulo">Primer Nombre</td><td class="texto">FORM</td></form>
+            """
+        let profile = try PortalProfile.parse(html: html)
+        XCTAssertEqual(profile.fullName, "TESTA UNO DOS")
+        XCTAssertEqual(profile.secondName, "")
+        XCTAssertEqual(profile.identityNumber, "00000000001")
+        XCTAssertEqual(profile.username, "X000Y")
+        XCTAssertEqual(profile.province, "LA HABANA")
+        XCTAssertEqual(profile.municipality, "PLAYA")
+        XCTAssertEqual(profile.address, "CALLE A, Nro. 1, Entre: B y C, Municipio: PLAYA")
+        XCTAssertThrowsError(try PortalProfile.parse(html: "<html><form>login</form></html>"))
+    }
+
     func testAntiForgeryInputAttributeOrderAndQuotes() throws {
         XCTAssertEqual(
             try AntiForgery.extract(from: "<input value='a&amp;b' type='hidden' name='__RequestVerificationToken'>"),

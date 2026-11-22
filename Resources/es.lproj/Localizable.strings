@@ -24,12 +24,15 @@
 "Add companion" = "Agregar acompañante";
 "Add companion?" = "¿Agregar acompañante?";
 "Adding or removing channels is done in the official portal." = "Para añadir o eliminar vías se usa el portal oficial.";
+"Address" = "Dirección";
 "App User Manual" = "Manual de usuario de la app";
 "Attempted from CASEROcu on %@ (Cuba time). Error: %@" = "Intentado desde CASEROcu el %1$@ (hora de Cuba). Error: %2$@";
 "Beta" = "Beta";
 "Born" = "Nacimiento";
 "Born: %@" = "Nacimiento: %@";
 "Browse your active guests and your registration history from the official portal. Open a guest to see their details, add companions or change the check-out date." = "Consulta tus huéspedes activos y tu historial de registros del portal oficial. Abre un huésped para ver sus datos, añadir acompañantes o cambiar la fecha de salida.";
+"Change password in the portal" = "Cambiar contraseña en el portal";
+"Check it on the official website" = "Consúltalo en la web oficial";
 "Check names, documents and dates. This app cannot undo a registration once the portal accepts it." = "Revisa nombres, documentos y fechas. Esta app no puede deshacer un registro una vez que el portal lo acepta.";
 "Check-in can be at most 7 days ago." = "La entrada puede ser como máximo hace 7 días.";
 "Check-in: %@  Check-out: %@  (%lld nights)" = "Entrada: %1$@  Salida: %2$@  (%3$lld noches)";
@@ -49,6 +52,7 @@
 "Guest registration — prepared" = "Registro de huéspedes — preparado";
 "Guest registration — registered" = "Registro de huéspedes — registrado";
 "Guests information" = "Información de Huéspedes";
+"Identity card (CI)" = "Carné de identidad (CI)";
 "If it keeps failing, report these people by SMS from the SMS tab, or save this PDF and take it to the nearest immigration office." = "Si sigue fallando, reporta a estas personas por SMS desde la pestaña SMS, o guarda este PDF y llévalo a la oficina de inmigración más cercana.";
 "If the person has a second given name, try without it." = "Si la persona tiene segundo nombre, prueba sin él.";
 "If the registration cannot be completed, report these people by SMS from the SMS tab, or take this document to the nearest immigration office and report them there." = "Si no se puede completar el registro, reporta a estas personas por SMS desde la pestaña SMS, o lleva este documento a la oficina de inmigración más cercana y repórtalas allí.";
@@ -58,6 +62,7 @@
 "Leaves tomorrow" = "Se va mañana";
 "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal." = "Busca a cada persona, indica las fechas de estancia y agrégala al registro. Toca Reportar personas para enviarlas al portal oficial.";
 "Look up guests and companions in the official registry, set their stay dates and submit them to the portal in one go." = "Busca huéspedes y acompañantes en el registro oficial, indica sus fechas de estancia y envíalos al portal de una vez.";
+"Municipality" = "Municipio";
 "New check-out" = "Nueva salida";
 "No communication channels registered." = "No hay vías de comunicación registradas.";
 "No departure date" = "Sin fecha de salida";
@@ -69,7 +74,9 @@
 "Passport/ID: %@" = "Pasaporte/carné: %@";
 "People marked Not registered were not accepted by the portal." = "Las personas marcadas como No registrado no fueron aceptadas por el portal.";
 "Phones and emails registered in the official portal for alternative communication." = "Teléfonos y correos registrados en el portal oficial como vías de comunicación alternativas.";
+"Portal Profile" = "Perfil del portal";
 "Prepared in CASEROcu on %@ (Cuba time), before sending. This is not proof of registration: only the stay IDs returned by the official portal confirm it." = "Preparado en CASEROcu el %@ (hora de Cuba), antes de enviar. No es una prueba de registro: solo los ID de estancia que devuelve el portal oficial lo confirman.";
+"Province" = "Provincia";
 "Register %lld people" = "Registrar %lld personas";
 "Register 1 person" = "Registrar 1 persona";
 "Manage phones and emails" = "Gestionar teléfonos y correos";
@@ -84,6 +91,7 @@
 "Select a person above to add them." = "Selecciona una persona arriba para agregarla.";
 "Sent from CASEROcu to the official portal on %@ (Cuba time). People marked Registered were accepted with the stay ID shown." = "Enviado desde CASEROcu al portal oficial el %@ (hora de Cuba). Las personas marcadas como Registrado fueron aceptadas con el ID de estancia indicado.";
 "Sent without confirmation. Check Guests before retrying." = "Enviado sin confirmación. Revisa Guests antes de reintentar.";
+"Sign in to see your portal profile." = "Inicia sesión para ver tu perfil del portal.";
 "Sign in to see your registered channels." = "Inicia sesión para ver tus vías registradas.";
 "Stay details" = "Datos de la estancia";
 "Stay ID: %@" = "ID de estancia: %@";
@@ -154,7 +162,6 @@
 "Prepare the first message" = "Prepara el primer mensaje";
 "For a guest, enter the passport and stay days. For a companion, enter the main guest's passport and the companion's identity number; the main guest must already be registered. The app prepares the HC message for 7344. Review it in Messages and send it." = "Para un huésped, introduce el pasaporte y los días de estancia. Para un acompañante, introduce el pasaporte del huésped principal y el carné del acompañante; el huésped principal debe estar registrado. La app prepara el mensaje HC para el 7344. Revísalo en Mensajes y envíalo.";
 "Check the reply and confirm" = "Revisa la respuesta y confirma";
-"View registered phones and emails" = "Ver teléfonos y correos registrados";
 "Wait for the service reply. Verify the guest's name and nationality, then select Confirm, enter the received confirmation code without HC, and send the prepared confirmation message to 7344." = "Espera la respuesta del servicio. Comprueba el nombre y la nacionalidad del huésped; selecciona Confirmar, introduce el código de confirmación recibido sin HC y envía el mensaje preparado al 7344.";
 "Wait for the registration code" = "Espera el código de registro";
 "The report is complete only after the service returns a final registration code. Each person needs a separate exchange. Confirmation requests expire after six hours; start a new report if one expires." = "El reporte solo queda completo cuando el servicio devuelve el código final de registro. Cada persona requiere un intercambio separado. Las solicitudes de confirmación vencen a las seis horas; inicia un reporte nuevo si vence.";
@@ -271,6 +278,7 @@
 "Photo" = "Foto";
 "Portal returned HTTP %lld." = "El portal devolvió el error HTTP %lld.";
 "Tap Preview SMS to open the prepared message in Messages. Review it and tap Send to confirm sending." = "Toca «Revisar SMS» para abrir el mensaje preparado en Mensajes. Revísalo y toca Enviar para confirmar el envío.";
+"Your account in the official portal." = "Tu cuenta en el portal oficial.";
 "You’ll review the prepared message in Messages before sending." = "Revisarás el mensaje preparado en Mensajes antes de enviarlo.";
 "Previously loaded guests remain available in Guests until the selected retention period expires. SMS/USSD requires cellular service even when no internet is needed." = "Los huéspedes cargados permanecen disponibles en Huéspedes hasta que venza el plazo de conservación seleccionado. SMS/USSD requiere cobertura celular aunque no use internet.";
 "Privacy Policy & Terms" = "Política de privacidad y términos";

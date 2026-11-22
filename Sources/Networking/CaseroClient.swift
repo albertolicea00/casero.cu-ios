@@ -139,6 +139,15 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
         }
     }
 
+    // MARK: - Profile
+
+    /// The host's account details, read from the profile page's HTML table.
+    func fetchProfile() async throws -> PortalProfile {
+        return try await authenticated {
+            try PortalProfile.parse(html: try await getHTML("Cuenta/Perfil"))
+        }
+    }
+
     // MARK: - Communication channels
 
     /// The host's registered phones and e-mails. Read-only: adding or removing

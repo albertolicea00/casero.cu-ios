@@ -23,13 +23,15 @@ Contents:
 | `Sources/Networking/CaseroClient.swift` | Every portal request, token handling, session recovery, TLS pinning |
 | `Sources/Networking/PortalError.swift` | All portal errors and their user-facing text |
 | `Sources/Networking/PortalServing.swift` | Protocol the view models use, so tests can stub the portal |
-| `Sources/Models/` | `Guest` (lists, registration answers), `PersonaValidation` + `GuestRegistration` (lookups, `personas=` wire format), `DotNetDate`, `PortalDates` (Cuba calendar/time zone) |
+| `Sources/Models/` | `Guest` (lists, registration answers), `PersonaValidation` + `GuestRegistration` (lookups, `personas=` wire format), `CommunicationChannel`, `PortalProfile` (profile HTML parser), `DotNetDate`, `PortalDates` (Cuba calendar/time zone) |
 | `Sources/Features/Register/` | Lookup, result sheet, queue, review sheet, results, PDFs |
 | `Sources/Features/Guests/` | Guest list, detail, companions, photos, `GuestAvatar`, `GuestNameTooltip`, `NationalityFlag`, `GuestStayText` |
 | `Sources/Features/SMS/` | SMS report composer (7344) |
-| `Sources/Features/Settings/`, `Login/` | Settings, exports, sign-in |
+| `Sources/Features/Settings/`, `Login/` | Settings, exports, sign-in, `PortalProfileSheet`, `CommunicationChannelsSheet`, `PortalHelpView`, `CubatramiteGuideView` |
 | `Sources/Persistence/` | `AppSettings`, `KeychainStore`, `GuestCache`, `PhotoCache` |
-| `Sources/Support/` | `ExportService` (CSV/PDF), `GuestPhotoService`, `InputCard`, `PrimaryActionButtonStyle`, `ShareSheet`, `ConnectivityMonitor` |
+| `Sources/Support/` | `ExportService` (CSV/PDF), `GuestPhotoService`, `InputCard`, `PrimaryActionButtonStyle`, `HelpBlocksView`, `SectionInfoSheet`, `ShareSheet`, `ConnectivityMonitor` |
+| `Resources/{en,es}.lproj/` | `Localizable.strings` (UI), `PortalHelp.strings` and `CubatramiteGuide.strings` (long help texts, see [Help screens](#help-screens)) |
+| `Resources/Assets.xcassets/Portal*` | Tiles copied from the portal's home page, shown in Official Portal Help only as a visual reference |
 | `Tests/` | Unit tests with fabricated fixtures and `URLProtocol` stubs |
 | `.ignore/` | Local, git-ignored browser captures. Contain live cookies and real data. Never commit, never quote in issues |
 
@@ -76,11 +78,21 @@ Contents:
   companion list reloads.
 - The side scrubber shows the current group's title while dragging.
 
+### Beta notice (Register and Guests)
+
+Both tabs have an ⓘ button in the toolbar that opens `SectionInfoSheet`: what
+the tab does, an orange **Beta** notice (unofficial connection to the portal, it
+may fail if the portal changes or is unreachable; finish the task in the portal
+if something goes wrong), and Safari links to the matching portal pages. Register
+sits behind `AuthGate`, so its ⓘ is only visible when signed in.
+
 ### Registration flow (Register tab)
 
-1. **Lookup.** A segmented selector: Passport · ID card (CI) · Name · Temp. ID.
-   Below it the full title, the fields (three for name: first name only, first
-   and second surname), the portal's help text, and a "Look up" button. Lookup
+1. **Lookup.** At the top, a short explanation of the tab and a "Complete in
+   official portal" link. Then a segmented selector: Passport · ID card (CI) ·
+   Name · Temp. ID, the fields (three for name: first name only, first and second
+   surname; no title above them), the portal's help text with an ⓘ icon, and a
+   "Look up" button. Lookup
    errors show under the button; the portal message is shown verbatim, and name
    lookups add "try without the second given name".
 2. **Result sheet** (`LookupResultSheet`). Every result opens it. One match is
@@ -117,6 +129,51 @@ Rules:
   of them is proof of registration; only portal stay IDs are. Files are written
   to the temp folder with complete file protection and handed to the share sheet.
 - The result's name comes from `Biografico`, with `*` turned into spaces.
+
+### Settings tab
+
+- **Account**, in this order:
+  - **Portal Profile** (person icon) → `PortalProfileSheet`: name, CI, username,
+    province, municipality and address from `CaseroClient.fetchProfile()`
+    (empty fields hidden, values selectable), loading/signed-out states, pull to
+    refresh, session expiry reported to `AppState`. On failure: the error,
+    "Retry" and "Check it on the official website". Always: "Change password in
+    the portal" (opens `Cuenta/Perfil` in Safari).
+  - **Communication channels** (envelope icon) → `CommunicationChannelsSheet`:
+    read-only list from `listCommunicationChannels()` (phone or envelope icon
+    by `CommunicationChannel.isPhone`), loading/error/empty/signed-out states,
+    pull to refresh, session expiry reported to `AppState`. "Manage phones and
+    emails" opens `ViasComunicacion` in Safari; the app never writes channels.
+  - Remember credentials, sign in / sign out.
+- **About**: App User Manual, Official Portal Help, Cubatramite source, Privacy
+  Policy & Terms, and external links.
+- `SettingsView` owns a `NavigationStack(path:)` of `SettingsView.Destination`.
+  `MainTabView` keeps that path (`settingsPath`) so other tabs can open a
+  Settings screen: the SMS information sheet's "SMS procedure reference"
+  dismisses the sheet, switches to Settings and pushes `.cubatramiteGuide`
+  (replacing whatever was open in Settings).
+
+### Help screens
+
+- **Official Portal Help** (`PortalHelpView`): the portal's own help (Home, My
+  profile, Register guest, Active guests, Registered guests, Communication
+  channels), each section with its portal tile and an "Open" link to that page,
+  plus a link to `Principal/Ayuda` at the top. Text comes from the help pasted by
+  the host; icons that were lost in the copy are named instead ("edit icon").
+  English keeps the portal's Spanish button labels with a translation in
+  parentheses.
+- **Cubatramite source** (`CubatramiteGuideView`): an **offline summary, in our
+  own words**, of the Cubatramite guide dated **2026-10-29** (who must report,
+  steps, SMS formats, deadlines, FAQ, penalties, contacts, legal basis), with a
+  link to the full article. The article is not copied verbatim because this repo
+  is public. It does not update itself: re-read the guide and update the summary
+  when it changes.
+- Both are built from `HelpBlock` values (`paragraph`, `heading`, `terms`,
+  `steps`, `bullets`, `notes`, `example`) rendered by `HelpBlocksView`. Every
+  string is an English key looked up in the screen's own strings table
+  (`PortalHelp`, `CubatramiteGuide`); `example` text (SMS formats) is not
+  translated. Adding a block means adding its key to **both** `en` and `es`
+  tables, including `"Notes"`. A missing key falls back to English silently.
 
 ---
 
