@@ -38,7 +38,11 @@
 "If it keeps failing, report these people by SMS from the SMS tab, or save this PDF and take it to the nearest immigration office." = "Si sigue fallando, reporta a estas personas por SMS desde la pestaña SMS, o guarda este PDF y llévalo a la oficina de inmigración más cercana.";
 "If the person has a second given name, try without it." = "Si la persona tiene segundo nombre, prueba sin él.";
 "If the registration cannot be completed, report these people by SMS from the SMS tab, or take this document to the nearest immigration office and report them there." = "Si no se puede completar el registro, reporta a estas personas por SMS desde la pestaña SMS, o lleva este documento a la oficina de inmigración más cercana y repórtalas allí.";
+"Leaves in %lld days" = "Se va en %lld días";
+"Leaves today" = "Se va hoy";
+"Leaves tomorrow" = "Se va mañana";
 "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal." = "Busca a cada persona, indica las fechas de estancia y agrégala al registro. Toca Reportar personas para enviarlas al portal oficial.";
+"No departure date" = "Sin fecha de salida";
 "Not confirmed" = "No confirmado";
 "Not found. If the person has a second given name, try without it." = "No encontrada. Si la persona tiene segundo nombre, prueba sin él.";
 "Not registered" = "No registrado";

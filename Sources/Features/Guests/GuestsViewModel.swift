@@ -66,11 +66,29 @@ final class GuestsViewModel: ObservableObject {
                     || $0.identificador.range(of: needle, options: [.caseInsensitive, .diacriticInsensitive]) != nil
             }
         }
+        if segment == .active {
+            // Active stays are grouped by departure day: whoever leaves soonest first.
+            return bySearch.sorted {
+                let left = $0.checkOut ?? .distantFuture
+                let right = $1.checkOut ?? .distantFuture
+                return left == right ? $0.fullName < $1.fullName : left < right
+            }
+        }
         return bySearch.sorted {
             let left = $0.checkIn ?? .distantPast
             let right = $1.checkIn ?? .distantPast
             return sortOrder == .newestFirst ? left > right : left < right
         }
+    }
+
+    /// Whole days from today to the guest's check-out, in Cuba time. `nil` without
+    /// a check-out date.
+    nonisolated static func daysUntilCheckOut(_ guest: Guest, now: Date = .now) -> Int? {
+        guard let checkOut = guest.checkOut else { return nil }
+        let calendar = PortalDates.calendar
+        return calendar.dateComponents(
+            [.day], from: calendar.startOfDay(for: now), to: calendar.startOfDay(for: checkOut)
+        ).day
     }
 
     /// Loads from cache first for instant offline display, then optionally refreshes.

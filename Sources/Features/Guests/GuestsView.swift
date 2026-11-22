@@ -43,23 +43,63 @@ struct GuestsView: View {
         return formatter
     }()
 
-    private struct GuestMonth: Identifiable {
-        let month: Date?
+    /// A list section: check-in month (History) or departure day (Active).
+    private struct GuestGroup: Identifiable {
+        let id: String
+        let title: String
+        /// Secondary text on the right of the header (the departure date).
+        let detail: String?
         var guests: [Guest]
-        var id: String { month.map { String($0.timeIntervalSince1970) } ?? "unknown" }
     }
 
-    private func groupedByCheckInMonth(_ guests: [Guest]) -> [GuestMonth] {
-        var groups: [GuestMonth] = []
+    private static let departureDate: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = .current
+        formatter.timeZone = PortalDates.timeZone
+        formatter.setLocalizedDateFormatFromTemplate("EEE d MMM")
+        return formatter
+    }()
+
+    private func groupedByCheckInMonth(_ guests: [Guest]) -> [GuestGroup] {
+        var groups: [GuestGroup] = []
         for guest in guests {
             let month = guest.checkIn.flatMap { PortalDates.calendar.dateInterval(of: .month, for: $0)?.start }
-            if groups.last?.month == month {
+            let id = month.map { String($0.timeIntervalSince1970) } ?? "unknown"
+            if groups.last?.id == id {
                 groups[groups.count - 1].guests.append(guest)
             } else {
-                groups.append(GuestMonth(month: month, guests: [guest]))
+                let title = month.map { Self.monthTitle.string(from: $0) } ?? String(localized: "Unknown date")
+                groups.append(GuestGroup(id: id, title: title, detail: nil, guests: [guest]))
             }
         }
         return groups
+    }
+
+    /// Active stays by how many days are left: "Leaves today", "Leaves in 3 days".
+    private func groupedByDeparture(_ guests: [Guest]) -> [GuestGroup] {
+        var groups: [GuestGroup] = []
+        for guest in guests {
+            let days = GuestsViewModel.daysUntilCheckOut(guest)
+            let id = days.map(String.init) ?? "unknown"
+            if groups.last?.id == id {
+                groups[groups.count - 1].guests.append(guest)
+            } else {
+                groups.append(
+                    GuestGroup(
+                        id: id, title: Self.departureTitle(days),
+                        detail: guest.checkOut.map { Self.departureDate.string(from: $0) }, guests: [guest]))
+            }
+        }
+        return groups
+    }
+
+    private static func departureTitle(_ days: Int?) -> String {
+        switch days {
+        case nil: return String(localized: "No departure date")
+        case 0: return String(localized: "Leaves today")
+        case 1: return String(localized: "Leaves tomorrow")
+        case let days?: return String(localized: "Leaves in \(days) days")
+        }
     }
 
     private var nationalityNamesByCode: [String: String] {
@@ -168,6 +208,8 @@ struct GuestsView: View {
             .frame(height: 44)
             .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
 
+            // Active is always ordered by departure, so sorting only applies to History.
+            if viewModel.segment == .history {
             Menu {
                 Picker("Sort order", selection: $viewModel.sortOrder) {
                     ForEach(GuestsViewModel.SortOrder.allCases) { order in
@@ -182,6 +224,7 @@ struct GuestsView: View {
             .buttonStyle(.plain)
             .tint(Color(uiColor: .tertiaryLabel))
             .accessibilityLabel("Sort guests")
+            }
         }
     }
 
@@ -243,7 +286,10 @@ struct GuestsView: View {
     // of it and the large title stops showing.
     private var content: some View {
         let guests = viewModel.filteredGuests
-        let months = groupedByCheckInMonth(guests)
+        let groups =
+            viewModel.segment == .active ? groupedByDeparture(guests) : groupedByCheckInMonth(guests)
+        let groupTitles = Dictionary(
+            groups.flatMap { group in group.guests.map { ($0.id, group.title) } }, uniquingKeysWith: { first, _ in first })
         let knownNationalities = nationalityNamesByCode
         return ScrollViewReader { scrollProxy in
                 ScrollView {
@@ -276,7 +322,7 @@ struct GuestsView: View {
                             .frame(maxWidth: .infinity, minHeight: 320)
                     } else {
                     LazyVStack(spacing: 10, pinnedViews: [.sectionHeaders]) {
-                        ForEach(months) { group in
+                        ForEach(groups) { group in
                         Section {
                             ForEach(group.guests) { guest in
                                 NavigationLink {
@@ -307,8 +353,16 @@ struct GuestsView: View {
                                 .id(guest.id)
                             }
                         } header: {
-                            Text(group.month.map { Self.monthTitle.string(from: $0) } ?? String(localized: "Unknown date"))
-                                .font(.headline)
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(group.title)
+                                    .font(.headline)
+                                Spacer(minLength: 8)
+                                if let detail = group.detail {
+                                    Text(detail)
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.vertical, 8)
                                 .background(Color(uiColor: .systemBackground))
@@ -330,7 +384,7 @@ struct GuestsView: View {
                 }
                 .overlay(alignment: .trailing) {
                     if guests.count > 1 {
-                        guestScrubber(guests: guests) { id in
+                        guestScrubber(guests: guests, titles: groupTitles) { id in
                             visibleGuestID = id
                             scrollProxy.scrollTo(id, anchor: .top)
                         }
@@ -340,7 +394,9 @@ struct GuestsView: View {
             }
     }
 
-    private func guestScrubber(guests: [Guest], onSelect: @escaping (String) -> Void) -> some View {
+    private func guestScrubber(
+        guests: [Guest], titles: [String: String], onSelect: @escaping (String) -> Void
+    ) -> some View {
         GeometryReader { geometry in
             let index = guests.firstIndex { $0.id == visibleGuestID } ?? 0
             let travel = max(0, geometry.size.height - 36)
@@ -358,7 +414,7 @@ struct GuestsView: View {
                     .padding(.trailing, 10)
                     .offset(y: position)
                 if isScrubbingGuests {
-                    Text(guests[index].checkIn.map { Self.monthTitle.string(from: $0) } ?? "—")
+                    Text(titles[guests[index].id] ?? "—")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.primary)
                         .fixedSize(horizontal: true, vertical: false)

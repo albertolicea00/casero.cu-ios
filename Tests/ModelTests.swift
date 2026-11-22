@@ -32,6 +32,22 @@ final class ModelTests: XCTestCase {
         XCTAssertEqual(earliest, PortalDates.calendar.startOfDay(for: earliest))
     }
 
+    func testDaysUntilCheckOutCountsCubaCalendarDays() throws {
+        func guest(checkOut ms: Int) throws -> Guest {
+            let json = #"{"Biografico":"Test","Identificador":"X1","FechaSalida":"/Date(\#(ms))/","EstanciaId":"1"}"#
+            return try JSONDecoder().decode(Guest.self, from: Data(json.utf8))
+        }
+        // 2026-11-21 15:00 Cuba time.
+        var components = DateComponents()
+        components.year = 2026; components.month = 11; components.day = 21; components.hour = 15
+        let now = PortalDates.calendar.date(from: components)!
+        let day: Int = 86_400_000
+        let todayMidnight = Int(PortalDates.calendar.startOfDay(for: now).timeIntervalSince1970 * 1000)
+        XCTAssertEqual(GuestsViewModel.daysUntilCheckOut(try guest(checkOut: todayMidnight), now: now), 0)
+        XCTAssertEqual(GuestsViewModel.daysUntilCheckOut(try guest(checkOut: todayMidnight + day), now: now), 1)
+        XCTAssertEqual(GuestsViewModel.daysUntilCheckOut(try guest(checkOut: todayMidnight + 3 * day), now: now), 3)
+    }
+
     func testPortalDatesKeepBirthDatesBefore1970() {
         XCTAssertNotNil(DotNetDate.parse("/Date(-315619200000)/"))
         XCTAssertEqual(DotNetDate.parse("/Date(0)/"), Date(timeIntervalSince1970: 0))

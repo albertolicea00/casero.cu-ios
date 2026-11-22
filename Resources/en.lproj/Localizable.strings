@@ -38,7 +38,11 @@
 "If it keeps failing, report these people by SMS from the SMS tab, or save this PDF and take it to the nearest immigration office." = "If it keeps failing, report these people by SMS from the SMS tab, or save this PDF and take it to the nearest immigration office.";
 "If the person has a second given name, try without it." = "If the person has a second given name, try without it.";
 "If the registration cannot be completed, report these people by SMS from the SMS tab, or take this document to the nearest immigration office and report them there." = "If the registration cannot be completed, report these people by SMS from the SMS tab, or take this document to the nearest immigration office and report them there.";
+"Leaves in %lld days" = "Leaves in %lld days";
+"Leaves today" = "Leaves today";
+"Leaves tomorrow" = "Leaves tomorrow";
 "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal." = "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal.";
+"No departure date" = "No departure date";
 "Not confirmed" = "Not confirmed";
 "Not found. If the person has a second given name, try without it." = "Not found. If the person has a second given name, try without it.";
 "Not registered" = "Not registered";

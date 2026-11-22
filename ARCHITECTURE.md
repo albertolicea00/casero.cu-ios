@@ -51,6 +51,15 @@ Contents:
 - At launch `AppState.restoreSession()` signs in silently when both "Remember
   credentials" and "Auto re-authenticate" are on.
 
+### Guests tab
+
+- **Active** stays (checked in, not yet past check-out) are grouped by departure:
+  "Leaves today", "Leaves tomorrow", "Leaves in N days", with the departure date
+  on the right of the header; soonest departure first. Days are counted in Cuba
+  time (`GuestsViewModel.daysUntilCheckOut`). The sort menu is hidden here.
+- **History** is grouped by check-in month and follows the sort menu.
+- The side scrubber shows the current group's title while dragging.
+
 ### Registration flow (Register tab)
 
 1. **Lookup.** A segmented selector: Passport · ID card (CI) · Name · Temp. ID.
