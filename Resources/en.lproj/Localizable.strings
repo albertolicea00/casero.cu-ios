@@ -18,6 +18,9 @@
 "+ 1 companion" = "+ 1 companion";
 "+ %lld companions" = "+ %lld companions";
 "%@ ago" = "%@ ago";
+"Add" = "Add";
+"Add companion" = "Add companion";
+"Add companion?" = "Add companion?";
 "Attempted from CASEROcu on %@ (Cuba time). Error: %@" = "Attempted from CASEROcu on %@ (Cuba time). Error: %@";
 "Born" = "Born";
 "Born: %@" = "Born: %@";
@@ -25,6 +28,7 @@
 "Check-in can be at most 7 days ago." = "Check-in can be at most 7 days ago.";
 "Check-in: %@  Check-out: %@  (%lld nights)" = "Check-in: %@  Check-out: %@  (%lld nights)";
 "Choose person" = "Choose person";
+"Companion of %@ · Stay ID %@" = "Companion of %@ · Stay ID %@";
 "Confirm person" = "Confirm person";
 "Copied" = "Copied";
 "Copy" = "Copy";
@@ -65,6 +69,7 @@
 "The answer was lost after sending: these people may already be registered. Check the official portal or the Guests list before reporting them again, to avoid duplicates." = "The answer was lost after sending: these people may already be registered. Check the official portal or the Guests list before reporting them again, to avoid duplicates.";
 "The connection was lost after sending. The portal may have registered these people. Check Guests or the official portal before retrying, to avoid duplicate reports." = "The connection was lost after sending. The portal may have registered these people. Check Guests or the official portal before retrying, to avoid duplicate reports.";
 "The portal rejected the registration." = "The portal rejected the registration.";
+"This person is already a companion in this stay." = "This person is already a companion in this stay.";
 "This search option is only valid for Cuban nationals." = "This search option is only valid for Cuban nationals.";
 "Fill in the fields above to look up." = "Fill in the fields above to look up.";
 "First name" = "First name";

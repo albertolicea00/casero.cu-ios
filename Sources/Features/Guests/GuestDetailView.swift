@@ -18,6 +18,7 @@ struct GuestDetailView: View {
     @State private var didLoadCompanions = false
     @State private var companionPhotos: [String: UIImage] = [:]
     @State private var companionPhotoError: String?
+    @State private var isAddingCompanion = false
 
     var body: some View {
         ScrollView {
@@ -215,6 +216,26 @@ struct GuestDetailView: View {
             }
             if let companionsError {
                 Text(companionsError).font(.caption).foregroundStyle(.red)
+            }
+            if guest.isActive() && !guest.stayId.isEmpty {
+                // Only active stays take new companions (portal: active-guests page).
+                Button {
+                    isAddingCompanion = true
+                } label: {
+                    Label("Add companion", systemImage: "person.badge.plus")
+                        .frame(maxWidth: .infinity, minHeight: 48)
+                }
+                .buttonStyle(.bordered)
+                .sheet(isPresented: $isAddingCompanion) {
+                    AddCompanionView(
+                        guest: guest,
+                        client: client,
+                        existingIDs: Set(companions.map { $0.identificador.uppercased() }),
+                        onAdded: { Task { await loadCompanions() } }
+                    )
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
+                }
             }
             Button {
                 Task { await loadCompanions() }

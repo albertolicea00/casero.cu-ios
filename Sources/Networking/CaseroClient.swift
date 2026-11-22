@@ -211,9 +211,11 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
     /// Captured responses come as an array (several matches are possible for a
     /// name lookup), as a bare object in older captures, or as
     /// `{ "success": false, "message": "Persona no encontrada." }` when nothing matches.
-    private func validatePersona(path: String, body: (String) -> Data) async throws -> [PersonaValidation] {
-        let token = try AntiForgery.extract(from: try await getHTML("Huespedes"))
-        let text = try await postForJSON(path, body: body(token), referer: "Huespedes")
+    private func validatePersona(path: String, page: String = "Huespedes", body: (String) -> Data) async throws
+        -> [PersonaValidation]
+    {
+        let token = try AntiForgery.extract(from: try await getHTML(page))
+        let text = try await postForJSON(path, body: body(token), referer: page)
         let data = Data(text.utf8)
         if let failure = try? JSONDecoder().decode(PortalFailure.self, from: data), !failure.success {
             throw PortalError.rejected(failure.message ?? String(localized: "Person not found."))
@@ -232,22 +234,56 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
                 ("personas", personas),
                 ("__RequestVerificationToken", token),
             ])
-            let text: String
-            do {
-                text = try await postForJSON("Huespedes/RegistrarHuesped", body: body, referer: "Huespedes")
-            } catch PortalError.unreachable {
-                // The form was already sent: losing the answer does not mean nothing was registered.
-                throw PortalError.registrationUncertain
-            } catch PortalError.http(let code) where code >= 500 {
-                throw PortalError.registrationUncertain
-            }
-            let data = Data(text.utf8)
-            if let failure = try? JSONDecoder().decode(PortalFailure.self, from: data), !failure.success {
-                throw PortalError.rejected(
-                    failure.message ?? String(localized: "The portal rejected the registration."))
-            }
-            return try Self.decodeGuestOrArray(data)
+            return try await postRegistration("Huespedes/RegistrarHuesped", body: body, referer: "Huespedes")
         }
+    }
+
+    // MARK: - Companions of an active stay
+
+    /// CI lookup as the active-guests page does it (adds `tipoDocumento=1`).
+    func validateCompanionForStay(identificador: String) async throws -> [PersonaValidation] {
+        return try await authenticated {
+            return try await validatePersona(
+                path: "Huespedes/ValidarPersonaSuin", page: "Huespedes/HuespedesActivos",
+                body: formEncodedWithToken([("identificador", identificador), ("tipoDocumento", "1")]),
+            )
+        }
+    }
+
+    /// Adds Cuban companions to an existing stay. The answer carries the guest's
+    /// `EstanciaId` and the companion's own `Id`.
+    func addCompanions(_ people: [CompanionRegistration], toStay stayId: String) async throws -> [Guest] {
+        return try await authenticated {
+            guard !people.isEmpty, !stayId.isEmpty else { return [] }
+            let token = try AntiForgery.extract(from: try await getHTML("Huespedes/HuespedesActivos"))
+            let body = formEncoded([
+                ("estanciaId", stayId),
+                ("personas", people.map(\.wireFormat).joined(separator: "|")),
+                ("__RequestVerificationToken", token),
+            ])
+            return try await postRegistration(
+                "Huespedes/RegistrarAcompannantes", body: body, referer: "Huespedes/HuespedesActivos")
+        }
+    }
+
+    /// Shared by every write that registers people: a lost answer after sending is
+    /// `registrationUncertain`, a `{ success: false }` answer is `rejected`.
+    private func postRegistration(_ path: String, body: Data, referer: String) async throws -> [Guest] {
+        let text: String
+        do {
+            text = try await postForJSON(path, body: body, referer: referer)
+        } catch PortalError.unreachable {
+            // The form was already sent: losing the answer does not mean nothing was registered.
+            throw PortalError.registrationUncertain
+        } catch PortalError.http(let code) where code >= 500 {
+            throw PortalError.registrationUncertain
+        }
+        let data = Data(text.utf8)
+        if let failure = try? JSONDecoder().decode(PortalFailure.self, from: data), !failure.success {
+            throw PortalError.rejected(
+                failure.message ?? String(localized: "The portal rejected the registration."))
+        }
+        return try Self.decodeGuestOrArray(data)
     }
 
     // MARK: - Photos

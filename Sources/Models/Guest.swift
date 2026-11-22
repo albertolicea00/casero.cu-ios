@@ -79,6 +79,15 @@ struct Guest: Codable, Identifiable {
     }
 }
 
+extension Guest {
+    /// Checked in and not past check-out day (Cuba time). Same rule as the
+    /// Guests "Active" segment; the only stays that can get companions added.
+    func isActive(now: Date = .now) -> Bool {
+        (checkIn ?? .distantPast) <= now
+            && (checkOut ?? .distantFuture) >= PortalDates.calendar.startOfDay(for: now)
+    }
+}
+
 /// Envelope returned by `Huespedes/ListarHuespedes`.
 struct GuestListResponse: Decodable {
     let error: String

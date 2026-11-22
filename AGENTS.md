@@ -235,6 +235,38 @@ JUAN**PEREZ*GOMEZ,X0000001,201,M,19/11/73,18/11/26,21/11/26,201|ANA*MARIA*LOPEZ*
 - Check-in can be at most **7 days back** (today the 21st → the 14th), counted
   in Cuba time. Future and maximum-stay limits are unknown.
 
+### Companions of an active stay — confirmed
+
+From the active-guests page (`Huespedes/HuespedesActivos`), the browser adds a
+Cuban companion to an existing stay. Token and referer come from that page.
+
+1. `POST /Huespedes/ValidarPersonaSuin` — `identificador=<CI>&tipoDocumento=1`.
+   Same person array as the other lookups.
+2. `POST /Huespedes/RegistrarAcompannantes` — `estanciaId=<guest stay id>`,
+   `personas=<entry>`, token. One entry has **7 fields** and the name **with
+   spaces** (not the `*` format), no origin field:
+
+   ```
+   ANA MARIA LOPEZ DIAZ,00000000001,247,F,06/04/85,22/11/26,23/11/26
+   ```
+
+   Several companions are assumed to be joined by `|` (only one was captured).
+3. Answer: one item per companion with the **guest's** `EstanciaId` (no `.1`
+   suffix) and the companion's own `"Id"`:
+
+   ```json
+   [ { "Biografico": "ANA MARIA LOPEZ DIAZ", "Identificador": "00000000001",
+       "FechaEntrada": "/Date(1795323600000)/", "FechaSalida": "/Date(1795410000000)/",
+       "FechaNacimiento": "/Date(481611600000)/", "Sexo": "F",
+       "EstanciaId": "20000001", "Id": "1", "Respuesta": "OK" } ]
+   ```
+
+   Refusals are assumed to use the same `{ success: false, message }` shape.
+   Whether companion dates must fall inside the guest's stay is unknown.
+
+**Update check-out date** (guest or companion, active stays only): requested,
+**not captured yet**, not implemented.
+
 ### Communication channels (`Vías de Comunicación`)
 
 `GET /ViasComunicacion` hosts the form for the host's phones and e-mails
@@ -292,6 +324,12 @@ name).
 
 Newest first. Each entry: what was learned and how.
 
+- **2026-11-22** — Adding a companion to an active stay: `ValidarPersonaSuin`
+  with `tipoDocumento=1`, then `RegistrarAcompannantes` with `estanciaId` and a
+  7-field entry with the name in spaces; the answer carries the guest's stay ID
+  and the companion's `Id` (web capture). Implemented; covered by
+  `testAddCompanionMatchesPortal`.
+
 - **2026-11-22** — First registration sent **from the app** to the live portal:
   accepted, and "Last result" showed the stay IDs (host, on device). Closes the
   end-to-end check of issue #2.
@@ -327,6 +365,10 @@ now closed):
 - Future check-in and maximum-stay limits.
 - Why the portal refuses a registration (it returns no reason).
 - `ListarAcompannantes` request and response (assumed, never captured).
+- **Update check-out date** for a guest or companion of an active stay: endpoint
+  and fields unknown. Capture it the next time a stay really changes.
+- `RegistrarAcompannantes`: several companions in one call, refusal shape, and
+  whether companion dates must fall inside the guest's stay.
 - Meaning of `Estado` in lookups.
 
 Known issues:

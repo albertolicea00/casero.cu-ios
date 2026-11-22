@@ -58,7 +58,7 @@ struct PersonaValidation: Decodable {
 /// Portal wire format (one entry, `|`-joined for multiple), confirmed against a
 /// browser capture:
 /// `NOMBRE*NOMBRE2*APELLIDO1*APELLIDO2,IDENTIFICADOR,NACIONALIDAD,SEXO,dd/MM/yy(nac),dd/MM/yy(entrada),dd/MM/yy(salida),PROCEDENCIA`
-/// An empty second name leaves `**` (`JEREMIAS**ARTEAGA*CHARIS`).
+/// An empty second name leaves `**` (`JUAN**PEREZ*GOMEZ`).
 struct GuestRegistration {
     let firstName: String
     /// Second given name (`Nombre2`); empty when the person has none.
@@ -101,6 +101,42 @@ struct GuestRegistration {
             Self.dateFormatter.string(from: checkIn),
             Self.dateFormatter.string(from: checkOut),
             procedenciaCode,
+        ].joined(separator: ",")
+    }
+}
+
+/// A Cuban companion added to an existing stay through
+/// `Huespedes/RegistrarAcompannantes` (confirmed against a browser capture).
+///
+/// Unlike `GuestRegistration`: the full name goes with spaces, and there is no
+/// origin field. One entry (`|`-joined for several, assumed):
+/// `FULL NAME,CI,NACIONALIDAD,SEXO,dd/MM/yy(birth),dd/MM/yy(check-in),dd/MM/yy(check-out)`
+struct CompanionRegistration {
+    let fullName: String
+    let identificador: String
+    let nationalityCode: String
+    let sex: String
+    let birthDate: Date
+    let checkIn: Date
+    let checkOut: Date
+
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "dd/MM/yy"
+        formatter.timeZone = PortalDates.timeZone
+        return formatter
+    }()
+
+    var wireFormat: String {
+        [
+            fullName.split(whereSeparator: \.isWhitespace).joined(separator: " "),
+            identificador,
+            nationalityCode,
+            sex,
+            Self.dateFormatter.string(from: birthDate),
+            Self.dateFormatter.string(from: checkIn),
+            Self.dateFormatter.string(from: checkOut),
         ].joined(separator: ",")
     }
 }

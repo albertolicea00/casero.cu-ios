@@ -75,6 +75,47 @@ final class NetworkingTests: XCTestCase {
         } catch { XCTFail("Unexpected error: \(error)") }
     }
 
+    /// Mirrors a browser capture of adding a companion from the active-guests page
+    /// (synthetic person): CI lookup with `tipoDocumento=1`, then
+    /// `RegistrarAcompannantes` with the stay ID and a 7-field entry whose name has spaces.
+    func testAddCompanionMatchesPortal() async throws {
+        let client = client()
+        let state = RequestState()
+        PortalURLProtocol.handler = { request in
+            let path = request.url?.path ?? ""
+            if request.httpMethod == "GET" {
+                XCTAssertTrue(path.hasSuffix("Huespedes/HuespedesActivos"))
+                return (200, "text/html", tokenHTML)
+            }
+            state.bodies.append(try formBody(request))
+            if path.hasSuffix("ValidarPersonaSuin") {
+                return (
+                    200, "application/json",
+                    #"[{"IdPersona":"x","Identificador":"00000000001","Nombre":"ANA","Nombre2":"MARIA","Apellido1":"LOPEZ","Apellido2":"DIAZ","Biografico":"ANA MARIA LOPEZ DIAZ","Sexo":"F","FechaNac":"\/Date(481611600000)\/","Nacionalidad":"247","DescNacionalidad":"CUBA"}]"#
+                )
+            }
+            XCTAssertTrue(path.hasSuffix("RegistrarAcompannantes"))
+            return (
+                200, "application/json",
+                #"[{"Biografico":"ANA MARIA LOPEZ DIAZ","Identificador":"00000000001","FechaEntrada":"\/Date(1795323600000)\/","FechaSalida":"\/Date(1795410000000)\/","FechaNacimiento":"\/Date(481611600000)\/","Sexo":"F","EstanciaId":"20000001","Id":"1","Respuesta":"OK"}]"#
+            )
+        }
+        let found = try await client.validateCompanionForStay(identificador: "00000000001")
+        let person = try XCTUnwrap(found.first)
+        let entry = CompanionRegistration(
+            fullName: person.fullName, identificador: person.identificador,
+            nationalityCode: person.nationalityCode ?? "", sex: person.sex ?? "",
+            birthDate: try XCTUnwrap(person.birthDate),
+            checkIn: Date(timeIntervalSince1970: 1_795_323_600), checkOut: Date(timeIntervalSince1970: 1_795_410_000))
+        XCTAssertEqual(entry.wireFormat, "ANA MARIA LOPEZ DIAZ,00000000001,247,F,06/04/85,22/11/26,23/11/26")
+        let answer = try await client.addCompanions([entry], toStay: "20000001")
+        XCTAssertEqual(answer.first?.stayId, "20000001")
+        XCTAssertEqual(answer.first?.companionId, "1")
+        XCTAssertEqual(answer.first?.response, "OK")
+        XCTAssertTrue(state.bodies[0].hasPrefix("identificador=00000000001&tipoDocumento=1&"))
+        XCTAssertTrue(state.bodies[1].hasPrefix("estanciaId=20000001&personas=ANA%20MARIA%20LOPEZ%20DIAZ%2C00000000001%2C247%2CF%2C06%2F04%2F85%2C22%2F11%2F26%2C23%2F11%2F26&"))
+    }
+
     func testUncertainRegistrationFailureIsNeverAutomaticallyRetried() async throws {
         let client = client()
         let state = RequestState()
@@ -125,6 +166,7 @@ private let tokenHTML = "<input name=\"__RequestVerificationToken\" value=\"fixt
 private final class RequestState: @unchecked Sendable {
     var recovered = false
     var gets = 0
+    var bodies: [String] = []
 }
 
 private func formBody(_ request: URLRequest) throws -> String {

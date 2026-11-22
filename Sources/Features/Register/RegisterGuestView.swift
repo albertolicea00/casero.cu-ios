@@ -323,7 +323,7 @@ struct RegisterGuestView: View {
 /// Guest-details style person block: photo, one-line name (tap it for the full
 /// name when cut), document, then origin and birth date. Callers wrap it in an
 /// `InputCard`; used in the result sheet and on the queue cards.
-private struct PersonDetails: View {
+struct PersonDetails: View {
     let name: String
     let identificador: String
     let nationality: String?
@@ -488,7 +488,7 @@ private struct RegistrationResultCard: View {
 }
 
 /// Display formatting shared by the Register cards and the submit summary.
-private enum RegisterText {
+enum RegisterText {
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium

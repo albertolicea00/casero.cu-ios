@@ -50,9 +50,7 @@ final class GuestsViewModel: ObservableObject {
         let now = Date()
         let bySegment = guests.filter { guest in
             switch segment {
-            case .active:
-                return (guest.checkIn ?? .distantPast) <= now
-                    && (guest.checkOut ?? .distantFuture) >= PortalDates.calendar.startOfDay(for: now)
+            case .active: return guest.isActive(now: now)
             case .history: return (guest.checkOut ?? .distantFuture) < PortalDates.calendar.startOfDay(for: now)
             }
         }

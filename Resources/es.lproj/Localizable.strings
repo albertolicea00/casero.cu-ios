@@ -18,6 +18,9 @@
 "+ 1 companion" = "+ 1 acompañante";
 "+ %lld companions" = "+ %lld acompañantes";
 "%@ ago" = "hace %@";
+"Add" = "Agregar";
+"Add companion" = "Agregar acompañante";
+"Add companion?" = "¿Agregar acompañante?";
 "Attempted from CASEROcu on %@ (Cuba time). Error: %@" = "Intentado desde CASEROcu el %1$@ (hora de Cuba). Error: %2$@";
 "Born" = "Nacimiento";
 "Born: %@" = "Nacimiento: %@";
@@ -25,6 +28,7 @@
 "Check-in can be at most 7 days ago." = "La entrada puede ser como máximo hace 7 días.";
 "Check-in: %@  Check-out: %@  (%lld nights)" = "Entrada: %1$@  Salida: %2$@  (%3$lld noches)";
 "Choose person" = "Elegir persona";
+"Companion of %@ · Stay ID %@" = "Acompañante de %1$@ · ID de estancia %2$@";
 "Confirm person" = "Confirmar persona";
 "Copied" = "Copiado";
 "Copy" = "Copiar";
@@ -65,6 +69,7 @@
 "The answer was lost after sending: these people may already be registered. Check the official portal or the Guests list before reporting them again, to avoid duplicates." = "La respuesta se perdió después de enviar: es posible que estas personas ya estén registradas. Revisa el portal oficial o la lista de Guests antes de volver a reportarlas, para evitar duplicados.";
 "The connection was lost after sending. The portal may have registered these people. Check Guests or the official portal before retrying, to avoid duplicate reports." = "Se perdió la conexión después de enviar. Es posible que el portal haya registrado a estas personas. Revisa Guests o el portal oficial antes de reintentar, para evitar reportes duplicados.";
 "The portal rejected the registration." = "El portal rechazó el registro.";
+"This person is already a companion in this stay." = "Esta persona ya es acompañante en esta estancia.";
 "This search option is only valid for Cuban nationals." = "Esta opción de búsqueda solo es válida para nacionales.";
 "Fill in the fields above to look up." = "Completa los campos de arriba para buscar.";
 "First name" = "Nombre";

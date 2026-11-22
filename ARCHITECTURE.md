@@ -58,6 +58,15 @@ Contents:
   on the right of the header; soonest departure first. Days are counted in Cuba
   time (`GuestsViewModel.daysUntilCheckOut`). The sort menu is hidden here.
 - **History** is grouped by check-in month and follows the sort menu.
+- **Add companion** (guest detail, only when `Guest.isActive()` and not a
+  companion): `AddCompanionView` looks up a CI (`validateCompanionForStay`),
+  shows the person card, takes stay dates (check-in from today, never before the
+  guest's check-in nor more than 7 days back; check-out defaults to the guest's),
+  asks for confirmation, calls `addCompanions(_:toStay:)` and shows the stay ID
+  and companion ID. On success the companion list reloads. Lost answers and
+  refusals behave as in registration (`postRegistration` in `CaseroClient`).
+- **Update check-out date** is planned for active guests and companions but not
+  built: the portal request has not been captured.
 - The side scrubber shows the current group's title while dragging.
 
 ### Registration flow (Register tab)

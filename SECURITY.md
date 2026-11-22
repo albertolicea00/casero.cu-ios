@@ -70,6 +70,26 @@ wrong with a host's account and guests' data if a device is lost or shared.
 Testing note: the iOS Simulator has no passcode by default, so silent sign-in
 stays off there. Enroll Face ID (Features → Face ID → Enrolled) to exercise it.
 
+## Test data and personal data in the repository
+
+The app handles personal data of third parties (guests' names, passports, CIs,
+birth dates, photos). None of it belongs in this repository.
+
+- **All tests use fabricated data.** Fixtures are made-up people and documents
+  (`TEST`, `X0000001`, `00000000001`, `JUAN PEREZ GOMEZ`, …) built in code, and
+  network tests answer through `URLProtocol` stubs. No test contacts the real
+  portal or needs credentials.
+- **Docs and comments use made-up examples** that keep the real shape of the
+  portal's requests and answers, never captured values.
+- **Real browser captures stay local** in `.ignore/` (git-ignored). They contain
+  live session cookies and real guest data: never commit them, never paste them
+  into issues or pull requests, and sign out of the portal after capturing.
+- **Before pushing,** search the diff for names, document numbers, stay IDs or
+  cookies taken from a capture. If one slipped into a local commit, rewrite that
+  commit before it is pushed; once pushed, treat it as published.
+
+How captures are taken and documented: [AGENTS.md](AGENTS.md#capturing-portal-traffic).
+
 ## Scope
 
 This is an unofficial client that talks to `casero.rem.cu` using the host's own credentials. Vulnerabilities in the official portal itself should be reported to CIDP-MININT, not here.
