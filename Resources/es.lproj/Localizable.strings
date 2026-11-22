@@ -74,7 +74,7 @@
 "Passport/ID: %@" = "Pasaporte/carné: %@";
 "People marked Not registered were not accepted by the portal." = "Las personas marcadas como No registrado no fueron aceptadas por el portal.";
 "Phones and emails registered in the official portal for alternative communication." = "Teléfonos y correos registrados en el portal oficial como vías de comunicación alternativas.";
-"Portal Profile" = "Perfil del portal";
+"Portal Profile Account" = "Cuenta del portal";
 "Prepared in CASEROcu on %@ (Cuba time), before sending. This is not proof of registration: only the stay IDs returned by the official portal confirm it." = "Preparado en CASEROcu el %@ (hora de Cuba), antes de enviar. No es una prueba de registro: solo los ID de estancia que devuelve el portal oficial lo confirman.";
 "Province" = "Provincia";
 "Register %lld people" = "Registrar %lld personas";

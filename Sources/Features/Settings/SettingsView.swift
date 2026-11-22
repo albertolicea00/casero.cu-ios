@@ -65,7 +65,7 @@ struct SettingsView: View {
             Button {
                 isProfilePresented = true
             } label: {
-                Label("Portal Profile", systemImage: "person.crop.circle")
+                Label("Portal Profile Account", systemImage: "person.crop.circle")
             }
             Button {
                 isChannelsPresented = true

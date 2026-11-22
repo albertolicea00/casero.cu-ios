@@ -35,7 +35,7 @@ struct PortalProfileSheet: View {
                 }
                 .padding()
             }
-            .navigationTitle("Portal Profile")
+            .navigationTitle("Portal Profile Account")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -45,7 +45,7 @@ struct PortalProfileSheet: View {
             .task(id: appState.isSignedIn) { await load() }
             .refreshable { await load() }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.large])
         .presentationDragIndicator(.visible)
     }
 

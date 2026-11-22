@@ -133,7 +133,7 @@ Rules:
 ### Settings tab
 
 - **Account**, in this order:
-  - **Portal Profile** (person icon) → `PortalProfileSheet`: name, CI, username,
+  - **Portal Profile Account** (person icon) → `PortalProfileSheet`: name, CI, username,
     province, municipality and address from `CaseroClient.fetchProfile()`
     (empty fields hidden, values selectable), loading/signed-out states, pull to
     refresh, session expiry reported to `AppState`. On failure: the error,
