@@ -19,13 +19,16 @@
 "+ 1 companion" = "+ 1 acompañante";
 "+ %lld companions" = "+ %lld acompañantes";
 "%@ ago" = "hace %@";
+"Active guests in the portal" = "Huéspedes activos en el portal";
 "Add" = "Agregar";
 "Add companion" = "Agregar acompañante";
 "Add companion?" = "¿Agregar acompañante?";
 "App User Manual" = "Manual de usuario de la app";
 "Attempted from CASEROcu on %@ (Cuba time). Error: %@" = "Intentado desde CASEROcu el %1$@ (hora de Cuba). Error: %2$@";
+"Beta" = "Beta";
 "Born" = "Nacimiento";
 "Born: %@" = "Nacimiento: %@";
+"Browse your active guests and your registration history from the official portal. Open a guest to see their details, add companions or change the check-out date." = "Consulta tus huéspedes activos y tu historial de registros del portal oficial. Abre un huésped para ver sus datos, añadir acompañantes o cambiar la fecha de salida.";
 "Check names, documents and dates. This app cannot undo a registration once the portal accepts it." = "Revisa nombres, documentos y fechas. Esta app no puede deshacer un registro una vez que el portal lo acepta.";
 "Check-in can be at most 7 days ago." = "La entrada puede ser como máximo hace 7 días.";
 "Check-in: %@  Check-out: %@  (%lld nights)" = "Entrada: %1$@  Salida: %2$@  (%3$lld noches)";
@@ -45,6 +48,7 @@
 "Guest registration — partly registered" = "Registro de huéspedes — registrado en parte";
 "Guest registration — prepared" = "Registro de huéspedes — preparado";
 "Guest registration — registered" = "Registro de huéspedes — registrado";
+"Guests information" = "Información de Huéspedes";
 "If it keeps failing, report these people by SMS from the SMS tab, or save this PDF and take it to the nearest immigration office." = "Si sigue fallando, reporta a estas personas por SMS desde la pestaña SMS, o guarda este PDF y llévalo a la oficina de inmigración más cercana.";
 "If the person has a second given name, try without it." = "Si la persona tiene segundo nombre, prueba sin él.";
 "If the registration cannot be completed, report these people by SMS from the SMS tab, or take this document to the nearest immigration office and report them there." = "Si no se puede completar el registro, reporta a estas personas por SMS desde la pestaña SMS, o lleva este documento a la oficina de inmigración más cercana y repórtalas allí.";
@@ -52,6 +56,7 @@
 "Leaves today" = "Se va hoy";
 "Leaves tomorrow" = "Se va mañana";
 "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal." = "Busca a cada persona, indica las fechas de estancia y agrégala al registro. Toca Reportar personas para enviarlas al portal oficial.";
+"Look up guests and companions in the official registry, set their stay dates and submit them to the portal in one go." = "Busca huéspedes y acompañantes en el registro oficial, indica sus fechas de estancia y envíalos al portal de una vez.";
 "New check-out" = "Nueva salida";
 "No departure date" = "Sin fecha de salida";
 "Not confirmed" = "No confirmado";
@@ -64,7 +69,10 @@
 "Prepared in CASEROcu on %@ (Cuba time), before sending. This is not proof of registration: only the stay IDs returned by the official portal confirm it." = "Preparado en CASEROcu el %@ (hora de Cuba), antes de enviar. No es una prueba de registro: solo los ID de estancia que devuelve el portal oficial lo confirman.";
 "Register %lld people" = "Registrar %lld personas";
 "Register 1 person" = "Registrar 1 persona";
+"Register guest information" = "Información de Registrar huésped";
+"Register guests in the portal" = "Registrar huéspedes en el portal";
 "Registered" = "Registrado";
+"Registered guests in the portal" = "Huéspedes registrados en el portal";
 "Remove" = "Quitar";
 "Remove from registration?" = "¿Quitar del registro?";
 "Review registration" = "Revisar registro";
@@ -96,6 +104,7 @@
 "Stored only on this device in the iOS Keychain, used to restore the app session." = "Se guardan solo en este dispositivo, en el llavero de iOS, para recuperar la sesión. Si activas esta opción después de entrar, vuelve a iniciar sesión para guardarlas.";
 "Temp. ID" = "CI temporal";
 "Temporary carné number" = "Número de carné temporal";
+"This section uses an unofficial connection to the official portal. It is in beta and may fail if the portal changes or cannot be reached. If something goes wrong, finish the task in the official portal." = "Esta sección usa una conexión no oficial con el portal oficial. Está en beta y puede fallar si el portal cambia o no está disponible. Si algo sale mal, termina la gestión en el portal oficial.";
 "Today" = "hoy";
 "Stay: %@" = "Estancia: %@";
 "ID" = "ID";

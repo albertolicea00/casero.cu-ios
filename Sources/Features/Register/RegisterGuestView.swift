@@ -3,6 +3,7 @@ import SwiftUI
 struct RegisterGuestView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var viewModel: RegisterGuestViewModel
+    @State private var isInfoPresented = false
     /// Photos seen in the result sheet, reused on the queue cards.
     @State private var queuePhotos: [String: UIImage] = [:]
     /// Queue entry waiting for the remove confirmation.
@@ -64,6 +65,24 @@ struct RegisterGuestView: View {
             .background(Color(uiColor: .systemBackground).ignoresSafeArea())
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Register guest")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isInfoPresented = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
+                    .accessibilityLabel("Register guest information")
+                }
+            }
+            .sheet(isPresented: $isInfoPresented) {
+                SectionInfoSheet(
+                    title: "Register guest",
+                    summary:
+                        "Look up guests and companions in the official registry, set their stay dates and submit them to the portal in one go.",
+                    links: [.init(title: "Register guests in the portal", path: "Huespedes")]
+                )
+            }
             .sheet(item: $pdfFile) { file in
                 ShareSheet(items: [file.url])
             }

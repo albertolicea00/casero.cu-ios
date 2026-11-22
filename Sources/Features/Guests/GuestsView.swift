@@ -6,6 +6,7 @@ struct GuestsView: View {
     @ObservedObject private var settings: AppSettings
     @StateObject private var viewModel: GuestsViewModel
     @State private var isDateFilterPresented = false
+    @State private var isInfoPresented = false
     @State private var pendingFrom = Date()
     @State private var pendingTo = Date()
     @State private var companionCounts: [String: Int] = [:]
@@ -126,6 +127,13 @@ struct GuestsView: View {
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
+                        isInfoPresented = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
+                    .accessibilityLabel("Guests information")
+
+                    Button {
                         Task { await viewModel.reload() }
                     } label: {
                         if viewModel.isLoading {
@@ -137,6 +145,17 @@ struct GuestsView: View {
                     .accessibilityLabel("Reload guests")
                     .disabled(viewModel.isLoading || !appState.isSignedIn)
                 }
+            }
+            .sheet(isPresented: $isInfoPresented) {
+                SectionInfoSheet(
+                    title: "Guests",
+                    summary:
+                        "Browse your active guests and your registration history from the official portal. Open a guest to see their details, add companions or change the check-out date.",
+                    links: [
+                        .init(title: "Active guests in the portal", path: "Huespedes/HuespedesActivos"),
+                        .init(title: "Registered guests in the portal", path: "Huespedes/HuespedesRegistrados"),
+                    ]
+                )
             }
             .sheet(isPresented: $isDateFilterPresented) {
                 GuestDateRangeSheet(
