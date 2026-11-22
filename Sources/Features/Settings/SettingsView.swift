@@ -158,7 +158,7 @@ struct SettingsView: View {
             .padding(.vertical, 4)
             NavigationLink("App User Manual") { ManualView() }
             NavigationLink("Official Portal Help") { PortalHelpView() }
-            Link(destination: USSDSMSReporter.instructionsURL) {
+            NavigationLink { CubatramiteGuideView() } label: {
                 Label("Cubatramite source", systemImage: "book")
             }
             NavigationLink("Privacy Policy & Terms") { PrivacyView() }

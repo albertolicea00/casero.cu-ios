@@ -82,67 +82,7 @@ private struct PortalHelpTopicView: View {
                 }
             }
 
-            VStack(alignment: .leading, spacing: 12) {
-                ForEach(Array(topic.blocks.enumerated()), id: \.offset) { index, block in
-                    if index > 0 { Divider() }
-                    blockView(block)
-                }
-            }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
-        }
-    }
-
-    @ViewBuilder
-    private func blockView(_ block: PortalHelpTopic.Block) -> some View {
-        switch block {
-        case .paragraph(let text):
-            Text(portalHelp(text))
-                .font(.subheadline)
-                .fixedSize(horizontal: false, vertical: true)
-        case .heading(let text):
-            Text(portalHelp(text))
-                .font(.subheadline.weight(.semibold))
-        case .terms(let terms):
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(terms, id: \.term) { item in
-                    (Text(portalHelp(item.term)).fontWeight(.semibold) + Text(": ") + Text(portalHelp(item.detail)))
-                        .font(.caption)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-        case .steps(let steps):
-            VStack(alignment: .leading, spacing: 10) {
-                ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-                    HStack(alignment: .top, spacing: 10) {
-                        Text("\(index + 1)")
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(.secondary)
-                            .frame(width: 22, height: 22)
-                            .background(Color(uiColor: .tertiarySystemFill), in: Circle())
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(portalHelp(step.text))
-                            ForEach(step.details, id: \.self) { detail in
-                                Text(portalHelp(detail)).foregroundStyle(.secondary)
-                            }
-                        }
-                        .font(.caption)
-                        .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-            }
-        case .notes(let notes):
-            VStack(alignment: .leading, spacing: 6) {
-                Label(portalHelp("Notes"), systemImage: "info.circle")
-                    .font(.caption.weight(.semibold))
-                ForEach(notes, id: \.self) { note in
-                    Text(portalHelp(note))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
+            HelpBlocksView(blocks: topic.blocks, table: "PortalHelp")
         }
     }
 }
@@ -178,18 +118,8 @@ private func portalHelp(_ key: String) -> String {
 }
 
 struct PortalHelpTopic: Identifiable {
-    struct Step {
-        let text: String
-        var details: [String] = []
-    }
-
-    enum Block {
-        case paragraph(String)
-        case heading(String)
-        case terms([(term: String, detail: String)])
-        case steps([Step])
-        case notes([String])
-    }
+    typealias Step = HelpStep
+    typealias Block = HelpBlock
 
     let id: String
     let title: String

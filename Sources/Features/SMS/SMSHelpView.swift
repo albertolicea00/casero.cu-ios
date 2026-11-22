@@ -301,7 +301,9 @@ private struct SMSReportInfoSheet: View {
                     }
                     .buttonStyle(.bordered)
 
-                    Link(destination: USSDSMSReporter.instructionsURL) {
+                    NavigationLink {
+                        CubatramiteGuideView()
+                    } label: {
                         HStack {
                             Spacer()
                             Label("SMS procedure reference", systemImage: "book")
