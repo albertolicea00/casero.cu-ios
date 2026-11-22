@@ -393,7 +393,7 @@ struct GuestsView: View {
                     if let current { visibleGuestID = current.key }
                 }
                 .overlay(alignment: .trailing) {
-                    if guests.count > 1 {
+                    if guests.count > Self.scrubberMinimumGuests {
                         guestScrubber(guests: guests, titles: groupTitles) { id in
                             visibleGuestID = id
                             scrollProxy.scrollTo(id, anchor: .top)
@@ -403,6 +403,9 @@ struct GuestsView: View {
                 .refreshable { if appState.isSignedIn { await viewModel.reload() } }
             }
     }
+
+    /// Short lists fit on screen or scroll easily: the scrubber appears only past this many guests.
+    private static let scrubberMinimumGuests = 8
 
     private func guestScrubber(
         guests: [Guest], titles: [String: String], onSelect: @escaping (String) -> Void
