@@ -222,7 +222,7 @@ struct RegisterGuestView: View {
                 onConfirm: {
                     isConfirmingSubmit = false
                     Task {
-                        if await viewModel.submit() { appState.didRegisterGuests() }
+                        if await viewModel.submit() { appState.guestsDidChange() }
                     }
                 }
             )

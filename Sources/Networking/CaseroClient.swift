@@ -266,6 +266,31 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
         }
     }
 
+    /// Changes the check-out date of an active stay (`companionId == nil`) or of one
+    /// of its companions. Returns the portal's confirmation message. Re-sending the
+    /// same date is harmless, so a lost answer is an ordinary error here.
+    func updateCheckOut(stayId: String, companionId: String? = nil, to checkOut: Date) async throws -> String {
+        return try await authenticated {
+            let token = try AntiForgery.extract(from: try await getHTML("Huespedes/HuespedesActivos"))
+            var params = [("estanciaId", stayId)]
+            if let companionId { params.append(("acompananteId", companionId)) }
+            params.append(("fechaSalida", Self.portalDateFormatter.string(from: checkOut)))
+            params.append(("__RequestVerificationToken", token))
+            let path =
+                companionId == nil
+                ? "Huespedes/ActualizarFechaSalidaHuesped" : "Huespedes/ActualizarFechaSalidaAcompannante"
+            let text = try await postForJSON(path, body: formEncoded(params), referer: "Huespedes/HuespedesActivos")
+            guard let outcome = try? JSONDecoder().decode(PortalFailure.self, from: Data(text.utf8)) else {
+                throw PortalError.invalidResponse
+            }
+            guard outcome.success else {
+                throw PortalError.rejected(
+                    outcome.message ?? String(localized: "The portal did not change the check-out date."))
+            }
+            return outcome.message ?? ""
+        }
+    }
+
     /// Shared by every write that registers people: a lost answer after sending is
     /// `registrationUncertain`, a `{ success: false }` answer is `rejected`.
     private func postRegistration(_ path: String, body: Data, referer: String) async throws -> [Guest] {
@@ -421,8 +446,8 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
     }
 }
 
-/// Error envelope returned by `ValidarPersonaDiie` / `ValidarPersonaSuin`, and
-/// assumed for `RegistrarHuesped` (not captured there yet).
+/// `{ success, message }` envelope: errors of the lookups and registrations, and
+/// the answer (success or not) of the check-out updates.
 private struct PortalFailure: Decodable {
     let success: Bool
     let message: String?

@@ -65,8 +65,13 @@ Contents:
   asks for confirmation, calls `addCompanions(_:toStay:)` and shows the stay ID
   and companion ID. On success the companion list reloads. Lost answers and
   refusals behave as in registration (`postRegistration` in `CaseroClient`).
-- **Update check-out date** is planned for active guests and companions but not
-  built: the portal request has not been captured.
+- **Update check-out** (`UpdateCheckOutView`, `CaseroClient.updateCheckOut`):
+  on the stay card of an active guest, and on each active companion card that
+  has a portal `Id`. The date picker starts at the person's check-in day;
+  current and new dates and nights are shown, the host confirms, and the
+  portal's message is displayed. Afterwards the guest screen shows the new date
+  and Guests reloads (`AppState.guestsDidChange()`); for a companion the
+  companion list reloads.
 - The side scrubber shows the current group's title while dragging.
 
 ### Registration flow (Register tab)
@@ -87,7 +92,7 @@ Contents:
    cannot undo a registration, "Register N people", and "Save PDF".
 5. **Result** ("Last result"). One `RegistrationResultCard` per person: ✅/❌,
    person card, **stay ID** (copyable), stay range, and "Save PDF". On success
-   `AppState.didRegisterGuests()` makes Guests reload.
+   `AppState.guestsDidChange()` makes Guests reload.
 
 Rules:
 

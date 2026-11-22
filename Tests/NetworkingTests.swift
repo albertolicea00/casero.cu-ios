@@ -116,6 +116,39 @@ final class NetworkingTests: XCTestCase {
         XCTAssertTrue(state.bodies[1].hasPrefix("estanciaId=20000001&personas=ANA%20MARIA%20LOPEZ%20DIAZ%2C00000000001%2C247%2CF%2C06%2F04%2F85%2C22%2F11%2F26%2C23%2F11%2F26&"))
     }
 
+    /// Mirrors browser captures of the check-out updates (synthetic stay): guest and
+    /// companion endpoints, `acompananteId` spelling, `dd/MM/yy`, and both answers.
+    func testUpdateCheckOutMatchesPortal() async throws {
+        let client = client()
+        let state = RequestState()
+        PortalURLProtocol.handler = { request in
+            if request.httpMethod == "GET" { return (200, "text/html", tokenHTML) }
+            state.bodies.append((request.url?.lastPathComponent ?? "") + "?" + (try formBody(request)))
+            if state.bodies.count == 3 {
+                return (200, "application/json", #"{"success":false,"message":"Fecha no válida."}"#)
+            }
+            return (
+                200, "application/json",
+                #"{"success":true,"message":"La operación se ha realizado satisfactoriamente."}"#
+            )
+        }
+        let date = Date(timeIntervalSince1970: 1_795_410_000)  // 23/11/26 in Cuba
+        let guestMessage = try await client.updateCheckOut(stayId: "20000001", to: date)
+        XCTAssertEqual(guestMessage, "La operación se ha realizado satisfactoriamente.")
+        _ = try await client.updateCheckOut(stayId: "20000001", companionId: "1", to: date)
+        XCTAssertTrue(
+            state.bodies[0].hasPrefix("ActualizarFechaSalidaHuesped?estanciaId=20000001&fechaSalida=23%2F11%2F26&"))
+        XCTAssertTrue(
+            state.bodies[1].hasPrefix(
+                "ActualizarFechaSalidaAcompannante?estanciaId=20000001&acompananteId=1&fechaSalida=23%2F11%2F26&"))
+        do {
+            _ = try await client.updateCheckOut(stayId: "20000001", to: date)
+            XCTFail("success:false must throw")
+        } catch PortalError.rejected(let message) {
+            XCTAssertEqual(message, "Fecha no válida.")
+        }
+    }
+
     func testUncertainRegistrationFailureIsNeverAutomaticallyRetried() async throws {
         let client = client()
         let state = RequestState()

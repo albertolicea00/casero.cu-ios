@@ -264,8 +264,24 @@ Cuban companion to an existing stay. Token and referer come from that page.
    Refusals are assumed to use the same `{ success: false, message }` shape.
    Whether companion dates must fall inside the guest's stay is unknown.
 
-**Update check-out date** (guest or companion, active stays only): requested,
-**not captured yet**, not implemented.
+### Check-out updates — confirmed
+
+From the active-guests page; token and referer `Huespedes/HuespedesActivos`.
+
+| Who | Endpoint | Body |
+|---|---|---|
+| Main guest | `POST /Huespedes/ActualizarFechaSalidaHuesped` | `estanciaId=<stay id>&fechaSalida=dd/MM/yy` |
+| Companion | `POST /Huespedes/ActualizarFechaSalidaAcompannante` | `estanciaId=<stay id>&acompananteId=<companion Id>&fechaSalida=dd/MM/yy` |
+
+- Note the field spelling `acompananteId` (one `n`), unlike the endpoint names.
+  The companion `Id` is the one returned by `RegistrarAcompannantes` and by the
+  companion list.
+- Answer: `{ "success": true, "message": "La operación se ha realizado satisfactoriamente." }`.
+  `success: false` is assumed to carry the reason in `message`.
+- Rule: the new check-out can be as early as the person's **own check-in day**
+  (checked in yesterday → yesterday at the earliest). Upper limit unknown.
+- Setting the same date twice is harmless, so a lost answer is not treated as
+  uncertain: the host can simply retry.
 
 ### Communication channels (`Vías de Comunicación`)
 
@@ -324,6 +340,11 @@ name).
 
 Newest first. Each entry: what was learned and how.
 
+- **2026-11-22** — Check-out updates: `ActualizarFechaSalidaHuesped` and
+  `ActualizarFechaSalidaAcompannante` (`acompananteId`), answer
+  `{ success: true, message }`; earliest date is the person's check-in day (web
+  capture, host). Implemented; covered by `testUpdateCheckOutMatchesPortal`.
+
 - **2026-11-22** — Adding a companion to an active stay: `ValidarPersonaSuin`
   with `tipoDocumento=1`, then `RegistrarAcompannantes` with `estanciaId` and a
   7-field entry with the name in spaces; the answer carries the guest's stay ID
@@ -365,8 +386,7 @@ now closed):
 - Future check-in and maximum-stay limits.
 - Why the portal refuses a registration (it returns no reason).
 - `ListarAcompannantes` request and response (assumed, never captured).
-- **Update check-out date** for a guest or companion of an active stay: endpoint
-  and fields unknown. Capture it the next time a stay really changes.
+- Check-out updates: the latest allowed date and the shape of a refusal.
 - `RegistrarAcompannantes`: several companions in one call, refusal shape, and
   whether companion dates must fall inside the guest's stay.
 - Meaning of `Estado` in lookups.

@@ -19,6 +19,10 @@ struct GuestDetailView: View {
     @State private var companionPhotos: [String: UIImage] = [:]
     @State private var companionPhotoError: String?
     @State private var isAddingCompanion = false
+    @State private var isUpdatingCheckOut = false
+    @State private var updatingCompanion: Guest?
+    /// New check-out confirmed by the portal while this screen is open.
+    @State private var updatedCheckOut: Date?
 
     var body: some View {
         ScrollView {
@@ -141,10 +145,17 @@ struct GuestDetailView: View {
         .padding(.horizontal, 5)
     }
 
+    private var checkOut: Date? { updatedCheckOut ?? guest.checkOut }
+
+    private var stayDuration: String? {
+        guard let checkIn = guest.checkIn, let checkOut else { return nil }
+        return GuestStayText.nights(from: checkIn, to: checkOut)
+    }
+
     private var stayCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            StayTimeline(guest: guest)
-            if guest.checkIn != nil || GuestStayText.duration(for: guest) != nil {
+            StayTimeline(guest: guest, checkOut: checkOut)
+            if guest.checkIn != nil || stayDuration != nil {
                 Divider()
                 VStack(alignment: .leading, spacing: 5) {
                     if let checkIn = guest.checkIn {
@@ -152,7 +163,7 @@ struct GuestDetailView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    if let duration = GuestStayText.duration(for: guest) {
+                    if let duration = stayDuration {
                         Label(
                             String.localizedStringWithFormat(String(localized: "Stay: %@"), duration),
                             systemImage: "moon.stars"
@@ -160,6 +171,25 @@ struct GuestDetailView: View {
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.secondary)
                     }
+                }
+            }
+            if !isCompanion && guest.isActive() && !guest.stayId.isEmpty {
+                // Only active stays can change their check-out (portal: active-guests page).
+                Divider()
+                Button {
+                    isUpdatingCheckOut = true
+                } label: {
+                    Label("Update check-out", systemImage: "calendar.badge.clock")
+                        .frame(maxWidth: .infinity, minHeight: 40)
+                }
+                .buttonStyle(.bordered)
+                .sheet(isPresented: $isUpdatingCheckOut) {
+                    UpdateCheckOutView(person: guest, client: client) { date in
+                        updatedCheckOut = date
+                        appState.guestsDidChange()
+                    }
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
                 }
             }
         }
@@ -206,7 +236,17 @@ struct GuestDetailView: View {
                 }
             }
             ForEach(companions) { companion in
-                CompanionSummary(guest: companion, photo: companionPhotos[companion.id])
+                CompanionSummary(
+                    guest: companion, photo: companionPhotos[companion.id],
+                    onUpdateCheckOut: companion.isActive() && companion.companionId != nil
+                        ? { updatingCompanion = companion } : nil)
+            }
+            .sheet(item: $updatingCompanion) { companion in
+                UpdateCheckOutView(person: companion, client: client, companionId: companion.companionId) { _ in
+                    Task { await loadCompanions() }
+                }
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
             }
             if let companionPhotoError {
                 Text(companionPhotoError)
@@ -334,11 +374,13 @@ struct GuestDetailView: View {
 
 private struct StayTimeline: View {
     let guest: Guest
+    /// Overrides `guest.checkOut` after an update in this screen.
+    var checkOut: Date? = nil
 
     var body: some View {
         VStack(spacing: 12) {
             dateRow(title: "Check-in", date: guest.checkIn, icon: "arrow.right.to.line", color: .accentColor)
-            dateRow(title: "Check-out", date: guest.checkOut, icon: "arrow.left.to.line", color: .orange)
+            dateRow(title: "Check-out", date: checkOut ?? guest.checkOut, icon: "arrow.left.to.line", color: .orange)
         }
     }
 
@@ -472,6 +514,8 @@ struct GuestNameTooltip: View {
 private struct CompanionSummary: View {
     let guest: Guest
     let photo: UIImage?
+    /// Set only for an active companion with a portal `Id`.
+    var onUpdateCheckOut: (() -> Void)? = nil
 
     var body: some View {
         companionCard.guestCard()
@@ -524,6 +568,16 @@ private struct CompanionSummary: View {
             if guest.checkIn != nil || guest.checkOut != nil {
                 Divider().padding(.vertical, 3)
                 StayTimeline(guest: guest)
+            }
+            if let onUpdateCheckOut {
+                Divider().padding(.vertical, 3)
+                Button(action: onUpdateCheckOut) {
+                    Label("Update check-out", systemImage: "calendar.badge.clock")
+                        .font(.caption.weight(.semibold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.tint)
             }
         }
     }

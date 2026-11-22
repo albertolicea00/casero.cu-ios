@@ -1,3 +1,4 @@
+"%@ · Stay ID %@" = "%@ · Stay ID %@";
 "%lld guests cached, last updated %@." = "%lld guests cached, last updated %@.";
 "%lld people match this search." = "%lld people match this search.";
 "%lld people will be reported to the official portal." = "%lld people will be reported to the official portal.";
@@ -27,12 +28,15 @@
 "Check names, documents and dates. This app cannot undo a registration once the portal accepts it." = "Check names, documents and dates. This app cannot undo a registration once the portal accepts it.";
 "Check-in can be at most 7 days ago." = "Check-in can be at most 7 days ago.";
 "Check-in: %@  Check-out: %@  (%lld nights)" = "Check-in: %@  Check-out: %@  (%lld nights)";
+"Check-out can't be before the check-in date." = "Check-out can't be before the check-in date.";
+"Check-out updated." = "Check-out updated.";
 "Choose person" = "Choose person";
 "Companion of %@ · Stay ID %@" = "Companion of %@ · Stay ID %@";
 "Confirm person" = "Confirm person";
 "Copied" = "Copied";
 "Copy" = "Copy";
 "Copy stay ID" = "Copy stay ID";
+"Current check-out" = "Current check-out";
 "First name (only the first one)" = "First name (only the first one)";
 "From (country)" = "From";
 "Guest registration — not completed" = "Guest registration — not completed";
@@ -46,6 +50,7 @@
 "Leaves today" = "Leaves today";
 "Leaves tomorrow" = "Leaves tomorrow";
 "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal." = "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal.";
+"New check-out" = "New check-out";
 "No departure date" = "No departure date";
 "Not confirmed" = "Not confirmed";
 "Not found. If the person has a second given name, try without it." = "Not found. If the person has a second given name, try without it.";
@@ -68,6 +73,7 @@
 "Stay ID: %@" = "Stay ID: %@";
 "The answer was lost after sending: these people may already be registered. Check the official portal or the Guests list before reporting them again, to avoid duplicates." = "The answer was lost after sending: these people may already be registered. Check the official portal or the Guests list before reporting them again, to avoid duplicates.";
 "The connection was lost after sending. The portal may have registered these people. Check Guests or the official portal before retrying, to avoid duplicate reports." = "The connection was lost after sending. The portal may have registered these people. Check Guests or the official portal before retrying, to avoid duplicate reports.";
+"The portal did not change the check-out date." = "The portal did not change the check-out date.";
 "The portal rejected the registration." = "The portal rejected the registration.";
 "This person is already a companion in this stay." = "This person is already a companion in this stay.";
 "This search option is only valid for Cuban nationals." = "This search option is only valid for Cuban nationals.";
@@ -113,6 +119,9 @@
 "Auto re-authenticate on expiry" = "Auto re-authenticate on expiry";
 "Before the first report" = "Before the first report";
 "Fill in the fields above to send the SMS." = "Fill in the fields above to send the SMS.";
+"Update" = "Update";
+"Update check-out" = "Update check-out";
+"Update check-out?" = "Update check-out?";
 "Use the phone number associated with your host account. Request phone association and wait for confirmation before reporting." = "Use the phone number associated with your host account. Request phone association and wait for confirmation before reporting.";
 "Each guest and companion needs a separate report. Check the reply's name and nationality, then send the confirmation code when prompted." = "Each guest and companion needs a separate report. Check the reply's name and nationality, then send the confirmation code when prompted.";
 "Built from the guests already cached on this device — reload the Guests tab first to include recent data." = "Built from the guests already cached on this device — reload the Guests tab first to include recent data.";

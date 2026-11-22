@@ -1,3 +1,4 @@
+"%@ · Stay ID %@" = "%1$@ · ID de estancia %2$@";
 "%lld guests cached, last updated %@." = "%lld huéspedes guardados; última actualización: %@.";
 "%lld people match this search." = "%lld personas coinciden con la búsqueda.";
 "%lld people will be reported to the official portal." = "Se reportarán %lld personas al portal oficial.";
@@ -27,12 +28,15 @@
 "Check names, documents and dates. This app cannot undo a registration once the portal accepts it." = "Revisa nombres, documentos y fechas. Esta app no puede deshacer un registro una vez que el portal lo acepta.";
 "Check-in can be at most 7 days ago." = "La entrada puede ser como máximo hace 7 días.";
 "Check-in: %@  Check-out: %@  (%lld nights)" = "Entrada: %1$@  Salida: %2$@  (%3$lld noches)";
+"Check-out can't be before the check-in date." = "La salida no puede ser antes de la fecha de entrada.";
+"Check-out updated." = "Salida actualizada.";
 "Choose person" = "Elegir persona";
 "Companion of %@ · Stay ID %@" = "Acompañante de %1$@ · ID de estancia %2$@";
 "Confirm person" = "Confirmar persona";
 "Copied" = "Copiado";
 "Copy" = "Copiar";
 "Copy stay ID" = "Copiar ID de estancia";
+"Current check-out" = "Salida actual";
 "First name (only the first one)" = "Nombre (solo el primero)";
 "From (country)" = "De";
 "Guest registration — not completed" = "Registro de huéspedes — no completado";
@@ -46,6 +50,7 @@
 "Leaves today" = "Se va hoy";
 "Leaves tomorrow" = "Se va mañana";
 "Look up each person, set the stay dates and add them to the registration. Tap Register people to submit them to the official portal." = "Busca a cada persona, indica las fechas de estancia y agrégala al registro. Toca Reportar personas para enviarlas al portal oficial.";
+"New check-out" = "Nueva salida";
 "No departure date" = "Sin fecha de salida";
 "Not confirmed" = "No confirmado";
 "Not found. If the person has a second given name, try without it." = "No encontrada. Si la persona tiene segundo nombre, prueba sin él.";
@@ -68,6 +73,7 @@
 "Stay ID: %@" = "ID de estancia: %@";
 "The answer was lost after sending: these people may already be registered. Check the official portal or the Guests list before reporting them again, to avoid duplicates." = "La respuesta se perdió después de enviar: es posible que estas personas ya estén registradas. Revisa el portal oficial o la lista de Guests antes de volver a reportarlas, para evitar duplicados.";
 "The connection was lost after sending. The portal may have registered these people. Check Guests or the official portal before retrying, to avoid duplicate reports." = "Se perdió la conexión después de enviar. Es posible que el portal haya registrado a estas personas. Revisa Guests o el portal oficial antes de reintentar, para evitar reportes duplicados.";
+"The portal did not change the check-out date." = "El portal no cambió la fecha de salida.";
 "The portal rejected the registration." = "El portal rechazó el registro.";
 "This person is already a companion in this stay." = "Esta persona ya es acompañante en esta estancia.";
 "This search option is only valid for Cuban nationals." = "Esta opción de búsqueda solo es válida para nacionales.";
@@ -113,6 +119,9 @@
 "Auto re-authenticate on expiry" = "Recuperar la sesión al vencer";
 "Before the first report" = "Antes del primer reporte";
 "Fill in the fields above to send the SMS." = "Rellena los campos de arriba para enviar el SMS.";
+"Update" = "Actualizar";
+"Update check-out" = "Actualizar salida";
+"Update check-out?" = "¿Actualizar la salida?";
 "Use the phone number associated with your host account. Request phone association and wait for confirmation before reporting." = "Usa el número asociado a tu registro como arrendador. Solicita la asociación del teléfono y espera la confirmación antes de reportar.";
 "Each guest and companion needs a separate report. Check the reply's name and nationality, then send the confirmation code when prompted." = "Cada huésped y acompañante requiere un reporte separado. Comprueba el nombre y la nacionalidad de la respuesta y luego envía el código de confirmación cuando se te solicite.";
 "Built from the guests already cached on this device — reload the Guests tab first to include recent data." = "Se exportan los huéspedes guardados en este dispositivo. Actualiza la pestaña Huéspedes para incluir los datos recientes.";
