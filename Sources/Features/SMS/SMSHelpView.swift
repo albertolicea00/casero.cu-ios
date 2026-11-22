@@ -7,9 +7,11 @@ struct SMSHelpView: View {
     @State private var isInfoPresented = false
     @State private var selectedReportKind = SMSReportViewModel.Kind.guest
     let onOpenSettings: () -> Void
+    let onOpenCubatramiteGuide: () -> Void
 
-    init(onOpenSettings: @escaping () -> Void = {}) {
+    init(onOpenSettings: @escaping () -> Void = {}, onOpenCubatramiteGuide: @escaping () -> Void = {}) {
         self.onOpenSettings = onOpenSettings
+        self.onOpenCubatramiteGuide = onOpenCubatramiteGuide
     }
 
     var body: some View {
@@ -83,7 +85,7 @@ struct SMSHelpView: View {
                 .interactiveDismissDisabled()
             }
             .sheet(isPresented: $isInfoPresented) {
-                SMSReportInfoSheet(onOpenSettings: onOpenSettings)
+                SMSReportInfoSheet(onOpenSettings: onOpenSettings, onOpenCubatramiteGuide: onOpenCubatramiteGuide)
                     .presentationDetents([.large])
                     .presentationDragIndicator(.visible)
             }
@@ -180,6 +182,7 @@ struct SMSHelpView: View {
 private struct SMSReportInfoSheet: View {
     @Environment(\.dismiss) private var dismiss
     let onOpenSettings: () -> Void
+    let onOpenCubatramiteGuide: () -> Void
 
     var body: some View {
         NavigationStack {
@@ -301,8 +304,9 @@ private struct SMSReportInfoSheet: View {
                     }
                     .buttonStyle(.bordered)
 
-                    NavigationLink {
-                        CubatramiteGuideView()
+                    Button {
+                        dismiss()
+                        onOpenCubatramiteGuide()
                     } label: {
                         HStack {
                             Spacer()

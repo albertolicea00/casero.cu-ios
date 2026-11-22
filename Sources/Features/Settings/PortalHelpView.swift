@@ -4,63 +4,27 @@ import SwiftUI
 /// Strings live in the `PortalHelp` table so the long prose stays out of `Localizable.strings`.
 struct PortalHelpView: View {
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text(portalHelp("These instructions come from the official CASERO portal help. They describe the website, not this app."))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 4)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(portalHelp("These instructions come from the official CASERO portal help. They describe the website, not this app."))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 4)
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Image("PortalLogo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 36)
-                            .padding(14)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(PortalHelpTopic.channels.color, in: RoundedRectangle(cornerRadius: 16))
-                            .accessibilityLabel("CASERO")
-                        Text(portalHelp("The official portal shows this logo and the colored icons below. Use them to find each section on the website."))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, 4)
+                Link(destination: CaseroClient.baseURL.appendingPathComponent("Principal/Ayuda")) {
+                    HStack {
+                        Spacer()
+                        Label(portalHelp("Open help in the official portal"), systemImage: "safari")
+                        Spacer()
                     }
-
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 12)], spacing: 12) {
-                        ForEach(PortalHelpTopic.all) { topic in
-                            Button {
-                                withAnimation { proxy.scrollTo(topic.id, anchor: .top) }
-                            } label: {
-                                VStack(spacing: 6) {
-                                    PortalHelpTile(topic: topic, size: 56)
-                                    Text(portalHelp(topic.title))
-                                        .font(.caption)
-                                        .multilineTextAlignment(.center)
-                                        .foregroundStyle(.primary)
-                                }
-                                .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-
-                    ForEach(PortalHelpTopic.all) { topic in
-                        PortalHelpTopicView(topic: topic)
-                            .id(topic.id)
-                    }
-
-                    Link(destination: CaseroClient.baseURL.appendingPathComponent("Principal/Ayuda")) {
-                        HStack {
-                            Spacer()
-                            Label(portalHelp("Open help in the official portal"), systemImage: "safari")
-                            Spacer()
-                        }
-                    }
-                    .buttonStyle(.bordered)
                 }
-                .padding()
+                .buttonStyle(.bordered)
+
+                ForEach(PortalHelpTopic.all) { topic in
+                    PortalHelpTopicView(topic: topic)
+                }
             }
+            .padding()
         }
         .background(Color(uiColor: .systemBackground).ignoresSafeArea())
         .navigationTitle("Official Portal Help")

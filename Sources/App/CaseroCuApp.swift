@@ -143,6 +143,7 @@ struct MainTabView: View {
     @EnvironmentObject private var appState: AppState
     @State private var selection: Tab = .sms
     @State private var isRegisterLoginPresented = false
+    @State private var settingsPath: [SettingsView.Destination] = []
     let client: CaseroClient
 
     var body: some View {
@@ -159,9 +160,13 @@ struct MainTabView: View {
             }
 
             TabView(selection: $selection) {
-                SMSHelpView {
-                    selection = .settings
-                }
+                SMSHelpView(
+                    onOpenSettings: { selection = .settings },
+                    onOpenCubatramiteGuide: {
+                        selection = .settings
+                        settingsPath = [.cubatramiteGuide]
+                    }
+                )
                 .tabItem { Label("SMS", systemImage: "message.fill") }
                 .tag(Tab.sms)
 
@@ -176,7 +181,7 @@ struct MainTabView: View {
                     .tabItem { Label("Guests", systemImage: "person.2.fill") }
                     .tag(Tab.guests)
 
-                SettingsView(client: client, settings: appState.settings)
+                SettingsView(client: client, settings: appState.settings, path: $settingsPath)
                     .tabItem { Label("Settings", systemImage: "gearshape.fill") }
                     .tag(Tab.settings)
             }
