@@ -292,6 +292,9 @@ name).
 
 Newest first. Each entry: what was learned and how.
 
+- **2026-11-22** — First registration sent **from the app** to the live portal:
+  accepted, and "Last result" showed the stay IDs (host, on device). Closes the
+  end-to-end check of issue #2.
 - **2026-11-21** — `RegistrarHuesped` refusal returns
   `{ success: false, message: "No se ha registrado ningún huésped." }` with no
   reason (web capture). The app shows it verbatim.
@@ -315,9 +318,9 @@ Newest first. Each entry: what was learned and how.
 
 ## Open questions and known issues
 
-Open questions (capture from the web when they happen; tracked in issue #2):
+Open questions (capture from the web when they happen; moved here from issue #2,
+now closed):
 
-- A full registration sent **from the app** to the live portal.
 - Registration of a person **without a second surname** (expected `NOMBRE**APELLIDO1*`).
 - `tipo=3` lookup when the person **is** found.
 - Whether the portal accepts a companion sent alone.

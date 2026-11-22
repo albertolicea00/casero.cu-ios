@@ -186,7 +186,7 @@ Before each release:
    **Actions → iOS checks → Run workflow**.
 2. **Live portal from Cuba:** sign-in, bad credentials, session expiry and
    recovery, guest lists and paging, photos, and one real authorized
-   registration confirmed in the official portal (issue #2).
+   registration confirmed in the official portal (first done 2026-11-22, issue #2).
 3. **Companion list contract:** confirm `ListarAcompannantes` against real traffic
    (still assumed).
 4. **TLS pin:** confirm the live certificate still matches the bundled one; the
@@ -204,6 +204,8 @@ Never store real data in fixtures, screenshots, source files, CI logs or issues.
 
 ### Verification log
 
+- **2026-11-22** — Registration sent from the app on a device was accepted by
+  the live portal and showed the stay IDs (issue #2, closed).
 - **2026-11-21** — 33 simulator tests, 29 pass; the 4 failures are the stale
   `SMSReportingTests` (see [known issues](AGENTS.md#open-questions-and-known-issues)). `swift-format lint --strict` fails on
   formatting only. Registration wire format and answers confirmed against web
