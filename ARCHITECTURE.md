@@ -68,8 +68,10 @@ Contents:
 - **Update check-out** (`UpdateCheckOutView`, `CaseroClient.updateCheckOut`):
   on the stay card of an active guest, and on each active companion card that
   has a portal `Id`. The date picker starts at the person's check-in day;
-  current and new dates and nights are shown, the host confirms, and the
-  portal's message is displayed. Afterwards the guest screen shows the new date
+  current and new dates and nights are shown, the confirmation says how many
+  days are added to or removed from the original check-out and the new date,
+  and the portal's message is displayed. Active guest and companion cards also
+  show "Leaves today / in N days" (`GuestStayText.departure`). Afterwards the guest screen shows the new date
   and Guests reloads (`AppState.guestsDidChange()`); for a companion the
   companion list reloads.
 - The side scrubber shows the current group's title while dragging.

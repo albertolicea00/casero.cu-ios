@@ -87,20 +87,11 @@ struct GuestsView: View {
             } else {
                 groups.append(
                     GuestGroup(
-                        id: id, title: Self.departureTitle(days),
+                        id: id, title: GuestStayText.departure(days),
                         detail: guest.checkOut.map { Self.departureDate.string(from: $0) }, guests: [guest]))
             }
         }
         return groups
-    }
-
-    private static func departureTitle(_ days: Int?) -> String {
-        switch days {
-        case nil: return String(localized: "No departure date")
-        case 0: return String(localized: "Leaves today")
-        case 1: return String(localized: "Leaves tomorrow")
-        case let days?: return String(localized: "Leaves in \(days) days")
-        }
     }
 
     private var nationalityNamesByCode: [String: String] {

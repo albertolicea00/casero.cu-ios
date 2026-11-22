@@ -32,7 +32,6 @@
 "Check names, documents and dates. This app cannot undo a registration once the portal accepts it." = "Check names, documents and dates. This app cannot undo a registration once the portal accepts it.";
 "Check-in can be at most 7 days ago." = "Check-in can be at most 7 days ago.";
 "Check-in: %@  Check-out: %@  (%lld nights)" = "Check-in: %@  Check-out: %@  (%lld nights)";
-"Check-out can't be before the check-in date." = "Check-out can't be before the check-in date.";
 "Check-out updated." = "Check-out updated.";
 "Choose person" = "Choose person";
 "Companion of %@ · Stay ID %@" = "Companion of %@ · Stay ID %@";
@@ -331,3 +330,10 @@
 "Use the phone number associated with your host account. Call 18808 to request association and wait for confirmation before reporting." = "Use the phone number associated with your host account. Call 18808 to request association and wait for confirmation before reporting.";
 "Username" = "Username";
 "View in official portal" = "View in official portal";
+"%1$@ will leave on %2$@." = "%1$@ will leave on %2$@.";
+"Removes %1$lld days from %2$@'s original check-out (%3$@). New check-out: %4$@." = "Removes %1$lld days from %2$@'s original check-out (%3$@). New check-out: %4$@.";
+"Removes %1$lld day from %2$@'s original check-out (%3$@). New check-out: %4$@." = "Removes %1$lld day from %2$@'s original check-out (%3$@). New check-out: %4$@.";
+"Adds %1$lld day to %2$@'s original check-out (%3$@). New check-out: %4$@." = "Adds %1$lld day to %2$@'s original check-out (%3$@). New check-out: %4$@.";
+"Adds %1$lld days to %2$@'s original check-out (%3$@). New check-out: %4$@." = "Adds %1$lld days to %2$@'s original check-out (%3$@). New check-out: %4$@.";
+"Choose a new check-out within the stay, from the check-in day (%@) onward." = "Choose a new check-out within the stay, from the check-in day (%@) onward.";
+"%1$@ keeps the original check-out (%2$@)." = "%1$@ keeps the original check-out (%2$@); nothing changes.";

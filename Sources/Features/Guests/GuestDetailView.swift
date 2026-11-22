@@ -158,7 +158,11 @@ struct GuestDetailView: View {
             if guest.checkIn != nil || stayDuration != nil {
                 Divider()
                 VStack(alignment: .leading, spacing: 5) {
-                    if let checkIn = guest.checkIn {
+                    if guest.isActive() {
+                        Text(GuestStayText.departure(checkOut: checkOut))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else if let checkIn = guest.checkIn {
                         Text(GuestStayText.age(of: checkIn))
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -180,9 +184,11 @@ struct GuestDetailView: View {
                     isUpdatingCheckOut = true
                 } label: {
                     Label("Update check-out", systemImage: "calendar.badge.clock")
-                        .frame(maxWidth: .infinity, minHeight: 40)
+                        .font(.caption.weight(.semibold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.plain)
+                .foregroundStyle(.tint)
                 .sheet(isPresented: $isUpdatingCheckOut) {
                     UpdateCheckOutView(person: guest, client: client) { date in
                         updatedCheckOut = date
@@ -568,6 +574,12 @@ private struct CompanionSummary: View {
             if guest.checkIn != nil || guest.checkOut != nil {
                 Divider().padding(.vertical, 3)
                 StayTimeline(guest: guest)
+                if guest.isActive() {
+                    Text(GuestStayText.departure(checkOut: guest.checkOut))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 4)
+                }
             }
             if let onUpdateCheckOut {
                 Divider().padding(.vertical, 3)
@@ -664,6 +676,25 @@ extension View {
 }
 
 enum GuestStayText {
+    /// "Leaves today", "Leaves in 3 days"; `days` from `GuestsViewModel.daysUntilCheckOut`.
+    static func departure(checkOut: Date?, now: Date = .now) -> String {
+        guard let checkOut else { return departure(nil) }
+        let calendar = PortalDates.calendar
+        return departure(
+            calendar.dateComponents(
+                [.day], from: calendar.startOfDay(for: now), to: calendar.startOfDay(for: checkOut)
+            ).day)
+    }
+
+    static func departure(_ days: Int?) -> String {
+        switch days {
+        case nil: return String(localized: "No departure date")
+        case 0: return String(localized: "Leaves today")
+        case 1: return String(localized: "Leaves tomorrow")
+        case let days?: return String(localized: "Leaves in \(days) days")
+        }
+    }
+
     static func duration(for guest: Guest) -> String? {
         guard let checkIn = guest.checkIn, let checkOut = guest.checkOut else { return nil }
         return nights(from: checkIn, to: checkOut)

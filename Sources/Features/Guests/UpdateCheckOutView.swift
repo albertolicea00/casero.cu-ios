@@ -32,9 +32,15 @@ struct UpdateCheckOutView: View {
                     .padding(.horizontal, 4)
 
                     InputCard {
-                        row("Check-in", value: person.checkIn.map(RegisterText.date) ?? "—")
-                        Divider()
-                        row("Current check-out", value: person.checkOut.map(RegisterText.date) ?? "—")
+                        HStack(alignment: .center, spacing: 8) {
+                            stayDate("Check-in", date: person.checkIn)
+                            Image(systemName: "arrow.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                                .frame(width: 18)
+                            stayDate("Current check-out", date: person.checkOut)
+                        }
+                        .padding(.vertical, 12)
                         Divider()
                         HStack {
                             Text("New check-out")
@@ -57,11 +63,6 @@ struct UpdateCheckOutView: View {
                             .padding(.vertical, 12)
                         }
                     }
-                    Label("Check-out can't be before the check-in date.", systemImage: "info.circle")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 4)
-
                     if let successMessage {
                         Label(successMessage, systemImage: "checkmark.circle.fill")
                             .font(.subheadline.weight(.semibold))
@@ -80,7 +81,11 @@ struct UpdateCheckOutView: View {
                             .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(PrimaryActionButtonStyle())
-                        .disabled(isSubmitting || isUnchanged)
+                        .disabled(isSubmitting)
+                        Label(rangeHint, systemImage: "lock.fill")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 4)
                     }
                     if let errorMessage {
                         Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
@@ -102,7 +107,7 @@ struct UpdateCheckOutView: View {
                 Button("Cancel", role: .cancel) {}
                 Button("Update") { Task { await submit() } }
             } message: {
-                Text(verbatim: "\(displayName)\n\(RegisterText.date(checkOut))")
+                Text(confirmationMessage)
             }
         }
         .interactiveDismissDisabled(isSubmitting)
@@ -118,18 +123,50 @@ struct UpdateCheckOutView: View {
         PortalDates.calendar.startOfDay(for: person.checkIn ?? .now)
     }
 
-    private var isUnchanged: Bool {
-        guard let current = person.checkOut else { return false }
-        return PortalDates.calendar.isDate(current, inSameDayAs: checkOut)
+    /// The same date is allowed on purpose: resending it changes nothing and lets the
+    /// host check the request against the portal without touching the stay.
+    private var rangeHint: String {
+        String.localizedStringWithFormat(
+            String(localized: "Choose a new check-out within the stay, from the check-in day (%@) onward."),
+            RegisterText.date(earliest))
     }
 
-    private func row(_ title: LocalizedStringKey, value: String) -> some View {
-        HStack {
-            Text(title)
-            Spacer(minLength: 8)
-            Text(value).foregroundStyle(.secondary)
+    /// "Removes 2 days from ANA's original check-out (Nov 24, 2026). New check-out: Nov 22, 2026."
+    private var confirmationMessage: String {
+        let newDate = RegisterText.date(checkOut)
+        guard let current = person.checkOut else {
+            return String.localizedStringWithFormat(
+                String(localized: "%1$@ will leave on %2$@."), displayName, newDate)
         }
-        .padding(.vertical, 12)
+        let calendar = PortalDates.calendar
+        let days =
+            calendar.dateComponents(
+                [.day], from: calendar.startOfDay(for: current), to: calendar.startOfDay(for: checkOut)
+            ).day ?? 0
+        let original = RegisterText.date(current)
+        if days == 0 {
+            return String.localizedStringWithFormat(
+                String(localized: "%1$@ keeps the original check-out (%2$@)."), displayName, original)
+        }
+        let format: String
+        switch days {
+        case ..<(-1): format = String(localized: "Removes %1$lld days from %2$@'s original check-out (%3$@). New check-out: %4$@.")
+        case -1: format = String(localized: "Removes %1$lld day from %2$@'s original check-out (%3$@). New check-out: %4$@.")
+        case 1: format = String(localized: "Adds %1$lld day to %2$@'s original check-out (%3$@). New check-out: %4$@.")
+        default: format = String(localized: "Adds %1$lld days to %2$@'s original check-out (%3$@). New check-out: %4$@.")
+        }
+        return String.localizedStringWithFormat(format, abs(days), displayName, original, newDate)
+    }
+
+    /// Same look as the dates of a row in Guests: title above, date below.
+    private func stayDate(_ title: LocalizedStringKey, date: Date?) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title).font(.caption2).foregroundStyle(.secondary)
+            Text(date.map(RegisterText.date) ?? "—")
+                .font(.subheadline.monospacedDigit().weight(.medium))
+                .foregroundStyle(date == nil ? .secondary : .primary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func submit() async {
