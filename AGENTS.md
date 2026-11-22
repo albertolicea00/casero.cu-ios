@@ -286,8 +286,15 @@ From the active-guests page; token and referer `Huespedes/HuespedesActivos`.
 ### Communication channels (`Vías de Comunicación`)
 
 `GET /ViasComunicacion` hosts the form for the host's phones and e-mails
-(phones stored as `+535XXXXXXX`). The list/modify actions were never captured,
-so the app does **not** call them: Settings opens the official page in Safari.
+(phones stored as `+535XXXXXXX`).
+
+- List: `POST /ViasComunicacion/ListarViasComunicacion`, AJAX headers, body
+  `__RequestVerificationToken=<token from /ViasComunicacion>` only.
+  Answer: `[{ "Tipo": "sms", "Valor": "+535XXXXXXX" }, …]`. Phones come back as
+  `Tipo: "sms"`; the e-mail `Tipo` has not been captured yet, so the app treats
+  any other `Tipo` as an e-mail. Settings shows this list read-only.
+- Modify: never captured, so the app does **not** call it. Adding or removing
+  channels opens the official page in Safari.
 
 ---
 

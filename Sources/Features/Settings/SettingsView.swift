@@ -13,6 +13,7 @@ struct SettingsView: View {
     @StateObject private var viewModel: SettingsViewModel
     @State private var isExportFormPresented = false
     @State private var isLoginPresented = false
+    @State private var isChannelsPresented = false
 
     init(client: CaseroClient, settings: AppSettings, path: Binding<[Destination]> = .constant([])) {
         self.client = client
@@ -24,7 +25,6 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack(path: $path) {
             Form {
-                communicationChannelsSection
                 accountSection
                 sessionSection
                 cacheSection
@@ -45,6 +45,9 @@ struct SettingsView: View {
             .onChange(of: appState.isSignedIn) { signedIn in
                 if signedIn { isLoginPresented = false }
             }
+            .sheet(isPresented: $isChannelsPresented) {
+                CommunicationChannelsSheet(client: client)
+            }
             .sheet(isPresented: $isExportFormPresented) {
                 ExportFormSheet(viewModel: viewModel)
                     .presentationDetents([.large])
@@ -53,19 +56,9 @@ struct SettingsView: View {
         }
     }
 
-    private var communicationChannelsSection: some View {
-        Section("Communication channels") {
-            Link(destination: CaseroClient.baseURL.appendingPathComponent("ViasComunicacion")) {
-                Label("Manage phones and emails", systemImage: "safari")
-            }
-            Text("Changes are saved directly through the official portal form.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-    }
-
     private var accountSection: some View {
         Section("Account") {
+            Button("View registered phones and emails") { isChannelsPresented = true }
             Toggle("Remember credentials", isOn: $settings.rememberCredentials)
             Text("Stored only on this device in the iOS Keychain, used to restore the app session.")
                 .font(.caption)

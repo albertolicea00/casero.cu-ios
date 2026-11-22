@@ -139,6 +139,25 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
         }
     }
 
+    // MARK: - Communication channels
+
+    /// The host's registered phones and e-mails. Read-only: adding or removing
+    /// channels is left to the official page because that action was never captured.
+    func listCommunicationChannels() async throws -> [CommunicationChannel] {
+        return try await authenticated {
+            let token = try AntiForgery.extract(from: try await getHTML("ViasComunicacion"))
+            let text = try await postForJSON(
+                "ViasComunicacion/ListarViasComunicacion",
+                body: formEncoded([("__RequestVerificationToken", token)]),
+                referer: "ViasComunicacion")
+            let data = Data(text.utf8)
+            if let failure = try? JSONDecoder().decode(PortalFailure.self, from: data), !failure.success {
+                throw PortalError.rejected(failure.message ?? String(localized: "The portal rejected the request."))
+            }
+            return try JSONDecoder().decode([CommunicationChannel].self, from: data)
+        }
+    }
+
     // MARK: - Companions
 
     /// Companions of a guest (Cuban nationals, identified by carné). Same paging

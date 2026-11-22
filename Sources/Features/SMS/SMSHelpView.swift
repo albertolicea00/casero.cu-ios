@@ -271,7 +271,7 @@ private struct SMSReportInfoSheet: View {
                     infoHeading("Instructions and portal")
                     VStack(alignment: .leading, spacing: 8) {
                         Text(
-                            "If you already have an account, associate or update your phone from Settings > Communication channels, or use the official portal."
+                            "If you already have an account, associate or update your phone from Settings > Account, or use the official portal."
                         )
                         .font(.subheadline)
                         Divider()
