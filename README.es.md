@@ -15,19 +15,29 @@ Cliente nativo iOS para que los arrendadores de casas particulares en Cuba repor
 > **Unofficial project.** Not affiliated with CIDP-MININT or any government entity. Talks to the official portal using the host's own credentials, the same way a browser does. We are not responsible for changes to `casero.rem.cu`, USSD/SMS codes, or any issues arising from using this software. Use at your own risk. Always verify guest registrations through official channels.
 ---
 
-## Implementation status
+## Estado de la implementación
 
-The app includes portal login, validated batch registration, paginated guest
-lists, offline data, photos, CSV/PDF exports, and an English/Spanish interface.
-Phones and emails are managed through the embedded official portal form.
+La app incluye inicio de sesión en el portal (con Face ID / código para usar las
+credenciales guardadas), listas de huéspedes paginadas, datos sin conexión,
+fotos, exportaciones CSV/PDF e interfaz en español e inglés.
 
-SMS reporting to **7344** is implemented with the **HC** prefix, stay days,
-companion reports, and the separate confirmation exchange. Phone association
-instructions use **18808**. The user reviews and sends each message through iOS.
+Registro de huéspedes: búsqueda por pasaporte, nombre, carné de identidad (CI) y
+CI temporal; confirmación de la persona, fechas (entrada hasta 7 días atrás),
+revisión antes de enviar, ID de estancia en el resultado y PDF antes, después y
+si falla. El formato de envío está confirmado con capturas del portal; falta un
+registro completo enviado desde la app (issue #2). Vea el
+[contrato de registro](AGENTS.md#registration--confirmed).
 
-Live portal verification from Cuba and distribution setup remain external
-release requirements. See [README.md](README.md) and [RELEASE.md](RELEASE.md) for
-current build instructions and remaining checks.
+Los teléfonos y correos se gestionan abriendo la página oficial del portal en
+Safari.
+
+El reporte por SMS a **7344** usa el prefijo **HC**, los días de estancia, los
+reportes de acompañantes y el intercambio de confirmación por separado. La
+asociación del teléfono se hace llamando al **18808**. El usuario revisa y envía
+cada mensaje desde iOS.
+
+La verificación con el portal real desde Cuba y la distribución siguen
+pendientes. Vea la [lista de verificación](ARCHITECTURE.md#release-checklist).
 
 ## 🛠 Stack Tecnológico
 
@@ -66,7 +76,7 @@ xcodebuild -scheme CaseroCu -destination 'generic/platform=iOS Simulator' build
 
 ## 🔒 Nota sobre TLS
 
-El portal sirve un certificado que no pasa la validación estándar. La app usa **certificate pinning** mediante `URLSessionDelegate` — no se deshabilita ATS globalmente. Vea [CLAUDE.md](CLAUDE.md) para el flujo de peticiones invertido.
+El portal sirve un certificado que no pasa la validación estándar. La app usa **certificate pinning** mediante `URLSessionDelegate` — no se deshabilita ATS globalmente. Vea [AGENTS.md](ARCHITECTURE.md#pinned-tls-certificate) para saber qué es el certificado y cómo renovarlo, y [AGENTS.md](AGENTS.md#portal-api-reference) para el flujo de peticiones obtenido por ingeniería inversa.
 
 ## 🤝 Contribuir
 

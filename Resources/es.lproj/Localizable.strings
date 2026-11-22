@@ -235,7 +235,6 @@
 "Personal data" = "Datos personales";
 "Personal data contains unsupported characters. Use the official portal." = "Los datos personales contienen caracteres no admitidos. Usa el portal oficial.";
 "Photo" = "Foto";
-"Pinned certificate not bundled. Add casero_rem_cu.cer to the app resources — see CLAUDE.md." = "Falta el certificado de seguridad del portal en esta instalación.";
 "Portal returned HTTP %lld." = "El portal devolvió el error HTTP %lld.";
 "Tap Preview SMS to open the prepared message in Messages. Review it and tap Send to confirm sending." = "Toca «Revisar SMS» para abrir el mensaje preparado en Mensajes. Revísalo y toca Enviar para confirmar el envío.";
 "You’ll review the prepared message in Messages before sending." = "Revisarás el mensaje preparado en Mensajes antes de enviarlo.";

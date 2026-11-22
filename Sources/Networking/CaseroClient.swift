@@ -142,7 +142,7 @@ final class CaseroClient: NSObject, PortalServing, @unchecked Sendable {
     // MARK: - Companions
 
     /// Companions of a guest (Cuban nationals, identified by carné). Same paging
-    /// contract as `ListarHuespedes` per CLAUDE.md, keyed by the guest's stay id.
+    /// contract as `ListarHuespedes` per AGENTS.md, keyed by the guest's stay id.
     ///
     /// ASSUMPTION (unverified against live traffic): the request carries
     /// `estanciaId` alongside the paging fields, and the response envelope is

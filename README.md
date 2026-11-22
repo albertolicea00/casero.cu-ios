@@ -19,14 +19,16 @@ Native iOS client for Cuban lodging hosts to submit guest reports to the officia
 ## ✨ Features
 
 - Portal sign-in with scoped certificate pinning, cookies, and anti-forgery tokens.
-- Foreign guest and Cuban companion lookups and batch registration, with validation
-  and retention of unconfirmed registrations.
+- Guest lookups by passport, name, CI and temporary CI; batch registration with a
+  review step, stay IDs in the result, PDF records (before, after and on failure)
+  and retention of unconfirmed registrations. See the
+  [registration contract](AGENTS.md#registration--confirmed).
 - Guest lists with all pages, date selection, search, active/history filters, and
   offline access to retained data after reopening the app.
 - Guest details, optional photo caching, and companion lookup with an official
   portal fallback.
-- Phone/email management through the authenticated official portal form embedded
-  in an ephemeral browser. No undocumented write endpoint is guessed.
+- Phone/email management by opening the official portal page in Safari. No
+  undocumented write endpoint is guessed.
 - CSV/Excel and PDF exports from the complete cached date range.
 - Device-only Keychain credentials (on by default), optional sign-in at launch and
   recovery of expired sessions behind Face ID/Touch ID/passcode, cache retention,
@@ -38,11 +40,11 @@ reports, and the separate confirmation SMS are prepared for **7344** with the
 **HC** prefix. Phone association instructions use **18808**. iOS asks the user to
 review and send each message; only the service's final registration code confirms
 the report. See the [published procedure](https://cubatramite.com/reporte-a-inmigracion-del-registro-de-turistas-extranjeros-hospedados-en-viviendas-de-alquiler/)
-and [SMS contract](CLAUDE.md#sms-reporting-contract).
+and [SMS contract](AGENTS.md#sms-reporting-contract).
 
 **Release status:** simulator tests cover synthetic data and mocked requests.
 Live registration and the assumed companion request contract still need
-verification from Cuba. See [release checks](RELEASE.md).
+verification from Cuba. See the [release checklist](ARCHITECTURE.md#release-checklist).
 
 ## 🛠 Tech Stack
 
@@ -92,7 +94,7 @@ start this workflow automatically. Tests never log in to the real portal or subm
 
 ## 🔒 TLS Note
 
-The portal serves a certificate that fails standard validation. The app uses **certificate pinning** via `URLSessionDelegate` — not global ATS disable. See [CLAUDE.md](CLAUDE.md) for the reverse-engineered request flow.
+The portal serves a certificate that fails standard validation. The app uses **certificate pinning** via `URLSessionDelegate` — not global ATS disable. See [AGENTS.md](ARCHITECTURE.md#pinned-tls-certificate) for the certificate and how to renew it, and [AGENTS.md](AGENTS.md#portal-api-reference) for the reverse-engineered request flow.
 
 ## 🤝 Contributing
 
