@@ -1,4 +1,8 @@
 # 🏠 CASERO.cu — iOS
+
+> [!CAUTION]
+> **Este repositorio está archivado y ya no se mantiene.** Las apps de Android e iOS resultaron ser el mismo producto, así que se unificaron en una sola app con Kotlin Multiplatform (KMP). El desarrollo continúa en **[albertolicea00/casero.cu](https://github.com/albertolicea00/casero.cu)** — abre nuevos issues y pull requests allí.
+
 Cliente nativo iOS para que los arrendadores de casas particulares en Cuba reporten sus huéspedes a las autoridades. 🇨🇺
 
 [![License: MIT](https://img.shields.io/badge/Licencia-MIT-yellow.svg)](LICENSE)

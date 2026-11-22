@@ -1,4 +1,8 @@
 # 🏠 CASERO.cu — iOS
+
+> [!CAUTION]
+> **This repository is archived and no longer maintained.** The Android and iOS apps turned out to be the same product, so they have been unified into a single Kotlin Multiplatform (KMP) app. Development continues at **[albertolicea00/casero.cu](https://github.com/albertolicea00/casero.cu)** — please open new issues and pull requests there.
+
 Native iOS client for Cuban lodging hosts to submit guest reports to the official portal. 🇨🇺
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
